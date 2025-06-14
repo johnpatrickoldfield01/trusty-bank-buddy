@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,9 +34,10 @@ const formSchema = z.object({
 interface SendMoneyDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onSendMoney: (data: { amount: number; recipientName: string }) => void;
 }
 
-const SendMoneyDialog = ({ isOpen, onOpenChange }: SendMoneyDialogProps) => {
+const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,6 +51,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange }: SendMoneyDialogProps) => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    onSendMoney({ amount: values.amount, recipientName: values.recipientName });
     toast.success(`Successfully sent $${values.amount.toLocaleString()} to ${values.recipientName}.`);
     onOpenChange(false);
     form.reset();

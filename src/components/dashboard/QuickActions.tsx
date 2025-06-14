@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
 
-const QuickActions = () => {
+const QuickActions = ({ onSendMoney }: { onSendMoney: (data: { amount: number; recipientName: string }) => void }) => {
   const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
 
   return (
@@ -48,7 +48,7 @@ const QuickActions = () => {
           </div>
         </CardContent>
       </Card>
-      <SendMoneyDialog isOpen={isSendMoneyOpen} onOpenChange={setIsSendMoneyOpen} />
+      <SendMoneyDialog isOpen={isSendMoneyOpen} onOpenChange={setIsSendMoneyOpen} onSendMoney={onSendMoney} />
     </>
   );
 };

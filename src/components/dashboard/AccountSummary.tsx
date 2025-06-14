@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Wallet, CreditCard, PiggyBank } from 'lucide-react';
 
-const AccountSummary = () => {
+const AccountSummary = ({ mainAccountBalance }: { mainAccountBalance: number }) => {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -20,7 +20,7 @@ const AccountSummary = () => {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Main Account</p>
-                <p className="font-bold">$12,458.32</p>
+                <p className="font-bold">${mainAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <p className="text-xs text-muted-foreground">**** **** **** 4832</p>
             </div>
