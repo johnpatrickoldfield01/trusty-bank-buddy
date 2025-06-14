@@ -1,4 +1,3 @@
-
 -- Create a table for user profiles
 CREATE TABLE public.profiles (
   id UUID NOT NULL PRIMARY KEY, -- This is the user_id from auth.users
@@ -46,7 +45,7 @@ CREATE POLICY "Users can insert their own profile."
   WITH CHECK (auth.uid() = id);
 
 -- Create an enum type for account types
-CREATE TYPE public.account_type AS ENUM ('main', 'savings', 'credit');
+CREATE TYPE public.account_type AS ENUM ('main', 'savings', 'credit', 'loan');
 
 -- Create a table for bank accounts
 CREATE TABLE public.accounts (
@@ -92,4 +91,3 @@ CREATE POLICY "Users can manage transactions for their own accounts."
       AND accounts.user_id = auth.uid()
     )
   );
-

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -40,9 +39,10 @@ const Index = () => {
     if (user && accounts && accounts.length === 0) {
       const createInitialAccounts = async () => {
         const { error } = await supabase.from('accounts').insert([
-          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '**** **** **** 1234' },
-          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '**** **** **** 5678' },
-          { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '**** **** **** 9012' }
+          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '1234 5678 9012 3456' },
+          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '9876 5432 1098 7654' },
+          { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
+          { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: 10000000, account_number: '4321 8765 4321 0987' }
         ]);
         if (error) {
           toast.error('Failed to initialize your accounts. Please refresh the page.');
@@ -133,12 +133,18 @@ const Index = () => {
   const mainAccount = accounts?.find(acc => acc.account_type === 'main');
   const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
   const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
+  const loanAccount = accounts?.find(acc => acc.account_type === 'loan');
 
   const mainAccountBalance = mainAccount?.balance ?? 0;
   const savingsBalance = savingsAccount?.balance ?? 0;
   const creditCardBalance = creditAccount?.balance ?? 0;
   const creditCardLimit = 1792952.54; 
-  const loanBalance = 10000000;
+  const loanBalance = loanAccount?.balance ?? 0;
+
+  const mainAccountNumber = mainAccount?.account_number;
+  const savingsAccountNumber = savingsAccount?.account_number;
+  const creditCardAccountNumber = creditAccount?.account_number;
+  const loanAccountNumber = loanAccount?.account_number;
 
   const totalBalance = mainAccountBalance + savingsBalance;
   const spendingThisMonth = 61008.20;
@@ -312,6 +318,10 @@ const Index = () => {
                 creditCardBalance={creditCardBalance}
                 creditCardLimit={creditCardLimit}
                 loanBalance={loanBalance}
+                mainAccountNumber={mainAccountNumber}
+                savingsAccountNumber={savingsAccountNumber}
+                creditCardAccountNumber={creditCardAccountNumber}
+                loanAccountNumber={loanAccountNumber}
               />
             )}
           </div>
