@@ -41,12 +41,12 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recipientName: '',
-      bankName: 'Capitec Bank Ltd',
-      accountNumber: '1775776032',
-      branchCode: '470010',
-      swiftCode: 'CABLZAJJ',
-      amount: 20000,
+      recipientName: 'MR JOHN P OLDFIELD',
+      bankName: 'First National Bank',
+      accountNumber: '63155335110',
+      branchCode: '220526',
+      swiftCode: 'FIRNZAJJ',
+      amount: 50000,
     },
   });
 
