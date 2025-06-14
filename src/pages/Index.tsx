@@ -99,7 +99,7 @@ const Index = () => {
     <div>
       <div className="container py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Welcome, {profile.full_name}!</h1>
+          <h1 className="text-3xl font-bold">Welcome, {profile?.full_name || 'User'}!</h1>
           <Button onClick={handleLogout} variant="outline">Logout</Button>
         </div>
         
