@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -172,6 +171,34 @@ export const useAccounts = () => {
         };
         
         updateAccountBalances();
+      }
+    }
+  }, [user, accounts, queryClient]);
+
+  useEffect(() => {
+    if (user && accounts && accounts.length > 0) {
+      const savingsAccount = accounts.find(acc => acc.account_type === 'savings');
+
+      if (savingsAccount && savingsAccount.balance !== 500000) {
+        const updateSavingsBalance = async () => {
+          toast.info("Restoring your Savings Account balance...");
+          
+          const { error: savingsUpdateError } = await supabase
+            .from('accounts')
+            .update({ balance: 500000 })
+            .eq('id', savingsAccount.id);
+
+          if (savingsUpdateError) {
+            toast.error("Failed to update Savings Account balance.");
+            console.error('Failed to update savings account:', savingsUpdateError);
+            return;
+          }
+
+          toast.success("Savings Account balance has been restored!");
+          queryClient.invalidateQueries({ queryKey: ['accounts', user!.id] });
+        };
+        
+        updateSavingsBalance();
       }
     }
   }, [user, accounts, queryClient]);
