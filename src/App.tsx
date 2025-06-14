@@ -10,6 +10,7 @@ import { SessionProvider } from "./hooks/useSession";
 import AuthPage from "./pages/AuthPage";
 import AppLayout from "./components/layout/AppLayout";
 import CardsPage from "./pages/CardsPage";
+import ForeignExchangePage from "./pages/ForeignExchangePage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelledPage from "./pages/PaymentCancelledPage";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route element={<AppLayout />}>
               <Route path="/" element={<Index />} />
               <Route path="/cards" element={<CardsPage />} />
+              <Route path="/foreign-exchange" element={<ForeignExchangePage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
             </Route>
