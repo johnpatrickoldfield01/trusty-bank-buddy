@@ -41,7 +41,7 @@ const Index = () => {
       const createInitialAccounts = async () => {
         const initialAccounts: Array<Database['public']['Tables']['accounts']['Insert']> = [
           { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 68000000, account_number: '1234 5678 9012 3456' },
-          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 0, account_number: '9876 5432 1098 7654' },
+          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '9876 5432 1098 7654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
           { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: 10000000, account_number: '4321 8765 4321 0987' }
         ];
@@ -174,7 +174,7 @@ const Index = () => {
           if (savingsAccount) {
             const { error: savingsUpdateError } = await supabase
               .from('accounts')
-              .update({ balance: 0 })
+              .update({ balance: 500000 })
               .eq('id', savingsAccount.id);
             if (savingsUpdateError) {
               toast.error("Failed to update Savings Account balance.");
