@@ -98,7 +98,7 @@ const LoanDetailsPage = () => {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">Outstanding Balance</p>
+              <p className="text-sm text-muted-foreground">Available Balance</p>
               <p className="text-3xl font-bold">
                 R{Math.abs(Number(loan.balance)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
