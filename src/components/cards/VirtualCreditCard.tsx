@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Wifi, CreditCard } from 'lucide-react';
@@ -10,7 +9,7 @@ type VirtualCreditCardProps = {
   expiryDate: string;
   onClick: () => void;
   isSelected: boolean;
-  gradient: { from: string; to: string };
+  gradient: string;
 };
 
 const VirtualCreditCard = ({ cardHolder, cardNumber, expiryDate, onClick, isSelected, gradient }: VirtualCreditCardProps) => {
@@ -19,8 +18,7 @@ const VirtualCreditCard = ({ cardHolder, cardNumber, expiryDate, onClick, isSele
       onClick={onClick}
       className={cn(
         "w-full max-w-sm rounded-xl bg-gradient-to-br text-white shadow-lg transform hover:scale-105 transition-transform duration-300 cursor-pointer",
-        gradient.from,
-        gradient.to,
+        gradient,
         isSelected && "ring-4 ring-offset-2 ring-offset-background ring-yellow-300 scale-105"
       )}
     >
