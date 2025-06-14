@@ -59,13 +59,24 @@ export const useProofOfPaymentDownloader = () => {
       const lastTableY = (doc as any).lastAutoTable.finalY;
       doc.setFontSize(14);
       doc.text(isDeposit ? 'Sender Details' : 'Recipient Details', 14, lastTableY + 15);
+      
+      const recipientDetailsBody: (string | null)[][] = [];
+      if (transaction.recipient_bank_name) {
+        recipientDetailsBody.push(['Name', transaction.recipient_name || '']);
+        recipientDetailsBody.push(['Bank', transaction.recipient_bank_name]);
+        recipientDetailsBody.push(['Account Number', transaction.recipient_account_number || '']);
+        if (transaction.recipient_swift_code) {
+          recipientDetailsBody.push(['SWIFT Code', transaction.recipient_swift_code]);
+        }
+      } else {
+        recipientDetailsBody.push(['Name', isDeposit ? 'External Employer Co.' : transaction.name.replace('Transfer to ', '')]);
+        recipientDetailsBody.push(['Bank', 'Other Bank Inc.']);
+        recipientDetailsBody.push(['Account Number', '**** **** **** 3456']);
+      }
+
       autoTable(doc, {
         startY: lastTableY + 20,
-        body: [
-          ['Name', isDeposit ? 'External Employer Co.' : transaction.name.replace('Transfer to ', '')],
-          ['Bank', 'Other Bank Inc.'],
-          ['Account Number', '**** **** **** 3456'],
-        ],
+        body: recipientDetailsBody,
         theme: 'plain',
         styles: { cellPadding: 2, fontSize: 10 },
         tableWidth: 'auto',
