@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -48,7 +47,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                   </Button>
                 </div>
               </div>
-              {mainAccountNumber && <p className="text-xs text-muted-foreground">{mainAccountNumber}</p>}
+              {mainAccountNumber && <p className="text-xs text-muted-foreground">{mainAccountNumber.replace(/ /g, '')}</p>}
             </div>
           </div>
 
@@ -62,7 +61,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                 <p className="font-medium">Savings</p>
                 <p className="font-bold">R{(savingsBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
-              {savingsAccountNumber && <p className="text-xs text-muted-foreground">{savingsAccountNumber}</p>}
+              {savingsAccountNumber && <p className="text-xs text-muted-foreground">{savingsAccountNumber.replace(/ /g, '')}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Savings Goal</span>
@@ -83,7 +82,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                 <p className="font-medium">Credit Card</p>
                 <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>R{(creditCardBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
-              {creditCardAccountNumber && <p className="text-xs text-muted-foreground">{creditCardAccountNumber}</p>}
+              {creditCardAccountNumber && <p className="text-xs text-muted-foreground">{creditCardAccountNumber.replace(/ /g, '')}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Credit Limit</span>
@@ -105,7 +104,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                 <p className="font-medium">Business Loan</p>
                 <p className="font-bold">R{(Math.abs(loanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
-              {loanAccountNumber && <p className="text-xs text-muted-foreground">{loanAccountNumber}</p>}
+              {loanAccountNumber && <p className="text-xs text-muted-foreground">{loanAccountNumber.replace(/ /g, '')}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
@@ -126,7 +125,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                 <p className="font-medium">Home Loan</p>
                 <p className="font-bold">R{(Math.abs(homeLoanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
-              {homeLoanAccountNumber && <p className="text-xs text-muted-foreground">{homeLoanAccountNumber}</p>}
+              {homeLoanAccountNumber && <p className="text-xs text-muted-foreground">{homeLoanAccountNumber.replace(/ /g, '')}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
