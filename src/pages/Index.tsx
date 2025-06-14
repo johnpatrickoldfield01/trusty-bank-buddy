@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,12 +15,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useStatementDownloader } from '@/hooks/useStatementDownloader';
 
 const Index = () => {
   const { profile } = useOutletContext<{ profile: Profile }>();
   const navigate = useNavigate();
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const { downloadStatement } = useStatementDownloader();
 
   const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
     queryKey: ['accounts', user?.id],
@@ -51,6 +52,62 @@ const Index = () => {
         }
       };
       createInitialAccounts();
+    }
+  }, [user, accounts, queryClient]);
+
+  useEffect(() => {
+    if (user && accounts && accounts.length > 0) {
+      const seedTransactions = async () => {
+        const mainAccount = accounts.find(acc => acc.account_type === 'main');
+        if (!mainAccount) return;
+
+        const { data: existingSeed } = await supabase
+          .from('transactions')
+          .select('id')
+          .eq('name', 'Monthly Salary Deposit - Month 1')
+          .eq('account_id', mainAccount.id)
+          .limit(1);
+
+        if (existingSeed && existingSeed.length > 0) return;
+
+        toast.info("Setting up your account history with sample deposits...");
+
+        const deposits = [];
+        const today = new Date();
+        for (let i = 1; i <= 12; i++) {
+          const transactionDate = new Date(today.getFullYear(), today.getMonth() - (12 - i), 15);
+          deposits.push({
+            account_id: mainAccount.id,
+            name: `Monthly Salary Deposit - Month ${i}`,
+            amount: 1000000,
+            category: 'Salary',
+            icon: '💰',
+            transaction_date: transactionDate.toISOString(),
+          });
+        }
+        
+        const { error: insertError } = await supabase.from('transactions').insert(deposits);
+
+        if (insertError) {
+          toast.error('Failed to seed monthly deposits.');
+          console.error('Failed to seed transactions:', insertError);
+        } else {
+          const { error: updateError } = await supabase
+            .from('accounts')
+            .update({ balance: (mainAccount.balance || 0) + 12000000 })
+            .eq('id', mainAccount.id);
+
+          if (updateError) {
+            toast.error('Failed to update account balance after seeding.');
+          } else {
+            toast.success('Successfully added 12 monthly deposits.');
+            queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+            queryClient.invalidateQueries({ queryKey: ['transactions', user.id] });
+          }
+        }
+      };
+
+      seedTransactions();
     }
   }, [user, accounts, queryClient]);
 
@@ -131,6 +188,11 @@ const Index = () => {
 
     await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
     await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+  };
+
+  const handleDownloadStatement = () => {
+    const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+    downloadStatement(profile, mainAccount);
   };
 
   const handleLogout = async () => {
@@ -219,7 +281,7 @@ const Index = () => {
                 </CardContent>
               </Card>
             ) : (
-              <TransactionList transactions={transactions || []} />
+              <TransactionList transactions={transactions || []} onDownloadStatement={handleDownloadStatement} />
             )}
           </div>
           <div>

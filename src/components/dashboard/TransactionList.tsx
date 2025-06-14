@@ -1,7 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Download } from 'lucide-react';
 
 export type Transaction = {
   id: string;
@@ -12,7 +15,7 @@ export type Transaction = {
   icon: string;
 };
 
-const TransactionList = ({ transactions }: { transactions: Transaction[] }) => {
+const TransactionList = ({ transactions, onDownloadStatement }: { transactions: Transaction[], onDownloadStatement: () => void }) => {
   return (
     <Card className="w-full">
       <CardHeader>
@@ -44,9 +47,15 @@ const TransactionList = ({ transactions }: { transactions: Transaction[] }) => {
             </div>
           ))}
           
-          <button className="w-full mt-2 text-sm text-bank-primary hover:text-bank-primary/80 font-medium py-2">
-            View all transactions
-          </button>
+          <div className="w-full mt-4 pt-4 border-t flex justify-center items-center gap-4">
+            <Button variant="link" className="text-bank-primary">
+              View all transactions
+            </Button>
+            <Button variant="outline" onClick={onDownloadStatement}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Statement
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
