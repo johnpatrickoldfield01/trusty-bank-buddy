@@ -13,6 +13,7 @@ import CardsPage from "./pages/CardsPage";
 import ForeignExchangePage from "./pages/ForeignExchangePage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelledPage from "./pages/PaymentCancelledPage";
+import TransactionDetailsPage from "./pages/TransactionDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/foreign-exchange" element={<ForeignExchangePage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
+              <Route path="/transaction/:id" element={<TransactionDetailsPage />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
