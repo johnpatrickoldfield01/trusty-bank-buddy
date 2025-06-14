@@ -58,9 +58,12 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [totalBalance, setTotalBalance] = useState(400000);
+  const [totalBalance, setTotalBalance] = useState(450000);
   const [spendingThisMonth, setSpendingThisMonth] = useState(3402.50);
   const [mainAccountBalance, setMainAccountBalance] = useState(400000);
+  const [savingsBalance, setSavingsBalance] = useState(50000);
+  const [creditCardBalance, setCreditCardBalance] = useState(-1258.32);
+  const [creditCardLimit, setCreditCardLimit] = useState(100000);
 
   const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
     const now = new Date();
@@ -132,7 +135,12 @@ const Index = () => {
             <TransactionList transactions={transactions} />
           </div>
           <div>
-            <AccountSummary mainAccountBalance={mainAccountBalance} />
+            <AccountSummary
+              mainAccountBalance={mainAccountBalance}
+              savingsBalance={savingsBalance}
+              creditCardBalance={creditCardBalance}
+              creditCardLimit={creditCardLimit}
+            />
           </div>
         </div>
         

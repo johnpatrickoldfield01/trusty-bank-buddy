@@ -4,7 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Wallet, CreditCard, PiggyBank } from 'lucide-react';
 
-const AccountSummary = ({ mainAccountBalance }: { mainAccountBalance: number }) => {
+interface AccountSummaryProps {
+  mainAccountBalance: number;
+  savingsBalance: number;
+  creditCardBalance: number;
+  creditCardLimit: number;
+}
+
+const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit }: AccountSummaryProps) => {
+  const creditUsagePercentage = (Math.abs(creditCardBalance) / creditCardLimit) * 100;
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -34,7 +43,7 @@ const AccountSummary = ({ mainAccountBalance }: { mainAccountBalance: number }) 
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Savings</p>
-                <p className="font-bold">$5,873.00</p>
+                <p className="font-bold">${savingsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
@@ -54,14 +63,15 @@ const AccountSummary = ({ mainAccountBalance }: { mainAccountBalance: number }) 
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Credit Card</p>
-                <p className="font-bold text-destructive">-$1,258.32</p>
+                <p className="font-bold text-destructive">${creditCardBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Credit Limit</span>
-                  <span>25%</span>
+                  <span>{creditUsagePercentage.toFixed(1)}%</span>
                 </div>
-                <Progress value={25} className="h-1.5 bg-red-200" />
+                <Progress value={creditUsagePercentage} className="h-1.5 bg-red-200" />
+                <p className="text-xs text-muted-foreground text-right mt-1">Limit: ${creditCardLimit.toLocaleString('en-US')}</p>
               </div>
             </div>
           </div>
