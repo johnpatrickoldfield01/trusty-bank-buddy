@@ -97,7 +97,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      transfer_money: {
+        Args: {
+          sender_account_id: string
+          recipient_name: string
+          transfer_amount: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       account_type: "main" | "savings" | "credit" | "loan"

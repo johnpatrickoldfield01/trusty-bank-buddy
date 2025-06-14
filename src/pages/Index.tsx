@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,6 +15,7 @@ import { useStatementDownloader } from '@/hooks/useStatementDownloader';
 
 import { useAccounts } from '@/hooks/useAccounts';
 import { useTransactions } from '@/hooks/useTransactions';
+import { useMonthlySpending } from '@/hooks/useMonthlySpending';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import PremiumCardOffer from '@/components/dashboard/PremiumCardOffer';
@@ -29,6 +29,7 @@ const Index = () => {
 
   const { accounts, isLoadingAccounts } = useAccounts();
   const { transactions, isLoadingTransactions } = useTransactions();
+  const { spendingThisMonth, isLoadingSpending } = useMonthlySpending();
   
   const mainAccount = accounts?.find(acc => acc.account_type === 'main');
   const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
@@ -38,7 +39,7 @@ const Index = () => {
   const mainAccountBalance = mainAccount?.balance ?? 0;
   const savingsBalance = savingsAccount?.balance ?? 0;
   const creditCardBalance = creditAccount?.balance ?? 0;
-  const creditCardLimit = 1792952.54; 
+  const creditCardLimit = 10000; 
   const loanBalance = loanAccount?.balance ?? 0;
 
   const mainAccountNumber = mainAccount?.account_number;
@@ -47,7 +48,6 @@ const Index = () => {
   const loanAccountNumber = loanAccount?.account_number;
 
   const totalBalance = mainAccountBalance + savingsBalance;
-  const spendingThisMonth = 61008.20;
 
   const handleSendMoney = async ({ amount, recipientName }: { amount: number; recipientName: string }) => {
     if (!user) {
@@ -71,31 +71,20 @@ const Index = () => {
         throw new Error("Insufficient funds.");
     }
 
-    const newTransaction = {
-      account_id: mainAccount.id,
-      name: `Transfer to ${recipientName}`,
-      amount: -amount,
-      category: 'Transfer',
-      icon: '💸',
-    };
+    const { error } = await supabase.rpc('transfer_money', {
+      sender_account_id: mainAccount.id,
+      recipient_name: recipientName,
+      transfer_amount: amount
+    });
 
-    const { error: txError } = await supabase.from('transactions').insert(newTransaction);
-    if (txError) {
-      toast.error("Failed to record transaction.");
-      throw txError;
-    }
-
-    const { error: accountError } = await supabase
-      .from('accounts')
-      .update({ balance: mainAccount.balance - amount })
-      .eq('id', mainAccount.id);
-    if (accountError) {
-      toast.error("Failed to update account balance in the database.");
-      throw accountError;
+    if (error) {
+      toast.error(`Transaction failed: ${error.message}`);
+      throw error;
     }
 
     await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
     await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+    await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
   };
 
   const handleDownloadStatement = () => {
@@ -119,9 +108,9 @@ const Index = () => {
         <DashboardHeader profile={profile} onLogout={handleLogout} />
         
         <DashboardStats
-          isLoading={isLoadingAccounts}
+          isLoading={isLoadingAccounts || isLoadingSpending}
           totalBalance={totalBalance}
-          spendingThisMonth={spendingThisMonth}
+          spendingThisMonth={spendingThisMonth ?? 0}
         />
         
         <div className="mb-6">
