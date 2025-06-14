@@ -9,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import StatCard from '@/components/ui/StatCard';
+import { Landmark } from 'lucide-react';
 
 const currencies = [
   { code: 'USD', name: 'US Dollar', balance: 1000000 },
@@ -33,9 +35,44 @@ const currencies = [
   { code: 'MXN', name: 'Mexican Peso', balance: 1000000 },
 ];
 
+const exchangeRatesToZAR: { [key: string]: number } = {
+  USD: 18.50,
+  EUR: 20.00,
+  JPY: 0.12,
+  GBP: 23.50,
+  CHF: 20.50,
+  CAD: 13.50,
+  AUD: 12.20,
+  NZD: 11.30,
+  CNY: 2.55,
+  HKD: 2.37,
+  SGD: 13.70,
+  SEK: 1.75,
+  NOK: 1.72,
+  DKK: 2.68,
+  KRW: 0.013,
+  INR: 0.22,
+  BRL: 3.45,
+  RUB: 0.21,
+  ZAR: 1.00,
+  MXN: 1.02,
+};
+
 const ForeignExchangePage = () => {
+  const totalBalanceInZAR = currencies.reduce((total, currency) => {
+    const rate = exchangeRatesToZAR[currency.code] || 0;
+    return total + currency.balance * rate;
+  }, 0);
+
   return (
     <div className="container mx-auto py-10">
+      <div className="mb-6">
+        <StatCard
+          title="Total Foreign Exchange Balance (ZAR)"
+          value={`R ${totalBalanceInZAR.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          icon={<Landmark className="h-6 w-6 text-muted-foreground" />}
+        />
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Foreign Exchange Balances</CardTitle>
