@@ -18,7 +18,7 @@ export const useAccountConfirmationDownloader = () => {
       toast.info('Generating your account confirmation letter...');
       
       const doc = new jsPDF();
-      const accountNumber = (mainAccount.account_number || '').replace(/ /g, '');
+      const accountNumber = (mainAccount.account_number || '').replace(/[^a-zA-Z0-9]/g, '');
 
       // Header
       doc.setFontSize(22);
