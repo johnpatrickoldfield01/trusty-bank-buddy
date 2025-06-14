@@ -22,7 +22,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <StatCard
               title="Total Balance"
-              value="$18,331.32"
+              value="$400,000"
               trend={{ value: "3.2% this month", positive: true }}
               icon={<WalletCards className="h-5 w-5" />}
             />
