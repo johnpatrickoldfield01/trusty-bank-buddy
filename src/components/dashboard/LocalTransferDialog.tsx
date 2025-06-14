@@ -25,6 +25,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange }: LocalTransferDialogProps)
       accountHolderName: '',
       bankName: '',
       accountNumber: '',
+      swiftCode: '',
       amount: undefined,
     },
   });
@@ -37,6 +38,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange }: LocalTransferDialogProps)
         accountHolderName: '',
         bankName: '',
         accountNumber: '',
+        swiftCode: '',
         amount: undefined,
       });
     }

@@ -66,6 +66,19 @@ const LocalTransferForm = ({ form, onSubmit, onCancel, isSubmitting }: LocalTran
         />
         <FormField
           control={form.control}
+          name="swiftCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>SWIFT Code</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., SBZAZAJJ" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
