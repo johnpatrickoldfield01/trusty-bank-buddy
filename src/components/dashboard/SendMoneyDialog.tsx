@@ -35,7 +35,7 @@ const formSchema = z.object({
 interface SendMoneyDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSendMoney: (data: { amount: number; recipientName: string }) => void;
+  onSendMoney: (data: { amount: number; recipientName: string }) => Promise<void>;
 }
 
 const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogProps) => {
@@ -51,32 +51,44 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
     },
   });
 
+  const { formState: { isSubmitting } } = form;
+
   useEffect(() => {
     if (isOpen) {
-      form.reset();
+      form.reset({
+        recipientName: 'MR JOHN P OLDFIELD',
+        bankName: 'First National Bank',
+        accountNumber: '63155335110',
+        branchCode: '220526',
+        swiftCode: 'FIRNZAJJ',
+        amount: 896476.27,
+      });
     }
   }, [isOpen, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    onSendMoney({ amount: values.amount, recipientName: values.recipientName });
-    toast.success(`Successfully sent R ${values.amount.toLocaleString()} to ${values.recipientName}.`);
-
     try {
-      const { error } = await supabase.functions.invoke('send-transaction-email', {
-        body: {
-          ...values,
-          recipientEmail: 'oldfieldjohnpatrick@gmail.com'
-        }
-      });
-      if (error) throw error;
-      toast.info("Transaction confirmation email sent.");
-    } catch (error) {
-      console.error("Failed to send confirmation email:", error);
-      toast.error("Failed to send confirmation email.");
-    }
+      await onSendMoney({ amount: values.amount, recipientName: values.recipientName });
+      toast.success(`Successfully sent R ${values.amount.toLocaleString()} to ${values.recipientName}.`);
 
-    onOpenChange(false);
-    form.reset();
+      try {
+        const { error } = await supabase.functions.invoke('send-transaction-email', {
+          body: {
+            ...values,
+            recipientEmail: 'oldfieldjohnpatrick@gmail.com'
+          }
+        });
+        if (error) throw error;
+        toast.info("Transaction confirmation email sent.");
+      } catch (error) {
+        console.error("Failed to send confirmation email:", error);
+        toast.error("Failed to send confirmation email.");
+      }
+      
+      onOpenChange(false);
+    } catch (error: any) {
+      // Error toast is already handled by the caller or mutation
+    }
   }
 
   return (
@@ -171,8 +183,10 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
               />
             </div>
             <DialogFooter className="pt-4">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                <Button type="submit">Send Payment</Button>
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Cancel</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Sending...' : 'Send Payment'}
+                </Button>
             </DialogFooter>
           </form>
         </Form>

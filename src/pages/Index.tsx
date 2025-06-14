@@ -1,92 +1,94 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { formatDistanceToNow } from 'date-fns';
+
 import AccountSummary from '@/components/dashboard/AccountSummary';
 import TransactionList, { Transaction } from '@/components/dashboard/TransactionList';
 import QuickActions from '@/components/dashboard/QuickActions';
 import StatCard from '@/components/ui/StatCard';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WalletCards, Coins, CreditCard } from 'lucide-react';
 import { type Profile } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-
-const initialTransactions: Transaction[] = [
-    {
-      id: '1',
-      name: 'Starbucks Coffee',
-      amount: -224.12,
-      date: 'Today, 9:15 AM',
-      category: 'Food',
-      icon: '🍔',
-    },
-    {
-      id: '2',
-      name: 'Amazon Purchase',
-      amount: -1613.48,
-      date: 'Yesterday, 2:30 PM',
-      category: 'Shopping',
-      icon: '🛍️',
-    },
-    {
-      id: '3',
-      name: 'Salary Deposit',
-      amount: 58091.67,
-      date: 'Apr 28, 2025',
-      category: 'Income',
-      icon: '💰',
-    },
-    {
-      id: '4',
-      name: 'Electric Bill',
-      amount: -2232.23,
-      date: 'Apr 27, 2025',
-      category: 'Utilities',
-      icon: '⚡',
-    },
-    {
-      id: '5',
-      name: 'Netflix Subscription',
-      amount: -286.69,
-      date: 'Apr 26, 2025',
-      category: 'Entertainment',
-      icon: '🎬',
-    },
-  ];
+import { useSession } from '@/hooks/useSession';
+import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const { profile } = useOutletContext<{ profile: Profile }>();
   const navigate = useNavigate();
+  const { user } = useSession();
+  const queryClient = useQueryClient();
 
-  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [totalBalance, setTotalBalance] = useState(8068286.43);
-  const [spendingThisMonth, setSpendingThisMonth] = useState(61008.20);
-  const [mainAccountBalance, setMainAccountBalance] = useState(7171810.16);
-  const [savingsBalance, setSavingsBalance] = useState(896476.27);
-  const [creditCardBalance, setCreditCardBalance] = useState(1792952.54);
-  const [creditCardLimit, setCreditCardLimit] = useState(1792952.54);
+  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
+    queryKey: ['accounts', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase.from('accounts').select('*');
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!user,
+  });
 
-  const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    const formattedDate = `Today, ${formattedHours}:${formattedMinutes} ${ampm}`;
-    
-    const newTransaction: Transaction = {
-      id: now.toISOString(),
+  const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
+    queryKey: ['transactions', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase.from('transactions').select('*').order('transaction_date', { ascending: false }).limit(5);
+      if (error) throw new Error(error.message);
+      return data.map((tx): Transaction => ({
+        id: tx.id,
+        name: tx.name,
+        amount: tx.amount,
+        date: formatDistanceToNow(new Date(tx.transaction_date), { addSuffix: true }),
+        category: tx.category || '',
+        icon: tx.icon || '💸',
+      }));
+    },
+    enabled: !!user,
+  });
+
+  const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+  const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
+  const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
+
+  const totalBalance = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0;
+  // Note: Spending calculation would require more historical data. Using a placeholder.
+  const spendingThisMonth = 61008.20;
+
+  const handleSendMoney = async ({ amount, recipientName }: { amount: number; recipientName: string }) => {
+    if (!mainAccount) {
+      toast.error("Main account not found.");
+      throw new Error("Main account not found.");
+    }
+    if (mainAccount.balance < amount) {
+        toast.error("Insufficient funds.");
+        throw new Error("Insufficient funds.");
+    }
+
+    const newTransaction = {
+      account_id: mainAccount.id,
       name: `Transfer to ${recipientName}`,
       amount: -amount,
-      date: formattedDate,
       category: 'Transfer',
       icon: '💸',
     };
 
-    setTransactions(prev => [newTransaction, ...prev]);
-    setTotalBalance(prev => prev - amount);
-    setMainAccountBalance(prev => prev - amount);
-    setSpendingThisMonth(prev => prev + amount);
+    const { error: txError } = await supabase.from('transactions').insert(newTransaction);
+    if (txError) throw txError;
+
+    const { error: accountError } = await supabase
+      .from('accounts')
+      .update({ balance: mainAccount.balance - amount })
+      .eq('id', mainAccount.id);
+    if (accountError) throw accountError;
+
+    await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+    await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
   };
 
   const handleLogout = async () => {
@@ -106,13 +108,13 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <StatCard
             title="Total Balance"
-            value={`R${totalBalance.toLocaleString('en-US')}`}
+            value={`R${totalBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend={{ value: "3.2% this month", positive: true }}
             icon={<WalletCards className="h-5 w-5" />}
           />
           <StatCard
             title="Spending this month"
-            value={`R${spendingThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            value={`R${spendingThisMonth.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend={{ value: "12% more than last month", positive: false }}
             icon={<CreditCard className="h-5 w-5" />}
           />
@@ -132,15 +134,65 @@ const Index = () => {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <TransactionList transactions={transactions} />
+            {isLoadingTransactions ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Transactions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/4" />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : (
+              <TransactionList transactions={transactions || []} />
+            )}
           </div>
           <div>
-            <AccountSummary
-              mainAccountBalance={mainAccountBalance}
-              savingsBalance={savingsBalance}
-              creditCardBalance={creditCardBalance}
-              creditCardLimit={creditCardLimit}
-            />
+            {isLoadingAccounts ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/4" />
+                    </div>
+                  </div>
+                   <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/4" />
+                    </div>
+                  </div>
+                   <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <AccountSummary
+                mainAccountBalance={mainAccount?.balance || 0}
+                savingsBalance={savingsAccount?.balance || 0}
+                creditCardBalance={creditAccount?.balance || 0}
+                creditCardLimit={1792952.54} // Assuming this is static for now
+              />
+            )}
           </div>
         </div>
         
