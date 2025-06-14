@@ -44,7 +44,7 @@ const Index = () => {
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
           { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: 10000000, account_number: '4321 8765 4321 0987' }
         ];
-        const { error } = await supabase.from('accounts').insert(initialAccounts as any);
+        const { error } = await supabase.from('accounts').insert(initialAccounts);
         if (error) {
           toast.error('Failed to initialize your accounts. Please refresh the page.');
           console.error('Failed to create initial accounts:', error);
