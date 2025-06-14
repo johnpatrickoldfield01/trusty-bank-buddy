@@ -1,4 +1,3 @@
-
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +6,29 @@ import { type User } from '@supabase/supabase-js';
 
 export const useAccountInitializer = () => {
     const queryClient = useQueryClient();
+
+    const addHomeLoanAccount = async (user: User) => {
+        toast.info("Setting up your Home Loan account...");
+
+        const homeLoanAccount: Database['public']['Tables']['accounts']['Insert'] = {
+            user_id: user.id,
+            account_type: 'loan',
+            account_name: 'Home Loan',
+            balance: -20000000.00,
+            account_number: '1122 3344 5566 7788'
+        };
+
+        const { error } = await supabase.from('accounts').insert(homeLoanAccount);
+
+        if (error) {
+            toast.error('Failed to set up your Home Loan account.');
+            console.error('Failed to create home loan account:', error);
+            return;
+        }
+
+        toast.success('Your Home Loan account has been set up!');
+        await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+    };
 
     const initializeAccounts = async (user: User) => {
         toast.info("Setting up your new accounts...");
@@ -47,5 +69,5 @@ export const useAccountInitializer = () => {
         await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
     };
 
-    return { initializeAccounts };
+    return { initializeAccounts, addHomeLoanAccount };
 };

@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +6,7 @@ import { useAccountInitializer } from './useAccountInitializer';
 
 export const useAccounts = () => {
   const { user } = useSession();
-  const { initializeAccounts } = useAccountInitializer();
+  const { initializeAccounts, addHomeLoanAccount } = useAccountInitializer();
 
   const { data: accounts, isLoading: isLoadingAccounts, isSuccess } = useQuery({
     queryKey: ['accounts', user?.id],
@@ -21,10 +20,17 @@ export const useAccounts = () => {
   });
 
   useEffect(() => {
-    if (user && isSuccess && accounts && accounts.length === 0) {
-      initializeAccounts(user);
+    if (user && isSuccess && accounts) {
+      if (accounts.length === 0) {
+        initializeAccounts(user);
+      } else {
+        const hasHomeLoan = accounts.some(acc => acc.account_name === 'Home Loan');
+        if (!hasHomeLoan) {
+          addHomeLoanAccount(user);
+        }
+      }
     }
-  }, [user, accounts, isSuccess, initializeAccounts]);
+  }, [user, accounts, isSuccess, initializeAccounts, addHomeLoanAccount]);
 
   return { accounts, isLoadingAccounts };
 };
