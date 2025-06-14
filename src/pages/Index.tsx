@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -41,9 +42,9 @@ const Index = () => {
   });
 
   // Using static values for balances as requested.
-  const mainAccountBalance = 1250000.75;
-  const savingsBalance = 375000.50;
-  const creditCardBalance = -25000.00;
+  const mainAccountBalance = 10000000;
+  const savingsBalance = 0;
+  const creditCardBalance = 1000000;
   const creditCardLimit = 1792952.54; 
 
   const totalBalance = mainAccountBalance + savingsBalance;
