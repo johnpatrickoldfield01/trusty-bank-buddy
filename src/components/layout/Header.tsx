@@ -2,19 +2,20 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Menu, Bell } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <CreditCard className="h-6 w-6 text-bank-primary" />
           <span className="text-xl font-bold">TrustyBank</span>
-        </div>
+        </Link>
         
         <nav className="hidden md:flex items-center gap-6">
-          <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Dashboard</a>
-          <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</a>
+          <Link to="/" className="text-sm font-medium hover:text-bank-primary transition-colors">Dashboard</Link>
+          <Link to="/cards" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</Link>
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</a>
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Support</a>
         </nav>

@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { SessionProvider } from "./hooks/useSession";
 import AuthPage from "./pages/AuthPage";
 import AppLayout from "./components/layout/AppLayout";
+import CardsPage from "./pages/CardsPage";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Index />} />
+              <Route path="/cards" element={<CardsPage />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
