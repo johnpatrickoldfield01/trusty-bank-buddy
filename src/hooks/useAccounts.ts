@@ -28,7 +28,9 @@ export const useAccounts = () => {
       } else {
         const outdatedAccounts = accounts.filter(
           (acc) =>
-            (acc.account_type === 'main' || acc.account_type === 'savings') &&
+            (acc.account_type === 'main' ||
+              acc.account_type === 'savings' ||
+              acc.account_type === 'credit') &&
             acc.account_number &&
             acc.account_number.replace(/\D/g, '').length < 16
         );
@@ -36,10 +38,18 @@ export const useAccounts = () => {
         if (outdatedAccounts.length > 0) {
           Promise.all(
             outdatedAccounts.map((account) => {
-              const newAccountNumber =
-                account.account_type === 'main'
-                  ? '1234567890123456'
-                  : '9876543210987654';
+              let newAccountNumber;
+              switch (account.account_type) {
+                case 'main':
+                  newAccountNumber = '1234567890123456';
+                  break;
+                case 'savings':
+                  newAccountNumber = '9876543210987654';
+                  break;
+                case 'credit':
+                  newAccountNumber = '5555666677778888';
+                  break;
+              }
               return supabase
                 .from('accounts')
                 .update({ account_number: newAccountNumber })
