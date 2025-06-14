@@ -18,7 +18,7 @@ const Header = () => {
           <Link to="/loans" className="text-sm font-medium hover:text-bank-primary transition-colors">Loans</Link>
           <Link to="/foreign-exchange" className="text-sm font-medium hover:text-bank-primary transition-colors">Foreign Exchange</Link>
           <Link to="/cards" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</Link>
-          <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</a>
+          <Link to="/payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</Link>
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Support</a>
         </nav>
         
@@ -40,3 +40,4 @@ const Header = () => {
 };
 
 export default Header;
+

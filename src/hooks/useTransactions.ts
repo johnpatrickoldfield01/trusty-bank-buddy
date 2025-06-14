@@ -5,14 +5,14 @@ import { useSession } from '@/hooks/useSession';
 import { formatDistanceToNow } from 'date-fns';
 import { type Transaction } from '@/components/dashboard/TransactionList';
 
-export const useTransactions = () => {
+export const useTransactions = (limit = 5) => {
   const { user } = useSession();
 
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
-    queryKey: ['transactions', user?.id],
+    queryKey: ['transactions', user?.id, limit],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase.from('transactions').select('*').order('transaction_date', { ascending: false }).limit(5);
+      const { data, error } = await supabase.from('transactions').select('*').order('transaction_date', { ascending: false }).limit(limit);
       if (error) throw new Error(error.message);
       return data.map((tx): Transaction => ({
         id: tx.id,
@@ -28,3 +28,4 @@ export const useTransactions = () => {
 
   return { transactions, isLoadingTransactions };
 };
+
