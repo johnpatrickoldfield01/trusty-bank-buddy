@@ -15,12 +15,84 @@ const cardsData = [
     expiryDate: '12/30',
     expiryDateFull: '12/2030',
     cvv: '123',
+    gradient: { from: 'from-blue-500', to: 'to-purple-600' },
   },
   {
     cardNumber: '4012 8888 8888 1881',
     expiryDate: '06/28',
     expiryDateFull: '06/2028',
     cvv: '456',
+    gradient: { from: 'from-pink-500', to: 'to-rose-500' },
+  },
+  {
+    cardNumber: '5102 1098 7654 3210',
+    expiryDate: '08/29',
+    expiryDateFull: '08/2029',
+    cvv: '789',
+    gradient: { from: 'from-green-400', to: 'to-emerald-500' },
+  },
+  {
+    cardNumber: '4532 7890 1234 5678',
+    expiryDate: '04/27',
+    expiryDateFull: '04/2027',
+    cvv: '101',
+    gradient: { from: 'from-orange-400', to: 'to-red-500' },
+  },
+  {
+    cardNumber: '4929 1234 5678 9012',
+    expiryDate: '11/31',
+    expiryDateFull: '11/2031',
+    cvv: '212',
+    gradient: { from: 'from-indigo-500', to: 'to-cyan-400' },
+  },
+  {
+    cardNumber: '5541 2345 6789 0123',
+    expiryDate: '03/26',
+    expiryDateFull: '03/2026',
+    cvv: '323',
+    gradient: { from: 'from-yellow-400', to: 'to-amber-500' },
+  },
+  {
+    cardNumber: '4111 2222 3333 4444',
+    expiryDate: '07/30',
+    expiryDateFull: '07/2030',
+    cvv: '434',
+    gradient: { from: 'from-teal-400', to: 'to-cyan-500' },
+  },
+  {
+    cardNumber: '4682 9101 1121 3141',
+    expiryDate: '01/29',
+    expiryDateFull: '01/2029',
+    cvv: '545',
+    gradient: { from: 'from-lime-400', to: 'to-green-600' },
+  },
+  {
+    cardNumber: '4444 5555 6666 7777',
+    expiryDate: '09/27',
+    expiryDateFull: '09/2027',
+    cvv: '656',
+    gradient: { from: 'from-fuchsia-500', to: 'to-purple-600' },
+  },
+  {
+    cardNumber: '4890 1234 5678 9012',
+    expiryDate: '02/28',
+    expiryDateFull: '02/2028',
+    cvv: '767',
+    gradient: { from: 'from-sky-400', to: 'to-blue-600' },
+  },
+  {
+    cardNumber: '4321 0987 6543 2109',
+    expiryDate: '05/31',
+    expiryDateFull: '05/2031',
+    cvv: '878',
+    gradient: { from: 'from-red-500', to: 'to-stone-700' },
+  },
+  {
+    cardNumber: '4777 8888 9999 0000',
+    expiryDate: '10/26',
+    expiryDateFull: '10/2026',
+    cvv: '989',
+    gradient: { from: 'from-slate-800', to: 'to-slate-900' },
   },
 ];
 
@@ -72,6 +144,7 @@ const CardsPage = () => {
               expiryDate={card.expiryDate}
               onClick={() => setSelectedCardIndex(index)}
               isSelected={selectedCardIndex === index}
+              gradient={card.gradient}
             />
           ))}
         </div>

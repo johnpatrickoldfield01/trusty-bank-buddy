@@ -10,14 +10,17 @@ type VirtualCreditCardProps = {
   expiryDate: string;
   onClick: () => void;
   isSelected: boolean;
+  gradient: { from: string; to: string };
 };
 
-const VirtualCreditCard = ({ cardHolder, cardNumber, expiryDate, onClick, isSelected }: VirtualCreditCardProps) => {
+const VirtualCreditCard = ({ cardHolder, cardNumber, expiryDate, onClick, isSelected, gradient }: VirtualCreditCardProps) => {
   return (
     <Card 
       onClick={onClick}
       className={cn(
-        "w-full max-w-sm rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg transform hover:scale-105 transition-transform duration-300 cursor-pointer",
+        "w-full max-w-sm rounded-xl bg-gradient-to-br text-white shadow-lg transform hover:scale-105 transition-transform duration-300 cursor-pointer",
+        gradient.from,
+        gradient.to,
         isSelected && "ring-4 ring-offset-2 ring-offset-background ring-yellow-300 scale-105"
       )}
     >
