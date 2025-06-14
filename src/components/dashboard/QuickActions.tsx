@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download, Landmark, Globe } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
 
 interface QuickActionsProps {
@@ -19,7 +18,7 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
       <Card>
         <CardContent className="p-6">
           <h3 className="font-medium mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             <Button
               variant="outline"
               className="h-auto flex-col gap-2 py-4"
@@ -71,6 +70,24 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
                 <Download className="h-4 w-4 text-blue-600" />
               </div>
               <span className="text-xs font-normal">Balance Sheet</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+            >
+              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                <Landmark className="h-4 w-4 text-purple-600" />
+              </div>
+              <span className="text-xs font-normal text-center">Local Account<br/>Transfer</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+            >
+              <div className="h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                <Globe className="h-4 w-4 text-teal-600" />
+              </div>
+              <span className="text-xs font-normal text-center">International<br/>Account Transfer</span>
             </Button>
           </div>
         </CardContent>
