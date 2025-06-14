@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -95,7 +94,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Business Loan</p>
-                <p className="font-bold">R{(loanBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{(Math.abs(loanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {loanAccountNumber && <p className="text-xs text-muted-foreground">{loanAccountNumber}</p>}
               <div className="mt-2">
@@ -116,7 +115,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Home Loan</p>
-                <p className="font-bold">R{(homeLoanBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{(Math.abs(homeLoanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {homeLoanAccountNumber && <p className="text-xs text-muted-foreground">{homeLoanAccountNumber}</p>}
               <div className="mt-2">
