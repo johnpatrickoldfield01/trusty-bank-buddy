@@ -7,6 +7,29 @@ import { type User } from '@supabase/supabase-js';
 export const useAccountInitializer = () => {
     const queryClient = useQueryClient();
 
+    const addBusinessLoans = async (user: User) => {
+        toast.info("Stacking 20 business loans...");
+
+        const businessLoans: Array<Database['public']['Tables']['accounts']['Insert']> = Array.from({ length: 20 }, (_, i) => ({
+            user_id: user.id,
+            account_type: 'loan',
+            account_name: `Business Loan ${i + 1}`,
+            balance: -10000000.00,
+            account_number: `998877665544${String(1001 + i).padStart(4, '0')}`
+        }));
+
+        const { error } = await supabase.from('accounts').insert(businessLoans);
+
+        if (error) {
+            toast.error('Failed to stack business loans.');
+            console.error('Failed to create business loans:', error);
+            return;
+        }
+
+        toast.success('20 business loans have been successfully stacked!');
+        await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+    };
+
     const addHomeLoanAccount = async (user: User) => {
         toast.info("Setting up your Home Loan account...");
 
@@ -68,5 +91,5 @@ export const useAccountInitializer = () => {
         await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
     };
 
-    return { initializeAccounts, addHomeLoanAccount };
+    return { initializeAccounts, addHomeLoanAccount, addBusinessLoans };
 };

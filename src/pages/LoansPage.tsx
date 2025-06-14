@@ -4,16 +4,32 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatAccountNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { useAccountInitializer } from '@/hooks/useAccountInitializer';
+import { useSession } from '@/hooks/useSession';
 
 const LoansPage = () => {
   const { accounts, isLoadingAccounts } = useAccounts();
+  const { addBusinessLoans } = useAccountInitializer();
+  const { user } = useSession();
 
   const loanAccounts = accounts?.filter((acc) => acc.account_type === 'loan') || [];
   const uniqueLoanAccounts = Array.from(new Map(loanAccounts.map(loan => [loan.account_name, loan])).values());
 
+  const handleAddLoans = () => {
+    if (user) {
+      addBusinessLoans(user);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Your Loans</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Your Loans</h1>
+        <Button onClick={handleAddLoans} disabled={!user}>
+          Create 20 Business Loans
+        </Button>
+      </div>
       {isLoadingAccounts ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
