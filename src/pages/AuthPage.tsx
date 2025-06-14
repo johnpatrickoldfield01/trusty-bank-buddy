@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -11,11 +10,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  password: z.string()
+    .min(12, { message: "Password must be at least 12 characters." })
+    .regex(/[A-Z]/, { message: "Must contain at least one uppercase letter."})
+    .regex(/[a-z]/, { message: "Must contain at least one lowercase letter."})
+    .regex(/[0-9]/, { message: "Must contain at least one number."})
+    .regex(/[^A-Za-z0-9]/, { message: "Must contain at least one special character."}),
 });
 
 const signInSchema = z.object({
@@ -36,6 +41,8 @@ const AuthPage = () => {
     resolver: zodResolver(signInSchema),
     defaultValues: { email: "", password: "" },
   });
+
+  const password = signUpForm.watch("password");
 
   const handleSignUp = async (values: z.infer<typeof signUpSchema>) => {
     setLoading(true);
@@ -169,6 +176,7 @@ const AuthPage = () => {
                           <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
                         <FormMessage />
+                        <PasswordStrengthIndicator password={password} />
                       </FormItem>
                     )}
                   />

@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,13 +24,20 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
-  recipientName: z.string().min(2, { message: 'Recipient name is required.' }),
+  recipientName: z.string().min(2, { message: 'Recipient name must be at least 2 characters.' }),
   recipientEmail: z.string().email({ message: 'Please enter a valid email.' }),
   bankName: z.string().min(2, { message: 'Bank name is required.' }),
-  accountNumber: z.string().regex(/^\d+$/, { message: 'Account number must be digits only.' }),
-  branchCode: z.string().optional(),
-  swiftCode: z.string().optional(),
-  amount: z.coerce.number().positive({ message: 'Amount must be positive.' }),
+  accountNumber: z.string()
+    .min(10, { message: 'Account number must be at least 10 digits.'})
+    .max(16, { message: 'Account number cannot exceed 16 digits.'})
+    .regex(/^\d+$/, { message: 'Account number must contain only digits.' }),
+  branchCode: z.string().length(6, { message: 'Branch code must be 6 digits.'}).regex(/^\d+$/, { message: 'Branch code must contain only digits.'}).optional().or(z.literal('')),
+  swiftCode: z.string().regex(/^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/, { message: 'Please enter a valid SWIFT/BIC code.'}).optional().or(z.literal('')),
+  amount: z.coerce
+    .number()
+    .positive({ message: 'Amount must be positive.' })
+    .max(1000000, { message: 'Transaction amount cannot exceed R 1,000,000.' })
+    .refine(val => (val.toString().split('.')[1] || '').length <= 2, { message: 'Amount can have at most 2 decimal places.' }),
 });
 
 interface SendMoneyDialogProps {
@@ -44,13 +50,13 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      recipientName: 'MR JOHN P OLDFIELD',
-      recipientEmail: 'oldfieldjohnpatrick@gmail.com',
-      bankName: 'First National Bank',
-      accountNumber: '63155335110',
-      branchCode: '220526',
-      swiftCode: 'FIRNZAJJ',
-      amount: 896476.27,
+      recipientName: '',
+      recipientEmail: '',
+      bankName: '',
+      accountNumber: '',
+      branchCode: '',
+      swiftCode: '',
+      amount: undefined,
     },
   });
 
@@ -59,13 +65,13 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
   useEffect(() => {
     if (isOpen) {
       form.reset({
-        recipientName: 'MR JOHN P OLDFIELD',
-        recipientEmail: 'oldfieldjohnpatrick@gmail.com',
-        bankName: 'First National Bank',
-        accountNumber: '63155335110',
-        branchCode: '220526',
-        swiftCode: 'FIRNZAJJ',
-        amount: 896476.27,
+        recipientName: '',
+        recipientEmail: '',
+        bankName: '',
+        accountNumber: '',
+        branchCode: '',
+        swiftCode: '',
+        amount: undefined,
       });
     }
   }, [isOpen, form]);
@@ -98,7 +104,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
         <DialogHeader>
           <DialogTitle>Send Money</DialogTitle>
           <DialogDescription>
-            Enter the transaction details. Fields are pre-filled based on your request.
+            Enter the transaction details. All fields are required unless marked optional.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -136,7 +142,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                 <FormItem>
                   <FormLabel>Amount (R)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input type="number" placeholder="e.g., 500.00" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,7 +155,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                 <FormItem>
                   <FormLabel>Bank Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="e.g., Standard Bank" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -162,7 +168,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                 <FormItem>
                   <FormLabel>Account Number</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="e.g., 1234567890" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -174,9 +180,9 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                 name="branchCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Branch Code</FormLabel>
+                    <FormLabel>Branch Code (Optional)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="e.g., 051001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -187,9 +193,9 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                 name="swiftCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SWIFT Code</FormLabel>
+                    <FormLabel>SWIFT Code (Optional)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input placeholder="e.g., SBZAZAJJ" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -210,4 +216,3 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
 };
 
 export default SendMoneyDialog;
-
