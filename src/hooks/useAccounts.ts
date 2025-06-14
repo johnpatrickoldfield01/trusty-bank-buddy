@@ -26,21 +26,25 @@ export const useAccounts = () => {
       if (accounts.length === 0) {
         initializeAccounts(user);
       } else {
-        const outdatedMainAccounts = accounts.filter(
+        const outdatedAccounts = accounts.filter(
           (acc) =>
-            acc.account_type === 'main' &&
+            (acc.account_type === 'main' || acc.account_type === 'savings') &&
             acc.account_number &&
             acc.account_number.replace(/\D/g, '').length < 16
         );
 
-        if (outdatedMainAccounts.length > 0) {
+        if (outdatedAccounts.length > 0) {
           Promise.all(
-            outdatedMainAccounts.map((account) =>
-              supabase
+            outdatedAccounts.map((account) => {
+              const newAccountNumber =
+                account.account_type === 'main'
+                  ? '1234567890123456'
+                  : '9876543210987654';
+              return supabase
                 .from('accounts')
-                .update({ account_number: '1234567890123456' })
-                .eq('id', account.id)
-            )
+                .update({ account_number: newAccountNumber })
+                .eq('id', account.id);
+            })
           ).then((results) => {
             const hasError = results.some((res) => res.error);
             if (!hasError) {
