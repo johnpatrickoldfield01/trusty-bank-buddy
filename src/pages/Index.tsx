@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -56,6 +55,33 @@ const Index = () => {
         }
       };
       createInitialAccounts();
+    }
+  }, [user, accounts, queryClient]);
+
+  useEffect(() => {
+    if (user && accounts) {
+      const loanAccountExists = accounts.some(acc => acc.account_type === 'loan');
+      if (accounts.length > 0 && !loanAccountExists) {
+        const createLoanAccount = async () => {
+          toast.info("Checking for Business Loan account...");
+          const { error } = await supabase.from('accounts').insert({
+            user_id: user.id,
+            account_type: 'loan',
+            account_name: 'Business Loan',
+            balance: 10000000,
+            account_number: '4321 8765 4321 0987'
+          });
+
+          if (error) {
+            toast.error('Failed to create your Business Loan account.');
+            console.error('Failed to create loan account:', error);
+          } else {
+            toast.success('Your Business Loan account has been added!');
+            queryClient.invalidateQueries({ queryKey: ['accounts', user!.id] });
+          }
+        };
+        createLoanAccount();
+      }
     }
   }, [user, accounts, queryClient]);
 
@@ -136,7 +162,7 @@ const Index = () => {
   const mainAccount = accounts?.find(acc => acc.account_type === 'main');
   const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
   const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
-  const loanAccount = accounts?.find(acc => (acc.account_type as any) === 'loan');
+  const loanAccount = accounts?.find(acc => acc.account_type === 'loan');
 
   const mainAccountBalance = mainAccount?.balance ?? 0;
   const savingsBalance = savingsAccount?.balance ?? 0;

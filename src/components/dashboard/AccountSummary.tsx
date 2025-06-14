@@ -35,7 +35,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Main Account</p>
-                <p className="font-bold">R{mainAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{mainAccountBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {mainAccountNumber && <p className="text-xs text-muted-foreground">{mainAccountNumber}</p>}
             </div>
@@ -49,7 +49,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Savings</p>
-                <p className="font-bold">R{savingsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{savingsBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {savingsAccountNumber && <p className="text-xs text-muted-foreground">{savingsAccountNumber}</p>}
               <div className="mt-2">
@@ -70,7 +70,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Credit Card</p>
-                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>R{creditCardBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>R{creditCardBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {creditCardAccountNumber && <p className="text-xs text-muted-foreground">{creditCardAccountNumber}</p>}
               <div className="mt-2">
@@ -79,7 +79,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                   <span>{creditUsagePercentage.toFixed(1)}%</span>
                 </div>
                 <Progress value={creditUsagePercentage} className={`h-1.5 ${creditCardBalance < 0 ? 'bg-red-200' : 'bg-secondary'}`} />
-                <p className="text-xs text-muted-foreground text-right mt-1">Limit: R{creditCardLimit.toLocaleString('en-US')}</p>
+                <p className="text-xs text-muted-foreground text-right mt-1">Limit: R{creditCardLimit.toLocaleString('en-ZA')}</p>
               </div>
             </div>
           </div>
@@ -92,13 +92,13 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Business Loan</p>
-                <p className="font-bold">R{loanBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{loanBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               {loanAccountNumber && <p className="text-xs text-muted-foreground">{loanAccountNumber}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
-                  <span>R{monthlyRepayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>R{monthlyRepayment.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <p className="text-xs text-muted-foreground text-right mt-1">30 years remaining</p>
               </div>
