@@ -1,23 +1,49 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import VirtualCreditCard from '@/components/cards/VirtualCreditCard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Profile } from '@/components/layout/AppLayout';
 
+const cardsData = [
+  {
+    cardNumber: '4242 4242 4242 4242',
+    expiryDate: '12/30',
+    expiryDateFull: '12/2030',
+    cvv: '123',
+  },
+  {
+    cardNumber: '4012 8888 8888 1881',
+    expiryDate: '06/28',
+    expiryDateFull: '06/2028',
+    cvv: '456',
+  },
+];
+
 const CardsPage = () => {
   const { profile } = useOutletContext<{ profile: Profile }>();
-  const cvv = '123';
-  const cardNumber = '4242 4242 4242 4242';
-  const expiryDate = '12/2030';
+  const [selectedCardIndex, setSelectedCardIndex] = useState(0);
+
+  const selectedCard = cardsData[selectedCardIndex];
 
   return (
     <div className="container mx-auto py-8 animate-fade-in">
       <h1 className="text-3xl font-bold mb-2">Your Cards</h1>
-      <p className="text-muted-foreground mb-8">View and manage your virtual cards.</p>
+      <p className="text-muted-foreground mb-8">View and manage your virtual cards. Select a card to view its details.</p>
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        <VirtualCreditCard cardHolder={profile.full_name || 'Valued Customer'} />
-        <Card className="w-full max-w-sm">
+        <div className="w-full lg:w-auto flex flex-col gap-8">
+          {cardsData.map((card, index) => (
+            <VirtualCreditCard
+              key={index}
+              cardHolder={profile.full_name || 'Valued Customer'}
+              cardNumber={card.cardNumber}
+              expiryDate={card.expiryDate}
+              onClick={() => setSelectedCardIndex(index)}
+              isSelected={selectedCardIndex === index}
+            />
+          ))}
+        </div>
+        <Card className="w-full max-w-sm sticky top-8">
             <CardHeader>
                 <CardTitle>Virtual Card Details</CardTitle>
                 <CardDescription>Keep these details secure.</CardDescription>
@@ -26,15 +52,15 @@ const CardsPage = () => {
                 <div className="space-y-4">
                     <div>
                         <p className="text-sm text-muted-foreground">Card Number</p>
-                        <p className="font-mono text-lg font-semibold">{cardNumber}</p>
+                        <p className="font-mono text-lg font-semibold">{selectedCard.cardNumber}</p>
                     </div>
                      <div>
                         <p className="text-sm text-muted-foreground">Expiry Date</p>
-                        <p className="text-lg font-semibold">{expiryDate}</p>
+                        <p className="text-lg font-semibold">{selectedCard.expiryDateFull}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">CVV</p>
-                        <p className="text-lg font-semibold">{cvv}</p>
+                        <p className="text-lg font-semibold">{selectedCard.cvv}</p>
                     </div>
                 </div>
             </CardContent>
