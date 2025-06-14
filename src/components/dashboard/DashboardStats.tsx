@@ -1,0 +1,64 @@
+
+import React from 'react';
+import StatCard from '@/components/ui/StatCard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { WalletCards, Coins, CreditCard } from 'lucide-react';
+
+interface DashboardStatsProps {
+  isLoading: boolean;
+  totalBalance: number;
+  spendingThisMonth: number;
+}
+
+const DashboardStats: React.FC<DashboardStatsProps> = ({ isLoading, totalBalance, spendingThisMonth }) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {isLoading ? (
+        <>
+          {[...Array(3)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  <Skeleton className="h-4 w-24" />
+                </CardTitle>
+                <Skeleton className="h-5 w-5" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  <Skeleton className="h-8 w-48" />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  <Skeleton className="h-3 w-32" />
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </>
+      ) : (
+        <>
+          <StatCard
+            title="Total Balance"
+            value={`R${totalBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            trend={{ value: "3.2% this month", positive: true }}
+            icon={<WalletCards className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Spending this month"
+            value={`R${spendingThisMonth.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            trend={{ value: "12% more than last month", positive: false }}
+            icon={<CreditCard className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Saved this month"
+            value="R15240.00"
+            trend={{ value: "5.3% this month", positive: true }}
+            icon={<Coins className="h-5 w-5" />}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+export default DashboardStats;
