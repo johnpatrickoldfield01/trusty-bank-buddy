@@ -15,6 +15,7 @@ import ForeignExchangePage from "./pages/ForeignExchangePage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelledPage from "./pages/PaymentCancelledPage";
 import TransactionDetailsPage from "./pages/TransactionDetailsPage";
+import LoansPage from "./pages/LoansPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/cards" element={<CardsPage />} />
               <Route path="/cards/:cardIndex" element={<CardDetailsPage />} />
               <Route path="/foreign-exchange" element={<ForeignExchangePage />} />
+              <Route path="/loans" element={<LoansPage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
               <Route path="/transaction/:id" element={<TransactionDetailsPage />} />
