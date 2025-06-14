@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import AccountSummary from '@/components/dashboard/AccountSummary';
@@ -62,7 +63,7 @@ const Index = () => {
   const [spendingThisMonth, setSpendingThisMonth] = useState(3402.50);
   const [mainAccountBalance, setMainAccountBalance] = useState(400000);
   const [savingsBalance, setSavingsBalance] = useState(50000);
-  const [creditCardBalance, setCreditCardBalance] = useState(-1258.32);
+  const [creditCardBalance, setCreditCardBalance] = useState(-100000);
   const [creditCardLimit, setCreditCardLimit] = useState(100000);
 
   const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
