@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStatementDownloader } from '@/hooks/useStatementDownloader';
+import { type Database } from '@/integrations/supabase/types';
 
 const Index = () => {
   const { profile } = useOutletContext<{ profile: Profile }>();
@@ -38,7 +40,7 @@ const Index = () => {
   useEffect(() => {
     if (user && accounts && accounts.length === 0) {
       const createInitialAccounts = async () => {
-        const initialAccounts = [
+        const initialAccounts: Array<Database['public']['Tables']['accounts']['Insert']> = [
           { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '1234 5678 9012 3456' },
           { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '9876 5432 1098 7654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
