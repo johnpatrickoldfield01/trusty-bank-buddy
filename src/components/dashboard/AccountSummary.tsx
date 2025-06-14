@@ -84,7 +84,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <p className="font-medium">Home Loan</p>
+                <p className="font-medium">Business Loan</p>
                 <p className="font-bold">R{loanBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="mt-2">
