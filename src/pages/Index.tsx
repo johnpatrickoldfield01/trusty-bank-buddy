@@ -40,8 +40,8 @@ const Index = () => {
     if (user && accounts && accounts.length === 0) {
       const createInitialAccounts = async () => {
         const initialAccounts: Array<Database['public']['Tables']['accounts']['Insert']> = [
-          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '1234 5678 9012 3456' },
-          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '9876 5432 1098 7654' },
+          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 68000000, account_number: '1234 5678 9012 3456' },
+          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 0, account_number: '9876 5432 1098 7654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
           { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: 10000000, account_number: '4321 8765 4321 0987' }
         ];
@@ -138,6 +138,57 @@ const Index = () => {
       };
 
       seedTransactions();
+    }
+  }, [user, accounts, queryClient]);
+
+  useEffect(() => {
+    if (user && accounts && accounts.length > 0) {
+      const mainAccount = accounts.find(acc => acc.account_type === 'main');
+      const savingsAccount = accounts.find(acc => acc.account_type === 'savings');
+
+      // Check for the old balance state (around 22M) to apply the update once.
+      if (mainAccount && mainAccount.balance < 30000000) {
+        const updateAccountBalances = async () => {
+          toast.info("Updating your account balances to new values...");
+
+          const { data: existingSeed } = await supabase
+            .from('transactions')
+            .select('id')
+            .eq('name', 'Monthly Salary Deposit - Month 1')
+            .eq('account_id', mainAccount.id)
+            .limit(1);
+          
+          const newMainBalance = (existingSeed && existingSeed.length > 0) ? 80000000 : 68000000;
+          
+          const { error: mainUpdateError } = await supabase
+            .from('accounts')
+            .update({ balance: newMainBalance })
+            .eq('id', mainAccount.id);
+
+          if (mainUpdateError) {
+            toast.error("Failed to update Main Account balance.");
+            console.error('Failed to update main account:', mainUpdateError);
+            return;
+          }
+          
+          if (savingsAccount) {
+            const { error: savingsUpdateError } = await supabase
+              .from('accounts')
+              .update({ balance: 0 })
+              .eq('id', savingsAccount.id);
+            if (savingsUpdateError) {
+              toast.error("Failed to update Savings Account balance.");
+              console.error('Failed to update savings account:', savingsUpdateError);
+              return;
+            }
+          }
+
+          toast.success("Account balances have been updated!");
+          queryClient.invalidateQueries({ queryKey: ['accounts', user!.id] });
+        };
+        
+        updateAccountBalances();
+      }
     }
   }, [user, accounts, queryClient]);
 
