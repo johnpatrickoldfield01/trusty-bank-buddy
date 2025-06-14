@@ -1,10 +1,19 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Menu, Bell } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/integrations/supabase/client';
 
 const Header = () => {
+  const { user } = useSession();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
@@ -30,9 +39,15 @@ const Header = () => {
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
           </Button>
-          <Button className="hidden md:flex bg-bank-primary hover:bg-bank-primary/90" size="sm">
-            Sign In
-          </Button>
+          {user ? (
+            <Button onClick={handleLogout} className="hidden md:flex bg-bank-primary hover:bg-bank-primary/90" size="sm">
+              Sign Out
+            </Button>
+          ) : (
+            <Button asChild className="hidden md:flex bg-bank-primary hover:bg-bank-primary/90" size="sm">
+              <Link to="/auth">Sign In</Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
@@ -40,4 +55,3 @@ const Header = () => {
 };
 
 export default Header;
-
