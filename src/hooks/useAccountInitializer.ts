@@ -1,3 +1,4 @@
+
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,16 +19,29 @@ export const useAccountInitializer = () => {
             account_number: `998877665544${String(1001 + i).padStart(4, '0')}`
         }));
 
-        const { error } = await supabase.from('accounts').insert(businessLoans);
+        const { data: newBusinessLoans, error } = await supabase.from('accounts').insert(businessLoans).select();
 
-        if (error) {
+        if (error || !newBusinessLoans) {
             toast.error('Failed to stack business loans.');
             console.error('Failed to create business loans:', error);
             return;
         }
+        
+        toast.info("Adding sample transactions for new business loans...");
+        const allTransactions: Database['public']['Tables']['transactions']['Insert'][] = [];
+        newBusinessLoans.forEach(loan => {
+            allTransactions.push(
+                { account_id: loan.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 0)).toISOString() },
+                { account_id: loan.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString() },
+                { account_id: loan.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString() }
+            );
+        });
+        
+        await supabase.from('transactions').insert(allTransactions);
 
         toast.success('20 business loans have been successfully stacked!');
-        await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+        await queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+        await queryClient.invalidateQueries({ queryKey: ['transactions'] });
     };
 
     const addHomeLoanAccount = async (user: User) => {
@@ -41,16 +55,26 @@ export const useAccountInitializer = () => {
             account_number: '1122334455667788'
         };
 
-        const { error } = await supabase.from('accounts').insert(homeLoanAccount);
+        const { data: newHomeLoanAccount, error } = await supabase.from('accounts').insert(homeLoanAccount).select().single();
 
-        if (error) {
+        if (error || !newHomeLoanAccount) {
             toast.error('Failed to set up your Home Loan account.');
             console.error('Failed to create home loan account:', error);
             return;
         }
 
         toast.success('Your Home Loan account has been set up!');
-        await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+        
+        toast.info("Adding some sample transaction history for your Home Loan...");
+        const sampleLoanTransactions: Database['public']['Tables']['transactions']['Insert'][] = [
+            { account_id: newHomeLoanAccount.id, name: 'Monthly Repayment', amount: -100000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 0)).toISOString() },
+            { account_id: newHomeLoanAccount.id, name: 'Monthly Repayment', amount: -100000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString() },
+            { account_id: newHomeLoanAccount.id, name: 'Monthly Repayment', amount: -100000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString() },
+        ];
+        await supabase.from('transactions').insert(sampleLoanTransactions);
+
+        await queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+        await queryClient.invalidateQueries({ queryKey: ['transactions'] });
     };
 
     const initializeAccounts = async (user: User) => {
@@ -86,9 +110,20 @@ export const useAccountInitializer = () => {
             await supabase.from('transactions').insert(sampleSpendTransactions);
         }
 
-        await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
-        await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-        await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
+        const businessLoanAccount = newAccounts.find(acc => acc.account_type === 'loan' && acc.account_name === 'Business Loan');
+        if (businessLoanAccount) {
+            toast.info("Adding some sample transaction history for your Business Loan...");
+            const sampleLoanTransactions: Database['public']['Tables']['transactions']['Insert'][] = [
+                { account_id: businessLoanAccount.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 0)).toISOString() },
+                { account_id: businessLoanAccount.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString() },
+                { account_id: businessLoanAccount.id, name: 'Monthly Repayment', amount: -50000.00, category: 'Repayment', icon: '🧾', transaction_date: new Date(new Date().setMonth(new Date().getMonth() - 2)).toISOString() },
+            ];
+            await supabase.from('transactions').insert(sampleLoanTransactions);
+        }
+
+        await queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+        await queryClient.invalidateQueries({ queryKey: ['transactions', user.id] });
+        await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user.id] });
     };
 
     return { initializeAccounts, addHomeLoanAccount, addBusinessLoans };
