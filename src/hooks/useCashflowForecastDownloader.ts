@@ -1,13 +1,9 @@
 
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format, addMonths } from 'date-fns';
 import { type Profile } from '@/components/layout/AppLayout';
 import { toast } from 'sonner';
-
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: any) => jsPDF;
-}
 
 export const useCashflowForecastDownloader = () => {
   const downloadCashflowForecast = (profile: Profile | null, currentBalance: number) => {
@@ -16,7 +12,7 @@ export const useCashflowForecastDownloader = () => {
       return;
     }
 
-    const doc = new jsPDF() as jsPDFWithAutoTable;
+    const doc = new jsPDF();
     const forecastMonths = 12;
     const salaryDeposit = 1000000;
     const forecastData = [];
@@ -43,7 +39,7 @@ export const useCashflowForecastDownloader = () => {
     doc.text(`Date Generated: ${format(new Date(), 'yyyy-MM-dd')}`, 14, 38);
     doc.text(`Starting Balance: R ${currentBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 14, 44);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 50,
       head: [['Month', 'Description', 'Inflow', 'Outflow', 'Closing Balance']],
       body: forecastData,
