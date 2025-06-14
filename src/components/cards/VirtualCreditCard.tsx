@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Wifi, CreditCard } from 'lucide-react';
@@ -7,8 +8,8 @@ type VirtualCreditCardProps = {
   cardHolder: string;
   cardNumber: string;
   expiryDate: string;
-  onClick: () => void;
-  isSelected: boolean;
+  onClick?: () => void;
+  isSelected?: boolean;
   gradient: string;
 };
 
