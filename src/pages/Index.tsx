@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -137,6 +138,7 @@ const Index = () => {
   const savingsBalance = savingsAccount?.balance ?? 0;
   const creditCardBalance = creditAccount?.balance ?? 0;
   const creditCardLimit = 1792952.54; 
+  const loanBalance = 10000000;
 
   const totalBalance = mainAccountBalance + savingsBalance;
   const spendingThisMonth = 61008.20;
@@ -309,6 +311,7 @@ const Index = () => {
                 savingsBalance={savingsBalance}
                 creditCardBalance={creditCardBalance}
                 creditCardLimit={creditCardLimit}
+                loanBalance={loanBalance}
               />
             )}
           </div>
