@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,6 +22,37 @@ const Index = () => {
   const { user } = useSession();
   const queryClient = useQueryClient();
 
+  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
+    queryKey: ['accounts', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase.from('accounts').select('*').eq('user_id', user.id);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    if (user && accounts && accounts.length === 0) {
+      const createInitialAccounts = async () => {
+        const { error } = await supabase.from('accounts').insert([
+          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '**** **** **** 1234' },
+          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '**** **** **** 5678' },
+          { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '**** **** **** 9012' }
+        ]);
+        if (error) {
+          toast.error('Failed to initialize your accounts. Please refresh the page.');
+          console.error('Failed to create initial accounts:', error);
+        } else {
+          toast.success('Your accounts have been initialized!');
+          queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+        }
+      };
+      createInitialAccounts();
+    }
+  }, [user, accounts, queryClient]);
+
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
     queryKey: ['transactions', user?.id],
     queryFn: async () => {
@@ -41,10 +71,13 @@ const Index = () => {
     enabled: !!user,
   });
 
-  // Using static values for balances as requested.
-  const mainAccountBalance = 10000000;
-  const savingsBalance = 500000;
-  const creditCardBalance = 1000000;
+  const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+  const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
+  const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
+
+  const mainAccountBalance = mainAccount?.balance ?? 0;
+  const savingsBalance = savingsAccount?.balance ?? 0;
+  const creditCardBalance = creditAccount?.balance ?? 0;
   const creditCardLimit = 1792952.54; 
 
   const totalBalance = mainAccountBalance + savingsBalance;
@@ -56,14 +89,9 @@ const Index = () => {
         throw new Error("User not logged in.");
     }
     
-    const { data: accounts, error: fetchError } = await supabase
-        .from('accounts')
-        .select('*')
-        .eq('user_id', user.id);
-
-    if (fetchError || !accounts) {
+    if (!accounts) {
         toast.error("Could not fetch account details.");
-        throw fetchError || new Error("No accounts found");
+        throw new Error("No accounts found");
     }
 
     const mainAccount = accounts.find(acc => acc.account_type === 'main');
@@ -100,6 +128,7 @@ const Index = () => {
       throw accountError;
     }
 
+    await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
     await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
   };
 
@@ -118,24 +147,34 @@ const Index = () => {
         
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <StatCard
-            title="Total Balance"
-            value={`R${totalBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            trend={{ value: "3.2% this month", positive: true }}
-            icon={<WalletCards className="h-5 w-5" />}
-          />
-          <StatCard
-            title="Spending this month"
-            value={`R${spendingThisMonth.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-            trend={{ value: "12% more than last month", positive: false }}
-            icon={<CreditCard className="h-5 w-5" />}
-          />
-          <StatCard
-            title="Saved this month"
-            value="R15240.00"
-            trend={{ value: "5.3% this month", positive: true }}
-            icon={<Coins className="h-5 w-5" />}
-          />
+          {isLoadingAccounts ? (
+            <>
+              <StatCard title="Total Balance" value={<Skeleton className="h-8 w-48" />} icon={<WalletCards className="h-5 w-5" />} />
+              <StatCard title="Spending this month" value={<Skeleton className="h-8 w-48" />} icon={<CreditCard className="h-5 w-5" />} />
+              <StatCard title="Saved this month" value={<Skeleton className="h-8 w-48" />} icon={<Coins className="h-5 w-5" />} />
+            </>
+          ) : (
+            <>
+              <StatCard
+                title="Total Balance"
+                value={`R${totalBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                trend={{ value: "3.2% this month", positive: true }}
+                icon={<WalletCards className="h-5 w-5" />}
+              />
+              <StatCard
+                title="Spending this month"
+                value={`R${spendingThisMonth.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                trend={{ value: "12% more than last month", positive: false }}
+                icon={<CreditCard className="h-5 w-5" />}
+              />
+              <StatCard
+                title="Saved this month"
+                value="R15240.00"
+                trend={{ value: "5.3% this month", positive: true }}
+                icon={<Coins className="h-5 w-5" />}
+              />
+            </>
+          )}
         </div>
         
         {/* Quick Actions */}
@@ -168,12 +207,23 @@ const Index = () => {
             )}
           </div>
           <div>
-            <AccountSummary
-              mainAccountBalance={mainAccountBalance}
-              savingsBalance={savingsBalance}
-              creditCardBalance={creditCardBalance}
-              creditCardLimit={creditCardLimit}
-            />
+            {isLoadingAccounts ? (
+              <Card>
+                <CardHeader><CardTitle><Skeleton className="h-6 w-3/4" /></CardTitle></CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/2" /><Skeleton className="h-3 w-1/4" /></div></div>
+                  <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/2" /><Skeleton className="h-3 w-1/4" /></div></div>
+                  <div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><div className="flex-1 space-y-2"><Skeleton className="h-4 w-1/2" /><Skeleton className="h-3 w-1/4" /></div></div>
+                </CardContent>
+              </Card>
+            ) : (
+              <AccountSummary
+                mainAccountBalance={mainAccountBalance}
+                savingsBalance={savingsBalance}
+                creditCardBalance={creditCardBalance}
+                creditCardLimit={creditCardLimit}
+              />
+            )}
           </div>
         </div>
         
