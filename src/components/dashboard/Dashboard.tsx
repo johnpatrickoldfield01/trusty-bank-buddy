@@ -20,6 +20,7 @@ import { useMonthlySpending } from '@/hooks/useMonthlySpending';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import PremiumCardOffer from '@/components/dashboard/PremiumCardOffer';
+import { useCashflowForecastDownloader } from '@/hooks/useCashflowForecastDownloader';
 
 interface DashboardProps {
     profile: Profile | null;
@@ -30,6 +31,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const { downloadStatement } = useStatementDownloader();
+  const { downloadCashflowForecast } = useCashflowForecastDownloader();
 
   const { accounts, isLoadingAccounts } = useAccounts();
   const { transactions, isLoadingTransactions } = useTransactions();
@@ -101,6 +103,10 @@ const Dashboard = ({ profile }: DashboardProps) => {
     downloadStatement(profile, mainAccount, 12);
   };
 
+  const handleDownloadCashflowForecast = () => {
+    downloadCashflowForecast(profile, totalBalance);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
@@ -118,7 +124,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
         />
         
         <div className="mb-6">
-          <QuickActions onSendMoney={handleSendMoney} />
+          <QuickActions onSendMoney={handleSendMoney} onDownloadCashflowForecast={handleDownloadCashflowForecast} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
