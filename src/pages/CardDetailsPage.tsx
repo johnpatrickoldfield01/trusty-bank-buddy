@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useOutletContext, Link } from 'react-router-dom';
 import { cardsData } from '@/data/cards';
@@ -39,7 +40,11 @@ const CardDetailsPage = () => {
     const outstandingBalance = mockTransactions.reduce((acc, t) => acc - t.amount, 0);
 
     const handleDownloadStatement = () => {
-      toast.info("Download statement functionality is not implemented yet.");
+      toast.info("3-month statement functionality for individual cards is not implemented yet.");
+    };
+    
+    const handleDownload12MonthStatement = () => {
+      toast.info("12-month statement functionality for individual cards is not implemented yet.");
     };
 
     return (
@@ -79,7 +84,11 @@ const CardDetailsPage = () => {
                     </div>
                 </div>
                 <div className="lg:col-span-2">
-                    <TransactionList transactions={mockTransactions} onDownloadStatement={handleDownloadStatement} />
+                    <TransactionList 
+                      transactions={mockTransactions} 
+                      onDownloadStatement={handleDownloadStatement} 
+                      onDownload12MonthStatement={handleDownload12MonthStatement}
+                    />
                 </div>
             </div>
         </div>

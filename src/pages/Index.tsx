@@ -192,7 +192,12 @@ const Index = () => {
 
   const handleDownloadStatement = () => {
     const mainAccount = accounts?.find(acc => acc.account_type === 'main');
-    downloadStatement(profile, mainAccount);
+    downloadStatement(profile, mainAccount, 3);
+  };
+
+  const handleDownload12MonthStatement = () => {
+    const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+    downloadStatement(profile, mainAccount, 12);
   };
 
   const handleLogout = async () => {
@@ -281,7 +286,11 @@ const Index = () => {
                 </CardContent>
               </Card>
             ) : (
-              <TransactionList transactions={transactions || []} onDownloadStatement={handleDownloadStatement} />
+              <TransactionList
+                transactions={transactions || []}
+                onDownloadStatement={handleDownloadStatement}
+                onDownload12MonthStatement={handleDownload12MonthStatement}
+              />
             )}
           </div>
           <div>

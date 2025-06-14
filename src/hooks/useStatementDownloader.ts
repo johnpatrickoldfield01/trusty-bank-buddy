@@ -9,7 +9,7 @@ import { type Profile } from '@/components/layout/AppLayout';
 type Account = Database['public']['Tables']['accounts']['Row'];
 
 export const useStatementDownloader = () => {
-  const downloadStatement = async (profile: Profile | null, mainAccount: Account | undefined) => {
+  const downloadStatement = async (profile: Profile | null, mainAccount: Account | undefined, months: number) => {
     if (!profile || !mainAccount) {
       toast.error('Could not get user or account details to generate statement.');
       return;
@@ -18,19 +18,19 @@ export const useStatementDownloader = () => {
     try {
       toast.info('Generating your statement...');
 
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      const startDateDt = new Date();
+      startDateDt.setMonth(startDateDt.getMonth() - months);
 
       const { data: transactions, error } = await supabase
         .from('transactions')
         .select('*')
         .eq('account_id', mainAccount.id)
-        .gte('transaction_date', threeMonthsAgo.toISOString())
+        .gte('transaction_date', startDateDt.toISOString())
         .order('transaction_date', { ascending: false });
 
       if (error) throw error;
       if (!transactions || transactions.length === 0) {
-        toast.warning('No transactions found for the last 3 months.');
+        toast.warning(`No transactions found for the last ${months} months.`);
         return;
       }
       
@@ -44,7 +44,7 @@ export const useStatementDownloader = () => {
       doc.text(`Account Name: ${mainAccount.account_name}`, 14, 42);
       doc.text(`Account Number: ${mainAccount.account_number || ''}`, 14, 49);
 
-      const startDate = threeMonthsAgo.toLocaleDateString('en-ZA');
+      const startDate = startDateDt.toLocaleDateString('en-ZA');
       const endDate = new Date().toLocaleDateString('en-ZA');
       doc.text(`Statement Period: ${startDate} - ${endDate}`, 14, 60);
 
@@ -61,7 +61,7 @@ export const useStatementDownloader = () => {
       });
 
       // Download
-      doc.save(`statement-${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(`statement-${months}-months-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success('Statement downloaded successfully!');
 
     } catch (error) {
