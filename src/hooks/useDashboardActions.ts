@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -105,7 +104,10 @@ export const useDashboardActions = ({
     const { error } = await supabase.rpc('transfer_money', {
       sender_account_id: senderMainAccount.id,
       recipient_name: values.accountHolderName,
-      transfer_amount: values.amount
+      transfer_amount: values.amount,
+      recipient_bank_name: values.bankName,
+      recipient_account_number: values.accountNumber,
+      recipient_swift_code: values.swiftCode
     });
 
     if (error) {

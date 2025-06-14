@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Banknote, Calendar, User, Landmark, Hash, Download } from 'lucide-react';
+import { ArrowLeft, Banknote, Calendar, User, Landmark, Hash, Download, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -133,9 +133,20 @@ const TransactionDetailsPage = () => {
 
             <div className="space-y-6">
                 <h3 className="text-lg font-semibold border-b pb-2">{isDeposit ? 'Sender Details' : 'Recipient Details'}</h3>
-                {renderDetailItem(<User className="h-5 w-5" />, 'Name', isDeposit ? 'External Employer Co.' : transaction.name.replace('Transfer to ', ''))}
-                {renderDetailItem(<Landmark className="h-5 w-5" />, 'Bank', 'Other Bank Inc.')}
-                {renderDetailItem(<Hash className="h-5 w-5" />, 'Account Number', '**** **** **** 3456')}
+                {transaction.recipient_bank_name ? (
+                  <>
+                    {renderDetailItem(<User className="h-5 w-5" />, 'Name', transaction.recipient_name)}
+                    {renderDetailItem(<Landmark className="h-5 w-5" />, 'Bank', transaction.recipient_bank_name)}
+                    {renderDetailItem(<Hash className="h-5 w-5" />, 'Account Number', transaction.recipient_account_number)}
+                    {transaction.recipient_swift_code && renderDetailItem(<Globe className="h-5 w-5" />, 'SWIFT Code', transaction.recipient_swift_code)}
+                  </>
+                ) : (
+                  <>
+                    {renderDetailItem(<User className="h-5 w-5" />, 'Name', isDeposit ? 'External Employer Co.' : transaction.name.replace('Transfer to ', ''))}
+                    {renderDetailItem(<Landmark className="h-5 w-5" />, 'Bank', 'Other Bank Inc.')}
+                    {renderDetailItem(<Hash className="h-5 w-5" />, 'Account Number', '**** **** **** 3456')}
+                  </>
+                )}
             </div>
         </CardContent>
       </Card>

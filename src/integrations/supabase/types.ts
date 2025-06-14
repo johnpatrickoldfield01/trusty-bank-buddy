@@ -62,6 +62,10 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          recipient_account_number: string | null
+          recipient_bank_name: string | null
+          recipient_name: string | null
+          recipient_swift_code: string | null
           transaction_date: string
         }
         Insert: {
@@ -71,6 +75,10 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          recipient_account_number?: string | null
+          recipient_bank_name?: string | null
+          recipient_name?: string | null
+          recipient_swift_code?: string | null
           transaction_date?: string
         }
         Update: {
@@ -80,6 +88,10 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          recipient_account_number?: string | null
+          recipient_bank_name?: string | null
+          recipient_name?: string | null
+          recipient_swift_code?: string | null
           transaction_date?: string
         }
         Relationships: [
@@ -98,11 +110,20 @@ export type Database = {
     }
     Functions: {
       transfer_money: {
-        Args: {
-          sender_account_id: string
-          recipient_name: string
-          transfer_amount: number
-        }
+        Args:
+          | {
+              sender_account_id: string
+              recipient_name: string
+              transfer_amount: number
+            }
+          | {
+              sender_account_id: string
+              recipient_name: string
+              transfer_amount: number
+              recipient_bank_name?: string
+              recipient_account_number?: string
+              recipient_swift_code?: string
+            }
         Returns: undefined
       }
     }
