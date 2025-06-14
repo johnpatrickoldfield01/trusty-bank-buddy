@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import { format } from 'date-fns';
 import { type Profile } from '@/components/layout/AppLayout';
 import { type Database } from '@/integrations/supabase/types';
+import { formatAccountNumber } from '@/lib/utils';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
 
@@ -18,7 +19,8 @@ export const useAccountConfirmationDownloader = () => {
       toast.info('Generating your account confirmation letter...');
       
       const doc = new jsPDF();
-      const accountNumber = (mainAccount.account_number || '').replace(/[^a-zA-Z0-9]/g, '');
+      const rawAccountNumber = (mainAccount.account_number || '').replace(/[^a-zA-Z0-9]/g, '');
+      const formattedAccountNumber = formatAccountNumber(mainAccount.account_number);
 
       // Header
       doc.setFontSize(22);
@@ -53,7 +55,7 @@ export const useAccountConfirmationDownloader = () => {
       doc.setFont('helvetica', 'bold');
       doc.text(`Account Number:`, 14, 109);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${accountNumber}`, 55, 109);
+      doc.text(`${formattedAccountNumber}`, 55, 109);
 
       doc.setFont('helvetica', 'bold');
       doc.text(`Account Type:`, 14, 116);
@@ -77,7 +79,7 @@ export const useAccountConfirmationDownloader = () => {
       doc.text(`Lovable Bank Management`, 14, 172);
 
       // Download
-      doc.save(`account-confirmation-${accountNumber}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(`account-confirmation-${rawAccountNumber}-${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success('Account confirmation letter downloaded successfully!');
 
     } catch (error) {
