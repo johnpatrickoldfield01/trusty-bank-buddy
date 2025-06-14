@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
 
-const QuickActions = ({ onSendMoney }: { onSendMoney: (data: { amount: number; recipientName: string }) => void }) => {
+const QuickActions = ({ onSendMoney }: { onSendMoney: (data: { amount: number; recipientName: string }) => Promise<void> }) => {
   const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
 
   return (

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,17 +22,6 @@ const Index = () => {
   const { user } = useSession();
   const queryClient = useQueryClient();
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
-    queryKey: ['accounts', user?.id],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase.from('accounts').select('*');
-      if (error) throw new Error(error.message);
-      return data;
-    },
-    enabled: !!user,
-  });
-
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery({
     queryKey: ['transactions', user?.id],
     queryFn: async () => {
@@ -52,15 +40,33 @@ const Index = () => {
     enabled: !!user,
   });
 
-  const mainAccount = accounts?.find(acc => acc.account_type === 'main');
-  const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
-  const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
+  // Using static values for balances as requested.
+  const mainAccountBalance = 1250000.75;
+  const savingsBalance = 375000.50;
+  const creditCardBalance = -25000.00;
+  const creditCardLimit = 1792952.54; 
 
-  const totalBalance = accounts?.reduce((sum, acc) => sum + acc.balance, 0) || 0;
-  // Note: Spending calculation would require more historical data. Using a placeholder.
+  const totalBalance = mainAccountBalance + savingsBalance;
   const spendingThisMonth = 61008.20;
 
   const handleSendMoney = async ({ amount, recipientName }: { amount: number; recipientName: string }) => {
+    if (!user) {
+        toast.error("You must be logged in to send money.");
+        throw new Error("User not logged in.");
+    }
+    
+    const { data: accounts, error: fetchError } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('user_id', user.id);
+
+    if (fetchError || !accounts) {
+        toast.error("Could not fetch account details.");
+        throw fetchError || new Error("No accounts found");
+    }
+
+    const mainAccount = accounts.find(acc => acc.account_type === 'main');
+
     if (!mainAccount) {
       toast.error("Main account not found.");
       throw new Error("Main account not found.");
@@ -79,16 +85,21 @@ const Index = () => {
     };
 
     const { error: txError } = await supabase.from('transactions').insert(newTransaction);
-    if (txError) throw txError;
+    if (txError) {
+      toast.error("Failed to record transaction.");
+      throw txError;
+    }
 
     const { error: accountError } = await supabase
       .from('accounts')
       .update({ balance: mainAccount.balance - amount })
       .eq('id', mainAccount.id);
-    if (accountError) throw accountError;
+    if (accountError) {
+      toast.error("Failed to update account balance in the database.");
+      throw accountError;
+    }
 
     await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-    await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
   };
 
   const handleLogout = async () => {
@@ -156,43 +167,12 @@ const Index = () => {
             )}
           </div>
           <div>
-            {isLoadingAccounts ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/4" />
-                    </div>
-                  </div>
-                   <div className="flex items-center gap-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/4" />
-                    </div>
-                  </div>
-                   <div className="flex items-center gap-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-3/4" />
-                      <Skeleton className="h-3 w-1/4" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <AccountSummary
-                mainAccountBalance={mainAccount?.balance || 0}
-                savingsBalance={savingsAccount?.balance || 0}
-                creditCardBalance={creditAccount?.balance || 0}
-                creditCardLimit={1792952.54} // Assuming this is static for now
-              />
-            )}
+            <AccountSummary
+              mainAccountBalance={mainAccountBalance}
+              savingsBalance={savingsBalance}
+              creditCardBalance={creditCardBalance}
+              creditCardLimit={creditCardLimit}
+            />
           </div>
         </div>
         
