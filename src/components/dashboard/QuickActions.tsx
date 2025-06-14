@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download, Landmark, Globe } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
+import LocalTransferDialog from './LocalTransferDialog';
 
 interface QuickActionsProps {
   onSendMoney: (data: { amount: number; recipientName: string }) => Promise<void>;
@@ -12,6 +14,7 @@ interface QuickActionsProps {
 
 const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalanceSheet }: QuickActionsProps) => {
   const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
+  const [isLocalTransferOpen, setIsLocalTransferOpen] = useState(false);
 
   return (
     <>
@@ -74,6 +77,7 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
             <Button
               variant="outline"
               className="h-auto flex-col gap-2 py-4"
+              onClick={() => setIsLocalTransferOpen(true)}
             >
               <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
                 <Landmark className="h-4 w-4 text-purple-600" />
@@ -93,6 +97,7 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
         </CardContent>
       </Card>
       <SendMoneyDialog isOpen={isSendMoneyOpen} onOpenChange={setIsSendMoneyOpen} onSendMoney={onSendMoney} />
+      <LocalTransferDialog isOpen={isLocalTransferOpen} onOpenChange={setIsLocalTransferOpen} />
     </>
   );
 };
