@@ -43,7 +43,7 @@ const Index = () => {
 
   // Using static values for balances as requested.
   const mainAccountBalance = 10000000;
-  const savingsBalance = 0;
+  const savingsBalance = 500000;
   const creditCardBalance = 1000000;
   const creditCardLimit = 1792952.54; 
 
