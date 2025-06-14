@@ -15,7 +15,8 @@ export const useAccountInitializer = () => {
           { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 125750.00, account_number: '1234 5678 9012 3456' },
           { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 32450.00, account_number: '9876 5432 1098 7654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: -2430.50, account_number: '5555 6666 7777 8888' },
-          { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: -185000.00, account_number: '4321 8765 4321 0987' }
+          { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: -185000.00, account_number: '4321 8765 4321 0987' },
+          { user_id: user.id, account_type: 'loan', account_name: 'Home Loan', balance: -20000000.00, account_number: '1122 3344 5566 7788' }
         ];
 
         const { data: newAccounts, error } = await supabase.from('accounts').insert(initialAccounts).select();

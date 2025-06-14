@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -42,18 +41,21 @@ const Dashboard = ({ profile }: DashboardProps) => {
   const mainAccount = accounts?.find(acc => acc.account_type === 'main');
   const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
   const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
-  const loanAccount = accounts?.find(acc => acc.account_type === 'loan');
+  const businessLoanAccount = accounts?.find(acc => acc.account_name === 'Business Loan');
+  const homeLoanAccount = accounts?.find(acc => acc.account_name === 'Home Loan');
 
   const mainAccountBalance = mainAccount?.balance ?? 0;
   const savingsBalance = savingsAccount?.balance ?? 0;
   const creditCardBalance = creditAccount?.balance ?? 0;
   const creditCardLimit = 10000; 
-  const loanBalance = loanAccount?.balance ?? 0;
+  const businessLoanBalance = businessLoanAccount?.balance ?? 0;
+  const homeLoanBalance = homeLoanAccount?.balance ?? 0;
 
   const mainAccountNumber = mainAccount?.account_number;
   const savingsAccountNumber = savingsAccount?.account_number;
   const creditCardAccountNumber = creditAccount?.account_number;
-  const loanAccountNumber = loanAccount?.account_number;
+  const businessLoanAccountNumber = businessLoanAccount?.account_number;
+  const homeLoanAccountNumber = homeLoanAccount?.account_number;
 
   const totalBalance = mainAccountBalance + savingsBalance;
 
@@ -117,7 +119,8 @@ const Dashboard = ({ profile }: DashboardProps) => {
       ],
       liabilities: [
         { name: 'Credit Card', balance: creditCardBalance },
-        { name: 'Business Loan', balance: loanBalance },
+        { name: 'Business Loan', balance: businessLoanBalance },
+        { name: 'Home Loan', balance: homeLoanBalance },
       ],
     };
     downloadBalanceSheet(profile, balanceSheetData);
@@ -186,11 +189,13 @@ const Dashboard = ({ profile }: DashboardProps) => {
                 savingsBalance={savingsBalance}
                 creditCardBalance={creditCardBalance}
                 creditCardLimit={creditCardLimit}
-                loanBalance={loanBalance}
+                loanBalance={businessLoanBalance}
+                homeLoanBalance={homeLoanBalance}
                 mainAccountNumber={mainAccountNumber}
                 savingsAccountNumber={savingsAccountNumber}
                 creditCardAccountNumber={creditCardAccountNumber}
-                loanAccountNumber={loanAccountNumber}
+                loanAccountNumber={businessLoanAccountNumber}
+                homeLoanAccountNumber={homeLoanAccountNumber}
               />
             )}
           </div>

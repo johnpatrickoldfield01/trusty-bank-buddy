@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Wallet, CreditCard, PiggyBank, Landmark } from 'lucide-react';
+import { Wallet, CreditCard, PiggyBank, Landmark, Home } from 'lucide-react';
 
 interface AccountSummaryProps {
   mainAccountBalance: number;
@@ -10,15 +10,18 @@ interface AccountSummaryProps {
   creditCardBalance: number;
   creditCardLimit: number;
   loanBalance: number;
+  homeLoanBalance: number;
   mainAccountNumber?: string;
   savingsAccountNumber?: string;
   creditCardAccountNumber?: string;
   loanAccountNumber?: string;
+  homeLoanAccountNumber?: string;
 }
 
-const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber }: AccountSummaryProps) => {
+const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber }: AccountSummaryProps) => {
   const creditUsagePercentage = creditCardBalance < 0 ? (Math.abs(creditCardBalance) / creditCardLimit) * 100 : 0;
-  const monthlyRepayment = loanBalance * 0.0001;
+  const monthlyRepayment = Math.abs(loanBalance * 0.0001);
+  const homeLoanMonthlyRepayment = Math.abs(homeLoanBalance * 0.0001);
 
   return (
     <Card className="w-full">
@@ -99,6 +102,27 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
                   <span>R{monthlyRepayment.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+                <p className="text-xs text-muted-foreground text-right mt-1">30 years remaining</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Home Loan Account */}
+          <div className="flex items-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-500/20 mr-3">
+              <Home className="h-5 w-5 text-teal-600" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-medium">Home Loan</p>
+                <p className="font-bold">R{homeLoanBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
+              {homeLoanAccountNumber && <p className="text-xs text-muted-foreground">{homeLoanAccountNumber}</p>}
+              <div className="mt-2">
+                <div className="flex items-center justify-between mb-1 text-xs">
+                  <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
+                  <span>R{homeLoanMonthlyRepayment.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <p className="text-xs text-muted-foreground text-right mt-1">30 years remaining</p>
               </div>
