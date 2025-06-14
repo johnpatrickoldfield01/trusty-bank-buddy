@@ -38,12 +38,13 @@ const Index = () => {
   useEffect(() => {
     if (user && accounts && accounts.length === 0) {
       const createInitialAccounts = async () => {
-        const { error } = await supabase.from('accounts').insert([
+        const initialAccounts = [
           { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 10000000, account_number: '1234 5678 9012 3456' },
           { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 500000, account_number: '9876 5432 1098 7654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: 1000000, account_number: '5555 6666 7777 8888' },
           { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: 10000000, account_number: '4321 8765 4321 0987' }
-        ]);
+        ];
+        const { error } = await supabase.from('accounts').insert(initialAccounts as any);
         if (error) {
           toast.error('Failed to initialize your accounts. Please refresh the page.');
           console.error('Failed to create initial accounts:', error);
@@ -133,7 +134,7 @@ const Index = () => {
   const mainAccount = accounts?.find(acc => acc.account_type === 'main');
   const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
   const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
-  const loanAccount = accounts?.find(acc => acc.account_type === 'loan');
+  const loanAccount = accounts?.find(acc => (acc.account_type as any) === 'loan');
 
   const mainAccountBalance = mainAccount?.balance ?? 0;
   const savingsBalance = savingsAccount?.balance ?? 0;
