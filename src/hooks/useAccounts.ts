@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
 import { useAccountInitializer } from './useAccountInitializer';
+import { toast } from 'sonner';
 
 export const useAccounts = () => {
   const { user } = useSession();
@@ -72,6 +73,29 @@ export const useAccounts = () => {
         const hasHomeLoan = accounts.some(acc => acc.account_name === 'Home Loan');
         if (!hasHomeLoan) {
           addHomeLoanAccount(user);
+        }
+
+        const businessLoan = accounts.find(
+            (acc) =>
+              acc.account_name === 'Business Loan' &&
+              acc.account_number === '4321876543210987'
+          );
+  
+        if (businessLoan && businessLoan.balance !== -10000000.00) {
+            toast.info("Updating Business Loan balance...");
+            supabase
+              .from('accounts')
+              .update({ balance: -10000000.00 })
+              .eq('id', businessLoan.id)
+              .then(({ error }) => {
+                if (error) {
+                  console.error('Failed to update Business Loan balance:', error.message);
+                  toast.error('Failed to update Business Loan balance.');
+                } else {
+                  toast.success('Business Loan balance updated to R10,000,000.');
+                  queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+                }
+              });
         }
       }
     }
