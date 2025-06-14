@@ -26,17 +26,33 @@ export const useAccounts = () => {
       if (accounts.length === 0) {
         initializeAccounts(user);
       } else {
-        const mainAccount = accounts.find(acc => acc.account_type === 'main');
-        if (mainAccount && mainAccount.account_number && mainAccount.account_number.length < 16) {
-          supabase
-            .from('accounts')
-            .update({ account_number: '1234567890123456' })
-            .eq('id', mainAccount.id)
-            .then(({ error }) => {
-              if (!error) {
-                queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
-              }
-            });
+        const outdatedMainAccounts = accounts.filter(
+          (acc) =>
+            acc.account_type === 'main' &&
+            acc.account_number &&
+            acc.account_number.replace(/\D/g, '').length < 16
+        );
+
+        if (outdatedMainAccounts.length > 0) {
+          Promise.all(
+            outdatedMainAccounts.map((account) =>
+              supabase
+                .from('accounts')
+                .update({ account_number: '1234567890123456' })
+                .eq('id', account.id)
+            )
+          ).then((results) => {
+            const hasError = results.some((res) => res.error);
+            if (!hasError) {
+              queryClient.invalidateQueries({ queryKey: ['accounts', user.id] });
+            } else {
+              results.forEach((res) => {
+                if (res.error) {
+                  console.error('Failed to update account number:', res.error.message);
+                }
+              });
+            }
+          });
         }
         
         const hasHomeLoan = accounts.some(acc => acc.account_name === 'Home Loan');
