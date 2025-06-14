@@ -9,6 +9,7 @@ const LoansPage = () => {
   const { accounts, isLoadingAccounts } = useAccounts();
 
   const loanAccounts = accounts?.filter((acc) => acc.account_type === 'loan') || [];
+  const uniqueLoanAccounts = Array.from(new Map(loanAccounts.map(loan => [loan.account_name, loan])).values());
 
   return (
     <div className="container mx-auto py-8">
@@ -31,9 +32,9 @@ const LoansPage = () => {
             </Card>
           ))}
         </div>
-      ) : loanAccounts.length > 0 ? (
+      ) : uniqueLoanAccounts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loanAccounts.map((loan) => (
+          {uniqueLoanAccounts.map((loan) => (
             <Card key={loan.id}>
               <CardHeader>
                 <CardTitle>{loan.account_name}</CardTitle>

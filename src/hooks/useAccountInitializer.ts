@@ -1,4 +1,3 @@
-
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,7 +38,6 @@ export const useAccountInitializer = () => {
           { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 32450.00, account_number: '9876543210987654' },
           { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: -2430.50, account_number: '5555666677778888' },
           { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: -185000.00, account_number: '4321876543210987' },
-          { user_id: user.id, account_type: 'loan', account_name: 'Home Loan', balance: -20000000.00, account_number: '1122334455667788' }
         ];
 
         const { data: newAccounts, error } = await supabase.from('accounts').insert(initialAccounts).select();
