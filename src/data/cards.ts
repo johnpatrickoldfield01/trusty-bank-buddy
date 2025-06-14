@@ -6,6 +6,7 @@ export const cardsData = [
     expiryDateFull: '12/2030',
     cvv: '123',
     gradient: 'from-blue-500 to-purple-600',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4012 8888 8888 1881',
@@ -13,6 +14,7 @@ export const cardsData = [
     expiryDateFull: '06/2028',
     cvv: '456',
     gradient: 'from-pink-500 to-rose-500',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '5102 1098 7654 3210',
@@ -20,6 +22,7 @@ export const cardsData = [
     expiryDateFull: '08/2029',
     cvv: '789',
     gradient: 'from-green-400 to-emerald-500',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4532 7890 1234 5678',
@@ -27,6 +30,7 @@ export const cardsData = [
     expiryDateFull: '04/2027',
     cvv: '101',
     gradient: 'from-orange-400 to-red-500',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4929 1234 5678 9012',
@@ -34,6 +38,7 @@ export const cardsData = [
     expiryDateFull: '11/2031',
     cvv: '212',
     gradient: 'from-indigo-500 to-cyan-400',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '5541 2345 6789 0123',
@@ -41,6 +46,7 @@ export const cardsData = [
     expiryDateFull: '03/2026',
     cvv: '323',
     gradient: 'from-yellow-400 to-amber-500',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4111 2222 3333 4444',
@@ -48,6 +54,7 @@ export const cardsData = [
     expiryDateFull: '07/2030',
     cvv: '434',
     gradient: 'from-teal-400 to-cyan-500',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4682 9101 1121 3141',
@@ -55,6 +62,7 @@ export const cardsData = [
     expiryDateFull: '01/2029',
     cvv: '545',
     gradient: 'from-lime-400 to-green-600',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4444 5555 6666 7777',
@@ -62,6 +70,7 @@ export const cardsData = [
     expiryDateFull: '09/2027',
     cvv: '656',
     gradient: 'from-fuchsia-500 to-purple-600',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4890 1234 5678 9012',
@@ -69,6 +78,7 @@ export const cardsData = [
     expiryDateFull: '02/2028',
     cvv: '767',
     gradient: 'from-sky-400 to-blue-600',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4321 0987 6543 2109',
@@ -76,6 +86,7 @@ export const cardsData = [
     expiryDateFull: '05/2031',
     cvv: '878',
     gradient: 'from-red-500 to-stone-700',
+    creditLimit: 1500000,
   },
   {
     cardNumber: '4777 8888 9999 0000',
@@ -83,5 +94,6 @@ export const cardsData = [
     expiryDateFull: '10/2026',
     cvv: '989',
     gradient: 'from-slate-800 to-to-slate-900',
+    creditLimit: 1500000,
   },
 ];

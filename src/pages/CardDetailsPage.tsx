@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useOutletContext, Link } from 'react-router-dom';
 import { cardsData } from '@/data/cards';
@@ -36,7 +35,7 @@ const CardDetailsPage = () => {
         );
     }
     
-    const creditLimit = 15000;
+    const { creditLimit } = card;
     const outstandingBalance = mockTransactions.reduce((acc, t) => acc - t.amount, 0);
 
     const handleDownloadStatement = () => {
