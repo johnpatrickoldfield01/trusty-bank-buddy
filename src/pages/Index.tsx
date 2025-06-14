@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import AccountSummary from '@/components/dashboard/AccountSummary';
@@ -15,7 +14,7 @@ const initialTransactions: Transaction[] = [
     {
       id: '1',
       name: 'Starbucks Coffee',
-      amount: -12.50,
+      amount: -224.12,
       date: 'Today, 9:15 AM',
       category: 'Food',
       icon: '🍔',
@@ -23,7 +22,7 @@ const initialTransactions: Transaction[] = [
     {
       id: '2',
       name: 'Amazon Purchase',
-      amount: -89.99,
+      amount: -1613.48,
       date: 'Yesterday, 2:30 PM',
       category: 'Shopping',
       icon: '🛍️',
@@ -31,7 +30,7 @@ const initialTransactions: Transaction[] = [
     {
       id: '3',
       name: 'Salary Deposit',
-      amount: 3240.00,
+      amount: 58091.67,
       date: 'Apr 28, 2025',
       category: 'Income',
       icon: '💰',
@@ -39,7 +38,7 @@ const initialTransactions: Transaction[] = [
     {
       id: '4',
       name: 'Electric Bill',
-      amount: -124.50,
+      amount: -2232.23,
       date: 'Apr 27, 2025',
       category: 'Utilities',
       icon: '⚡',
@@ -47,7 +46,7 @@ const initialTransactions: Transaction[] = [
     {
       id: '5',
       name: 'Netflix Subscription',
-      amount: -15.99,
+      amount: -286.69,
       date: 'Apr 26, 2025',
       category: 'Entertainment',
       icon: '🎬',
@@ -59,12 +58,12 @@ const Index = () => {
   const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
-  const [totalBalance, setTotalBalance] = useState(450000);
-  const [spendingThisMonth, setSpendingThisMonth] = useState(3402.50);
-  const [mainAccountBalance, setMainAccountBalance] = useState(400000);
-  const [savingsBalance, setSavingsBalance] = useState(50000);
-  const [creditCardBalance, setCreditCardBalance] = useState(100000);
-  const [creditCardLimit, setCreditCardLimit] = useState(100000);
+  const [totalBalance, setTotalBalance] = useState(8068286.43);
+  const [spendingThisMonth, setSpendingThisMonth] = useState(61008.20);
+  const [mainAccountBalance, setMainAccountBalance] = useState(7171810.16);
+  const [savingsBalance, setSavingsBalance] = useState(896476.27);
+  const [creditCardBalance, setCreditCardBalance] = useState(1792952.54);
+  const [creditCardLimit, setCreditCardLimit] = useState(1792952.54);
 
   const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
     const now = new Date();
@@ -107,19 +106,19 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <StatCard
             title="Total Balance"
-            value={`$${totalBalance.toLocaleString('en-US')}`}
+            value={`R${totalBalance.toLocaleString('en-US')}`}
             trend={{ value: "3.2% this month", positive: true }}
             icon={<WalletCards className="h-5 w-5" />}
           />
           <StatCard
             title="Spending this month"
-            value={`$${spendingThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            value={`R${spendingThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             trend={{ value: "12% more than last month", positive: false }}
             icon={<CreditCard className="h-5 w-5" />}
           />
           <StatCard
             title="Saved this month"
-            value="$850.00"
+            value="R15240.00"
             trend={{ value: "5.3% this month", positive: true }}
             icon={<Coins className="h-5 w-5" />}
           />

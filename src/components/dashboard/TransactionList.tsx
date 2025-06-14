@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +35,7 @@ const TransactionList = ({ transactions }: { transactions: Transaction[] }) => {
                   transaction.amount > 0 ? "text-bank-secondary" : ""
                 )}>
                   {transaction.amount > 0 ? '+' : ''}
-                  ${Math.abs(transaction.amount).toFixed(2)}
+                  R{Math.abs(transaction.amount).toFixed(2)}
                 </p>
                 <Badge variant="secondary" className="text-xs font-normal">
                   {transaction.category}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -29,7 +28,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Main Account</p>
-                <p className="font-bold">${mainAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{mainAccountBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <p className="text-xs text-muted-foreground">**** **** **** 4832</p>
             </div>
@@ -43,7 +42,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Savings</p>
-                <p className="font-bold">${savingsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">R{savingsBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
@@ -63,7 +62,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Credit Card</p>
-                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>${creditCardBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>R{creditCardBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               </div>
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
@@ -71,7 +70,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                   <span>{creditUsagePercentage.toFixed(1)}%</span>
                 </div>
                 <Progress value={creditUsagePercentage} className={`h-1.5 ${creditCardBalance < 0 ? 'bg-red-200' : 'bg-secondary'}`} />
-                <p className="text-xs text-muted-foreground text-right mt-1">Limit: ${creditCardLimit.toLocaleString('en-US')}</p>
+                <p className="text-xs text-muted-foreground text-right mt-1">Limit: R{creditCardLimit.toLocaleString('en-US')}</p>
               </div>
             </div>
           </div>

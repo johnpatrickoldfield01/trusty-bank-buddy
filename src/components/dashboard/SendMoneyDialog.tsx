@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: 'Recipient name is required.' }),
@@ -47,7 +47,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
       accountNumber: '63155335110',
       branchCode: '220526',
       swiftCode: 'FIRNZAJJ',
-      amount: 50000,
+      amount: 896476.27,
     },
   });
 
@@ -57,9 +57,24 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
     }
   }, [isOpen, form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     onSendMoney({ amount: values.amount, recipientName: values.recipientName });
-    toast.success(`Successfully sent $${values.amount.toLocaleString()} to ${values.recipientName}.`);
+    toast.success(`Successfully sent R ${values.amount.toLocaleString()} to ${values.recipientName}.`);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-transaction-email', {
+        body: {
+          ...values,
+          recipientEmail: 'oldfieldjohnpatrick@gmail.com'
+        }
+      });
+      if (error) throw error;
+      toast.info("Transaction confirmation email sent.");
+    } catch (error) {
+      console.error("Failed to send confirmation email:", error);
+      toast.error("Failed to send confirmation email.");
+    }
+
     onOpenChange(false);
     form.reset();
   }
@@ -93,7 +108,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount ($)</FormLabel>
+                  <FormLabel>Amount (R)</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
