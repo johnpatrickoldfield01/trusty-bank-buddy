@@ -52,6 +52,10 @@ const handler = async (req: Request): Promise<Response> => {
       <p>Thank you for using our service.</p>
     `;
 
+    // IMPORTANT: For production, you must use a verified domain with Resend.
+    // Replace 'onboarding@resend.dev' with your own sending email address
+    // from a domain you have verified in your Resend account.
+    // See: https://resend.com/domains
     const { data, error } = await resend.emails.send({
       from: "Lovable Bank <onboarding@resend.dev>",
       to: [recipientEmail],

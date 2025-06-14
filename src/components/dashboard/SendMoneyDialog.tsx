@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const formSchema = z.object({
   recipientName: z.string().min(2, { message: 'Recipient name is required.' }),
+  recipientEmail: z.string().email({ message: 'Please enter a valid email.' }),
   bankName: z.string().min(2, { message: 'Bank name is required.' }),
   accountNumber: z.string().regex(/^\d+$/, { message: 'Account number must be digits only.' }),
   branchCode: z.string().optional(),
@@ -43,6 +45,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
     resolver: zodResolver(formSchema),
     defaultValues: {
       recipientName: 'MR JOHN P OLDFIELD',
+      recipientEmail: 'oldfieldjohnpatrick@gmail.com',
       bankName: 'First National Bank',
       accountNumber: '63155335110',
       branchCode: '220526',
@@ -57,6 +60,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
     if (isOpen) {
       form.reset({
         recipientName: 'MR JOHN P OLDFIELD',
+        recipientEmail: 'oldfieldjohnpatrick@gmail.com',
         bankName: 'First National Bank',
         accountNumber: '63155335110',
         branchCode: '220526',
@@ -73,10 +77,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
 
       try {
         const { error } = await supabase.functions.invoke('send-transaction-email', {
-          body: {
-            ...values,
-            recipientEmail: 'oldfieldjohnpatrick@gmail.com'
-          }
+          body: values
         });
         if (error) throw error;
         toast.info("Transaction confirmation email sent.");
@@ -110,6 +111,19 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
                   <FormLabel>Recipient Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter recipient's full name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="recipientEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Recipient Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="recipient@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,3 +210,4 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
 };
 
 export default SendMoneyDialog;
+
