@@ -60,7 +60,7 @@ const Index = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [totalBalance, setTotalBalance] = useState(400000);
   const [spendingThisMonth, setSpendingThisMonth] = useState(3402.50);
-  const [mainAccountBalance, setMainAccountBalance] = useState(12458.32);
+  const [mainAccountBalance, setMainAccountBalance] = useState(400000);
 
   const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
     const now = new Date();
