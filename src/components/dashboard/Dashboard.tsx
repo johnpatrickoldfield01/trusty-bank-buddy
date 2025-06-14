@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,6 +13,7 @@ import { useSession } from '@/hooks/useSession';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useStatementDownloader } from '@/hooks/useStatementDownloader';
+import { useAccountConfirmationDownloader } from '@/hooks/useAccountConfirmationDownloader';
 
 import { useAccounts } from '@/hooks/useAccounts';
 import { useTransactions } from '@/hooks/useTransactions';
@@ -33,6 +35,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
   const { downloadStatement } = useStatementDownloader();
   const { downloadCashflowForecast } = useCashflowForecastDownloader();
   const { downloadBalanceSheet } = useBalanceSheetDownloader();
+  const { downloadAccountConfirmation } = useAccountConfirmationDownloader();
 
   const { accounts, isLoadingAccounts } = useAccounts();
   const { transactions, isLoadingTransactions } = useTransactions();
@@ -126,6 +129,10 @@ const Dashboard = ({ profile }: DashboardProps) => {
     downloadBalanceSheet(profile, balanceSheetData);
   };
 
+  const handleDownloadConfirmation = () => {
+    downloadAccountConfirmation(profile, mainAccount);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
@@ -196,6 +203,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
                 creditCardAccountNumber={creditCardAccountNumber}
                 loanAccountNumber={businessLoanAccountNumber}
                 homeLoanAccountNumber={homeLoanAccountNumber}
+                onDownloadConfirmation={handleDownloadConfirmation}
               />
             )}
           </div>

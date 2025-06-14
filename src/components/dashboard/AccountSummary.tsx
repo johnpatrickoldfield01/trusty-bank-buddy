@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Wallet, CreditCard, PiggyBank, Landmark, Home } from 'lucide-react';
+import { Wallet, CreditCard, PiggyBank, Landmark, Home, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AccountSummaryProps {
   mainAccountBalance: number;
@@ -15,9 +17,10 @@ interface AccountSummaryProps {
   creditCardAccountNumber?: string;
   loanAccountNumber?: string;
   homeLoanAccountNumber?: string;
+  onDownloadConfirmation: () => void;
 }
 
-const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber }: AccountSummaryProps) => {
+const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber, onDownloadConfirmation }: AccountSummaryProps) => {
   const creditUsagePercentage = creditCardBalance < 0 ? (Math.abs(creditCardBalance) / creditCardLimit) * 100 : 0;
   const monthlyRepayment = Math.abs((loanBalance || 0) * 0.0001);
   const homeLoanMonthlyRepayment = Math.abs((homeLoanBalance || 0) * 0.0001);
@@ -37,7 +40,13 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Main Account</p>
-                <p className="font-bold">R{(mainAccountBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-bold">R{(mainAccountBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownloadConfirmation}>
+                    <Download className="h-4 w-4" />
+                    <span className="sr-only">Download confirmation letter</span>
+                  </Button>
+                </div>
               </div>
               {mainAccountNumber && <p className="text-xs text-muted-foreground">{mainAccountNumber}</p>}
             </div>
