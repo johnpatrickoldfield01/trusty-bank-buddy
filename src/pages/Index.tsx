@@ -1,53 +1,165 @@
 
-import { useOutletContext } from 'react-router-dom';
-import { Profile } from '@/components/layout/AppLayout';
+import React, { useState } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import AccountSummary from '@/components/dashboard/AccountSummary';
-import QuickActions from '@/components/dashboard/QuickActions';
 import TransactionList, { Transaction } from '@/components/dashboard/TransactionList';
-import PartnershipInitiator from '@/components/admin/PartnershipInitiator';
-import { toast } from "sonner";
+import QuickActions from '@/components/dashboard/QuickActions';
+import StatCard from '@/components/ui/StatCard';
+import { Card, CardContent } from '@/components/ui/card';
+import { WalletCards, Coins, CreditCard } from 'lucide-react';
+import { type Profile } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+
+const initialTransactions: Transaction[] = [
+    {
+      id: '1',
+      name: 'Starbucks Coffee',
+      amount: -12.50,
+      date: 'Today, 9:15 AM',
+      category: 'Food',
+      icon: '🍔',
+    },
+    {
+      id: '2',
+      name: 'Amazon Purchase',
+      amount: -89.99,
+      date: 'Yesterday, 2:30 PM',
+      category: 'Shopping',
+      icon: '🛍️',
+    },
+    {
+      id: '3',
+      name: 'Salary Deposit',
+      amount: 3240.00,
+      date: 'Apr 28, 2025',
+      category: 'Income',
+      icon: '💰',
+    },
+    {
+      id: '4',
+      name: 'Electric Bill',
+      amount: -124.50,
+      date: 'Apr 27, 2025',
+      category: 'Utilities',
+      icon: '⚡',
+    },
+    {
+      id: '5',
+      name: 'Netflix Subscription',
+      amount: -15.99,
+      date: 'Apr 26, 2025',
+      category: 'Entertainment',
+      icon: '🎬',
+    },
+  ];
 
 const Index = () => {
   const { profile } = useOutletContext<{ profile: Profile }>();
+  const navigate = useNavigate();
 
-  // Mock data for AccountSummary
-  const accountSummaryData = {
-    mainAccountBalance: 12540.75,
-    savingsBalance: 5830.20,
-    creditCardBalance: -430.50,
-    creditCardLimit: 10000,
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+  const [totalBalance, setTotalBalance] = useState(450000);
+  const [spendingThisMonth, setSpendingThisMonth] = useState(3402.50);
+  const [mainAccountBalance, setMainAccountBalance] = useState(400000);
+  const [savingsBalance, setSavingsBalance] = useState(50000);
+  const [creditCardBalance, setCreditCardBalance] = useState(100000);
+  const [creditCardLimit, setCreditCardLimit] = useState(100000);
+
+  const handleSendMoney = ({ amount, recipientName }: { amount: number; recipientName: string }) => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    const formattedDate = `Today, ${formattedHours}:${formattedMinutes} ${ampm}`;
+    
+    const newTransaction: Transaction = {
+      id: now.toISOString(),
+      name: `Transfer to ${recipientName}`,
+      amount: -amount,
+      date: formattedDate,
+      category: 'Transfer',
+      icon: '💸',
+    };
+
+    setTransactions(prev => [newTransaction, ...prev]);
+    setTotalBalance(prev => prev - amount);
+    setMainAccountBalance(prev => prev - amount);
+    setSpendingThisMonth(prev => prev + amount);
   };
 
-  // Mock data for TransactionList
-  const mockTransactions: Transaction[] = [
-    { id: '1', name: 'Netflix Subscription', amount: -15.99, date: 'June 12, 2025', category: 'Entertainment', icon: '🎬' },
-    { id: '2', name: 'Salary Deposit', amount: 3500.00, date: 'June 10, 2025', category: 'Income', icon: '💼' },
-    { id: '3', name: 'Grocery Shopping', amount: -120.45, date: 'June 10, 2025', category: 'Food', icon: '🛒' },
-    { id: '4', name: 'Starbucks Coffee', amount: -5.75, date: 'June 9, 2025', category: 'Food', icon: '☕' },
-  ];
-
-  // Mock handler for QuickActions
-  const handleSendMoney = (data: { amount: number; recipientName: string }) => {
-    console.log('Sending money:', data);
-    toast.success(`Successfully sent $${data.amount.toFixed(2)} to ${data.recipientName}`);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Welcome back, {profile.full_name}!</h1>
-        <p className="text-muted-foreground">Here's your financial overview for today.</p>
-      </div>
-
-      <div className="grid gap-8 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-8">
-          <AccountSummary {...accountSummaryData} />
-          <TransactionList transactions={mockTransactions} />
+    <div>
+      <div className="container py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Welcome, {profile.full_name}!</h1>
+          <Button onClick={handleLogout} variant="outline">Logout</Button>
         </div>
-
-        <div className="space-y-8">
+        
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <StatCard
+            title="Total Balance"
+            value={`$${totalBalance.toLocaleString('en-US')}`}
+            trend={{ value: "3.2% this month", positive: true }}
+            icon={<WalletCards className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Spending this month"
+            value={`$${spendingThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            trend={{ value: "12% more than last month", positive: false }}
+            icon={<CreditCard className="h-5 w-5" />}
+          />
+          <StatCard
+            title="Saved this month"
+            value="$850.00"
+            trend={{ value: "5.3% this month", positive: true }}
+            icon={<Coins className="h-5 w-5" />}
+          />
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="mb-6">
           <QuickActions onSendMoney={handleSendMoney} />
-          <PartnershipInitiator />
+        </div>
+        
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <TransactionList transactions={transactions} />
+          </div>
+          <div>
+            <AccountSummary
+              mainAccountBalance={mainAccountBalance}
+              savingsBalance={savingsBalance}
+              creditCardBalance={creditCardBalance}
+              creditCardLimit={creditCardLimit}
+            />
+          </div>
+        </div>
+        
+        {/* Card Promotions */}
+        <div className="mt-8">
+          <Card className="bg-gradient-to-r from-bank-primary to-bank-accent text-white overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Premium Card Offer</h3>
+                  <p className="text-white/80 max-w-md">Upgrade to our Premium Card and enjoy 2% cashback on all purchases and zero foreign transaction fees.</p>
+                </div>
+                <button className="bg-white text-bank-primary px-6 py-2 rounded-md font-medium hover:bg-white/90 transition-colors">
+                  Learn More
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
