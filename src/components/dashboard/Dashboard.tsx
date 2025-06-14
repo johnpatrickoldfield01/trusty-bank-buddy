@@ -21,6 +21,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import PremiumCardOffer from '@/components/dashboard/PremiumCardOffer';
 import { useCashflowForecastDownloader } from '@/hooks/useCashflowForecastDownloader';
+import { useBalanceSheetDownloader } from '@/hooks/useBalanceSheetDownloader';
 
 interface DashboardProps {
     profile: Profile | null;
@@ -32,6 +33,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
   const queryClient = useQueryClient();
   const { downloadStatement } = useStatementDownloader();
   const { downloadCashflowForecast } = useCashflowForecastDownloader();
+  const { downloadBalanceSheet } = useBalanceSheetDownloader();
 
   const { accounts, isLoadingAccounts } = useAccounts();
   const { transactions, isLoadingTransactions } = useTransactions();
@@ -107,6 +109,20 @@ const Dashboard = ({ profile }: DashboardProps) => {
     downloadCashflowForecast(profile, totalBalance);
   };
 
+  const handleDownloadBalanceSheet = () => {
+    const balanceSheetData = {
+      assets: [
+        { name: 'Main Account', balance: mainAccountBalance },
+        { name: 'Savings Account', balance: savingsBalance },
+      ],
+      liabilities: [
+        { name: 'Credit Card', balance: creditCardBalance },
+        { name: 'Business Loan', balance: loanBalance },
+      ],
+    };
+    downloadBalanceSheet(profile, balanceSheetData);
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/auth');
@@ -124,7 +140,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
         />
         
         <div className="mb-6">
-          <QuickActions onSendMoney={handleSendMoney} onDownloadCashflowForecast={handleDownloadCashflowForecast} />
+          <QuickActions onSendMoney={handleSendMoney} onDownloadCashflowForecast={handleDownloadCashflowForecast} onDownloadBalanceSheet={handleDownloadBalanceSheet} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

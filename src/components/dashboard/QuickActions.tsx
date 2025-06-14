@@ -2,15 +2,16 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
 
 interface QuickActionsProps {
   onSendMoney: (data: { amount: number; recipientName: string }) => Promise<void>;
   onDownloadCashflowForecast: () => void;
+  onDownloadBalanceSheet: () => void;
 }
 
-const QuickActions = ({ onSendMoney, onDownloadCashflowForecast }: QuickActionsProps) => {
+const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalanceSheet }: QuickActionsProps) => {
   const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
 
   return (
@@ -18,7 +19,7 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast }: QuickActionsP
       <Card>
         <CardContent className="p-6">
           <h3 className="font-medium mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <Button
               variant="outline"
               className="h-auto flex-col gap-2 py-4"
@@ -60,6 +61,16 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast }: QuickActionsP
                 <TrendingUp className="h-4 w-4 text-emerald-600" />
               </div>
               <span className="text-xs font-normal">Forecast</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              onClick={onDownloadBalanceSheet}
+            >
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <Download className="h-4 w-4 text-blue-600" />
+              </div>
+              <span className="text-xs font-normal">Balance Sheet</span>
             </Button>
           </div>
         </CardContent>
