@@ -1,16 +1,15 @@
 
 import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
-import { toast } from 'sonner';
-import { type Database } from '@/integrations/supabase/types';
+import { useAccountInitializer } from './useAccountInitializer';
 
 export const useAccounts = () => {
   const { user } = useSession();
-  const queryClient = useQueryClient();
+  const { initializeAccounts } = useAccountInitializer();
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
+  const { data: accounts, isLoading: isLoadingAccounts, isSuccess } = useQuery({
     queryKey: ['accounts', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -22,48 +21,10 @@ export const useAccounts = () => {
   });
 
   useEffect(() => {
-    if (user && accounts && accounts.length === 0) {
-      const createInitialAccountsAndSeedTransactions = async () => {
-        toast.info("Setting up your new accounts...");
-
-        const initialAccounts: Array<Database['public']['Tables']['accounts']['Insert']> = [
-          { user_id: user.id, account_type: 'main', account_name: 'Main Account', balance: 125750.00, account_number: '1234 5678 9012 3456' },
-          { user_id: user.id, account_type: 'savings', account_name: 'Savings Account', balance: 32450.00, account_number: '9876 5432 1098 7654' },
-          { user_id: user.id, account_type: 'credit', account_name: 'Credit Card', balance: -2430.50, account_number: '5555 6666 7777 8888' },
-          { user_id: user.id, account_type: 'loan', account_name: 'Business Loan', balance: -185000.00, account_number: '4321 8765 4321 0987' }
-        ];
-
-        const { data: newAccounts, error } = await supabase.from('accounts').insert(initialAccounts).select();
-        
-        if (error || !newAccounts) {
-          toast.error('Failed to initialize your accounts. Please refresh the page.');
-          console.error('Failed to create initial accounts:', error);
-          return;
-        }
-        
-        toast.success('Your accounts have been initialized!');
-
-        const mainAccount = newAccounts.find(acc => acc.account_type === 'main');
-        if (mainAccount) {
-            toast.info("Adding some sample transaction history...");
-            const sampleSpendTransactions = [
-                { account_id: mainAccount.id, name: 'Online Shopping', amount: -1200.50, category: 'Shopping', icon: '🛍️' },
-                { account_id: mainAccount.id, name: 'Groceries', amount: -850.75, category: 'Food', icon: '🛒' },
-                { account_id: mainAccount.id, name: 'Monthly Subscription', amount: -99.99, category: 'Bills', icon: '🧾' },
-                { account_id: mainAccount.id, name: 'Dinner with Friends', amount: -600.00, category: 'Entertainment', icon: '🍽️' },
-            ];
-            
-            await supabase.from('transactions').insert(sampleSpendTransactions);
-        }
-
-        queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
-        queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
-        queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
-      };
-      
-      createInitialAccountsAndSeedTransactions();
+    if (user && isSuccess && accounts && accounts.length === 0) {
+      initializeAccounts(user);
     }
-  }, [user, accounts, queryClient]);
+  }, [user, accounts, isSuccess, initializeAccounts]);
 
   return { accounts, isLoadingAccounts };
 };
