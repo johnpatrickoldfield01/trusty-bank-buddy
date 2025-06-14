@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          account_name: string
+          account_number: string | null
+          account_type: Database["public"]["Enums"]["account_type"]
+          balance: number
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          account_number?: string | null
+          account_type: Database["public"]["Enums"]["account_type"]
+          balance?: number
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string | null
+          account_type?: Database["public"]["Enums"]["account_type"]
+          balance?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          category: string | null
+          icon: string | null
+          id: string
+          name: string
+          transaction_date: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          category?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          transaction_date?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          category?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +100,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      account_type: "main" | "savings" | "credit"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +215,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["main", "savings", "credit"],
+    },
   },
 } as const
