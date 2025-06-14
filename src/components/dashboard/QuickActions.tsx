@@ -5,14 +5,16 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download, Landmark, Globe } from 'lucide-react';
 import SendMoneyDialog from './SendMoneyDialog';
 import LocalTransferDialog from './LocalTransferDialog';
+import { type LocalTransferFormValues } from '@/schemas/localTransferSchema';
 
 interface QuickActionsProps {
   onSendMoney: (data: { amount: number; recipientName: string }) => Promise<void>;
   onDownloadCashflowForecast: () => void;
   onDownloadBalanceSheet: () => void;
+  onLocalTransfer: (values: LocalTransferFormValues) => Promise<void>;
 }
 
-const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalanceSheet }: QuickActionsProps) => {
+const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalanceSheet, onLocalTransfer }: QuickActionsProps) => {
   const [isSendMoneyOpen, setIsSendMoneyOpen] = useState(false);
   const [isLocalTransferOpen, setIsLocalTransferOpen] = useState(false);
 
@@ -97,7 +99,7 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
         </CardContent>
       </Card>
       <SendMoneyDialog isOpen={isSendMoneyOpen} onOpenChange={setIsSendMoneyOpen} onSendMoney={onSendMoney} />
-      <LocalTransferDialog isOpen={isLocalTransferOpen} onOpenChange={setIsLocalTransferOpen} />
+      <LocalTransferDialog isOpen={isLocalTransferOpen} onOpenChange={setIsLocalTransferOpen} onLocalTransfer={onLocalTransfer} />
     </>
   );
 };

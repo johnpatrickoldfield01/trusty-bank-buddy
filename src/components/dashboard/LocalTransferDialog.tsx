@@ -16,9 +16,10 @@ import LocalTransferForm from './LocalTransferForm';
 interface LocalTransferDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onLocalTransfer: (values: LocalTransferFormValues) => Promise<void>;
 }
 
-const LocalTransferDialog = ({ isOpen, onOpenChange }: LocalTransferDialogProps) => {
+const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTransferDialogProps) => {
   const form = useForm<LocalTransferFormValues>({
     resolver: zodResolver(localTransferFormSchema),
     defaultValues: {
@@ -45,10 +46,14 @@ const LocalTransferDialog = ({ isOpen, onOpenChange }: LocalTransferDialogProps)
   }, [isOpen, form]);
 
   async function onSubmit(values: LocalTransferFormValues) {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    toast.success(`Successfully transferred R ${values.amount.toLocaleString()} to ${values.accountHolderName}.`);
-    onOpenChange(false);
+    try {
+      await onLocalTransfer(values);
+      toast.success(`Successfully transferred R ${values.amount.toLocaleString()} to ${values.accountHolderName}.`);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Transfer failed:', error);
+      // The error toast is handled by the `handleLocalTransfer` function in Dashboard.tsx
+    }
   }
 
   return (

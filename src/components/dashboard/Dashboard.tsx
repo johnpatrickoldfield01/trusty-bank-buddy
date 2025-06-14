@@ -23,6 +23,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats';
 import PremiumCardOffer from '@/components/dashboard/PremiumCardOffer';
 import { useCashflowForecastDownloader } from '@/hooks/useCashflowForecastDownloader';
 import { useBalanceSheetDownloader } from '@/hooks/useBalanceSheetDownloader';
+import { type LocalTransferFormValues } from '@/schemas/localTransferSchema';
 
 interface DashboardProps {
     profile: Profile | null;
@@ -100,6 +101,44 @@ const Dashboard = ({ profile }: DashboardProps) => {
     await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
   };
 
+  const handleLocalTransfer = async (values: LocalTransferFormValues) => {
+    if (!user) {
+        toast.error("You must be logged in to send money.");
+        throw new Error("User not logged in.");
+    }
+    
+    if (!accounts) {
+        toast.error("Could not fetch account details.");
+        throw new Error("No accounts found");
+    }
+
+    const mainAccount = accounts.find(acc => acc.account_type === 'main');
+
+    if (!mainAccount) {
+      toast.error("Main account not found.");
+      throw new Error("Main account not found.");
+    }
+    if (mainAccount.balance < values.amount) {
+        toast.error("Insufficient funds.");
+        throw new Error("Insufficient funds.");
+    }
+
+    const { error } = await supabase.rpc('transfer_money', {
+      sender_account_id: mainAccount.id,
+      recipient_name: values.accountHolderName,
+      transfer_amount: values.amount
+    });
+
+    if (error) {
+      toast.error(`Transaction failed: ${error.message}`);
+      throw error;
+    }
+
+    await queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+    await queryClient.invalidateQueries({ queryKey: ['transactions', user?.id] });
+    await queryClient.invalidateQueries({ queryKey: ['monthlySpending', user?.id] });
+  };
+
   const handleDownloadStatement = () => {
     const mainAccount = accounts?.find(acc => acc.account_type === 'main');
     downloadStatement(profile, mainAccount, 3);
@@ -150,7 +189,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
         />
         
         <div className="mb-6">
-          <QuickActions onSendMoney={handleSendMoney} onDownloadCashflowForecast={handleDownloadCashflowForecast} onDownloadBalanceSheet={handleDownloadBalanceSheet} />
+          <QuickActions onSendMoney={handleSendMoney} onDownloadCashflowForecast={handleDownloadCashflowForecast} onDownloadBalanceSheet={handleDownloadBalanceSheet} onLocalTransfer={handleLocalTransfer} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
