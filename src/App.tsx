@@ -17,6 +17,7 @@ import PaymentCancelledPage from "./pages/PaymentCancelledPage";
 import TransactionDetailsPage from "./pages/TransactionDetailsPage";
 import LoansPage from "./pages/LoansPage";
 import PaymentsPage from "./pages/PaymentsPage";
+import LoanDetailsPage from "./pages/LoanDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/cards/:cardIndex" element={<CardDetailsPage />} />
               <Route path="/foreign-exchange" element={<ForeignExchangePage />} />
               <Route path="/loans" element={<LoansPage />} />
+              <Route path="/loans/:loanId" element={<LoanDetailsPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/payment/success" element={<PaymentSuccessPage />} />
               <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
@@ -50,4 +52,3 @@ const App = () => (
 );
 
 export default App;
-

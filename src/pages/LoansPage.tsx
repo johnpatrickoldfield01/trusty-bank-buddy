@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useAccountInitializer } from '@/hooks/useAccountInitializer';
 import { useSession } from '@/hooks/useSession';
+import { Link } from 'react-router-dom';
 
 const LoansPage = () => {
   const { accounts, isLoadingAccounts } = useAccounts();
@@ -51,19 +52,21 @@ const LoansPage = () => {
       ) : uniqueLoanAccounts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {uniqueLoanAccounts.map((loan) => (
-            <Card key={loan.id}>
-              <CardHeader>
-                <CardTitle>{loan.account_name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">Account Number</p>
-                <p className="font-mono">{loan.account_number ? formatAccountNumber(loan.account_number) : 'N/A'}</p>
-                <p className="text-2xl font-bold mt-4">
-                  R{Math.abs(Number(loan.balance)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-sm text-muted-foreground">Outstanding Balance</p>
-              </CardContent>
-            </Card>
+            <Link key={loan.id} to={`/loans/${loan.id}`} className="block rounded-lg transition-all duration-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle>{loan.account_name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">Account Number</p>
+                  <p className="font-mono">{loan.account_number ? formatAccountNumber(loan.account_number) : 'N/A'}</p>
+                  <p className="text-2xl font-bold mt-4">
+                    R{Math.abs(Number(loan.balance)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Outstanding Balance</p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (
