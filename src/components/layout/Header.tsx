@@ -52,7 +52,7 @@ const Header = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-1 text-sm font-medium hover:text-bank-primary transition-colors">
-                Banks
+                Local Banks
                 <ChevronDown className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
