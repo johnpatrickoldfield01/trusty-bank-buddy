@@ -1,10 +1,13 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
 const CryptoPage = () => {
+  const navigate = useNavigate();
+  
   const cryptocurrencies = [
     { rank: 1, name: 'Bitcoin', symbol: 'BTC', price: 43250.50, change: 2.34 },
     { rank: 2, name: 'Ethereum', symbol: 'ETH', price: 2680.75, change: -1.12 },
@@ -61,6 +64,10 @@ const CryptoPage = () => {
 
   const totalPortfolioValue = cryptocurrencies.reduce((sum, crypto) => sum + (crypto.price * balance), 0);
 
+  const handleRowClick = (symbol: string) => {
+    navigate(`/crypto/${symbol.toLowerCase()}`);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -84,7 +91,7 @@ const CryptoPage = () => {
         <CardHeader>
           <CardTitle>Top 30 Cryptocurrencies</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Each cryptocurrency shows a balance of 1,000,000 units
+            Each cryptocurrency shows a balance of 1,000,000 units. Click on any row to view details.
           </p>
         </CardHeader>
         <CardContent>
@@ -102,7 +109,11 @@ const CryptoPage = () => {
             </TableHeader>
             <TableBody>
               {cryptocurrencies.map((crypto) => (
-                <TableRow key={crypto.rank}>
+                <TableRow 
+                  key={crypto.rank}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => handleRowClick(crypto.symbol)}
+                >
                   <TableCell className="font-medium">#{crypto.rank}</TableCell>
                   <TableCell className="font-medium">{crypto.name}</TableCell>
                   <TableCell>
