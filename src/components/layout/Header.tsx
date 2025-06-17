@@ -72,6 +72,7 @@ const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
           
+          <Link to="/crypto" className="text-sm font-medium hover:text-bank-primary transition-colors">Crypto</Link>
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Support</a>
         </nav>
         

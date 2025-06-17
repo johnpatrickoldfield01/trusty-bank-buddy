@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ import LoansPage from "./pages/LoansPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import LoanDetailsPage from "./pages/LoanDetailsPage";
 import StandardBankPage from "./pages/StandardBankPage";
+import CryptoPage from "./pages/CryptoPage";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,7 @@ const App = () => (
               <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
               <Route path="/transaction/:id" element={<TransactionDetailsPage />} />
               <Route path="/standard-bank" element={<StandardBankPage />} />
+              <Route path="/crypto" element={<CryptoPage />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
