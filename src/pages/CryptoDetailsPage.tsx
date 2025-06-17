@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
+import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
 
 const CryptoDetailsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
@@ -44,7 +45,7 @@ const CryptoDetailsPage = () => {
   ];
 
   const crypto = cryptocurrencies.find(c => c.symbol === symbol?.toUpperCase());
-  const balance = 1000000;
+  const [balance, setBalance] = useState(1000000);
 
   if (!crypto) {
     return (
@@ -90,6 +91,11 @@ const CryptoDetailsPage = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Portfolio
         </Button>
+        <SendCryptoDialog 
+          crypto={crypto} 
+          balance={balance} 
+          onBalanceUpdate={setBalance}
+        />
       </div>
 
       <div className="grid gap-6">
