@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams, useOutletContext, Link } from 'react-router-dom';
 import { cardsData } from '@/data/cards';
 import VirtualCreditCard from '@/components/cards/VirtualCreditCard';
+import PaymentProcessor from '@/components/cards/PaymentProcessor';
 import TransactionList from '@/components/dashboard/TransactionList';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Profile } from '@/components/layout/AppLayout';
@@ -63,6 +64,15 @@ const CardDetailsPage = () => {
                             gradient={card.gradient}
                             isSelected={true}
                         />
+                        
+                        {/* Add Payment Processor */}
+                        <PaymentProcessor
+                            cardNumber={card.cardNumber}
+                            cardHolder={profile.full_name || 'Valued Customer'}
+                            expiryDate={card.expiryDate}
+                            cvv={card.cvv}
+                        />
+                        
                         <Card className="mt-8">
                             <CardHeader>
                                 <CardTitle>Card Summary</CardTitle>
