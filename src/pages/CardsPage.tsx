@@ -19,6 +19,7 @@ const CardsPage = () => {
               cardHolder={profile.full_name || 'Valued Customer'}
               cardNumber={card.cardNumber}
               expiryDate={card.expiryDate}
+              cvv={card.cvv}
               gradient={card.gradient}
             />
           </Link>
