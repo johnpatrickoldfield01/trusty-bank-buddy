@@ -110,20 +110,14 @@ export type Database = {
     }
     Functions: {
       transfer_money: {
-        Args:
-          | {
-              sender_account_id: string
-              recipient_name: string
-              transfer_amount: number
-            }
-          | {
-              sender_account_id: string
-              recipient_name: string
-              transfer_amount: number
-              recipient_bank_name?: string
-              recipient_account_number?: string
-              recipient_swift_code?: string
-            }
+        Args: {
+          sender_account_id: string
+          recipient_name: string
+          transfer_amount: number
+          recipient_bank_name?: string
+          recipient_account_number?: string
+          recipient_swift_code?: string
+        }
         Returns: undefined
       }
     }
