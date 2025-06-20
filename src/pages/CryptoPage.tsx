@@ -1,12 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
 
 const CryptoPage = () => {
   const navigate = useNavigate();
+  const [balances, setBalances] = useState<Record<string, number>>({});
   
   const cryptocurrencies = [
     { rank: 1, name: 'Bitcoin', symbol: 'BTC', price: 43250.50, change: 2.34 },
@@ -41,7 +43,18 @@ const CryptoPage = () => {
     { rank: 30, name: 'Flow', symbol: 'FLOW', price: 0.78, change: -1.33 }
   ];
 
-  const balance = 1000000; // 1,000,000 units for each cryptocurrency
+  const initialBalance = 1000000; // 1,000,000 units for each cryptocurrency
+
+  const getBalance = (symbol: string) => {
+    return balances[symbol] !== undefined ? balances[symbol] : initialBalance;
+  };
+
+  const updateBalance = (symbol: string, newBalance: number) => {
+    setBalances(prev => ({
+      ...prev,
+      [symbol]: newBalance
+    }));
+  };
 
   const formatPrice = (price: number) => {
     if (price < 0.001) {
@@ -53,7 +66,7 @@ const CryptoPage = () => {
     }
   };
 
-  const formatValue = (price: number) => {
+  const formatValue = (price: number, balance: number) => {
     return (price * balance).toLocaleString('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -62,9 +75,16 @@ const CryptoPage = () => {
     });
   };
 
-  const totalPortfolioValue = cryptocurrencies.reduce((sum, crypto) => sum + (crypto.price * balance), 0);
+  const totalPortfolioValue = cryptocurrencies.reduce((sum, crypto) => {
+    const balance = getBalance(crypto.symbol);
+    return sum + (crypto.price * balance);
+  }, 0);
 
-  const handleRowClick = (symbol: string) => {
+  const handleRowClick = (symbol: string, event: React.MouseEvent) => {
+    // Don't navigate if clicking on the send button
+    if ((event.target as HTMLElement).closest('button')) {
+      return;
+    }
     navigate(`/crypto/${symbol.toLowerCase()}`);
   };
 
@@ -91,7 +111,7 @@ const CryptoPage = () => {
         <CardHeader>
           <CardTitle>Top 30 Cryptocurrencies</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Each cryptocurrency shows a balance of 1,000,000 units. Click on any row to view details.
+            Each cryptocurrency shows a balance of 1,000,000 units. Click on any row to view details or use the send button to transfer cryptocurrency.
           </p>
         </CardHeader>
         <CardContent>
@@ -105,36 +125,51 @@ const CryptoPage = () => {
                 <TableHead className="text-right">24h Change</TableHead>
                 <TableHead className="text-right">Balance</TableHead>
                 <TableHead className="text-right">Value (USD)</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cryptocurrencies.map((crypto) => (
-                <TableRow 
-                  key={crypto.rank}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => handleRowClick(crypto.symbol)}
-                >
-                  <TableCell className="font-medium">#{crypto.rank}</TableCell>
-                  <TableCell className="font-medium">{crypto.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{crypto.symbol}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    ${formatPrice(crypto.price)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant={crypto.change >= 0 ? "default" : "destructive"}>
-                      {crypto.change >= 0 ? '+' : ''}{crypto.change.toFixed(2)}%
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {balance.toLocaleString()} {crypto.symbol}
-                  </TableCell>
-                  <TableCell className="text-right font-mono font-semibold">
-                    {formatValue(crypto.price)}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {cryptocurrencies.map((crypto) => {
+                const balance = getBalance(crypto.symbol);
+                return (
+                  <TableRow 
+                    key={crypto.rank}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={(e) => handleRowClick(crypto.symbol, e)}
+                  >
+                    <TableCell className="font-medium">#{crypto.rank}</TableCell>
+                    <TableCell className="font-medium">{crypto.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{crypto.symbol}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      ${formatPrice(crypto.price)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={crypto.change >= 0 ? "default" : "destructive"}>
+                        {crypto.change >= 0 ? '+' : ''}{crypto.change.toFixed(2)}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {balance.toLocaleString()} {crypto.symbol}
+                    </TableCell>
+                    <TableCell className="text-right font-mono font-semibold">
+                      {formatValue(crypto.price, balance)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <SendCryptoDialog
+                        crypto={{
+                          name: crypto.name,
+                          symbol: crypto.symbol,
+                          price: crypto.price
+                        }}
+                        balance={balance}
+                        onBalanceUpdate={(newBalance) => updateBalance(crypto.symbol, newBalance)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
