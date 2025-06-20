@@ -2,6 +2,7 @@
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SendCryptoParams {
   crypto: {
@@ -18,35 +19,46 @@ interface SendCryptoParams {
 export const useSendCrypto = () => {
   const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, onSuccess }: SendCryptoParams) => {
     try {
-      toast.info('Processing transaction...');
+      toast.info('Processing transaction with Coinbase...');
 
-      // Simulate API call to Coinbase (in real implementation, this would call Coinbase API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the Coinbase integration edge function
+      const { data, error } = await supabase.functions.invoke('coinbase-crypto-send', {
+        body: {
+          crypto,
+          amount,
+          toAddress
+        }
+      });
 
-      // Generate transaction ID
-      const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Calculate new balance
-      const newBalance = fromBalance - amount;
-      
-      // Generate PDF proof
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Transaction failed');
+      }
+
+      // Generate PDF proof with real transaction data
       await generateTransactionPDF({
-        transactionId,
+        transactionId: data.transactionId,
         crypto,
         amount,
         toAddress,
         usdValue: amount * crypto.price,
         timestamp: new Date(),
+        transactionHash: data.transactionHash,
+        status: data.status,
+        coinbaseUrl: data.coinbaseTransactionUrl
       });
 
-      // Update balance
-      onSuccess(newBalance);
+      // Update balance with real Coinbase balance
+      onSuccess(data.newBalance);
       
-      toast.success(`Successfully sent ${amount} ${crypto.symbol}!`);
+      toast.success(`Successfully sent ${amount} ${crypto.symbol} via Coinbase!`);
       
     } catch (error) {
       console.error('Send crypto error:', error);
-      toast.error('Failed to send cryptocurrency. Please try again.');
+      toast.error(`Failed to send cryptocurrency: ${error.message}`);
       throw error;
     }
   };
@@ -58,13 +70,16 @@ export const useSendCrypto = () => {
     toAddress: string;
     usdValue: number;
     timestamp: Date;
+    transactionHash?: string;
+    status?: string;
+    coinbaseUrl?: string;
   }) => {
     try {
       const doc = new jsPDF();
 
       // Header
       doc.setFontSize(22);
-      doc.text("Cryptocurrency Transaction Receipt", 14, 22);
+      doc.text("Coinbase Cryptocurrency Transaction Receipt", 14, 22);
       doc.setFontSize(12);
 
       // Add a line separator
@@ -79,12 +94,14 @@ export const useSendCrypto = () => {
         startY: 45,
         body: [
           ['Transaction ID', transaction.transactionId],
+          ['Transaction Hash', transaction.transactionHash || 'Pending'],
           ['Date & Time', transaction.timestamp.toLocaleString('en-US')],
-          ['Status', 'Completed'],
+          ['Status', transaction.status || 'Completed'],
           ['Cryptocurrency', `${transaction.crypto.name} (${transaction.crypto.symbol})`],
           ['Amount Sent', `${transaction.amount.toLocaleString()} ${transaction.crypto.symbol}`],
           ['USD Value', `$${transaction.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
           ['Price per Unit', `$${transaction.crypto.price.toFixed(2)}`],
+          ['Network', 'Coinbase'],
         ],
         theme: 'plain',
         styles: { cellPadding: 2, fontSize: 10 },
@@ -102,7 +119,7 @@ export const useSendCrypto = () => {
         body: [
           ['Recipient Address', transaction.toAddress],
           ['Network', 'Coinbase API'],
-          ['Confirmation Status', 'Confirmed'],
+          ['Confirmation Status', transaction.status || 'Confirmed'],
         ],
         theme: 'plain',
         styles: { cellPadding: 2, fontSize: 10 },
@@ -110,26 +127,35 @@ export const useSendCrypto = () => {
         columnStyles: { 0: { fontStyle: 'bold' } }
       });
 
-      // Footer
+      // Coinbase Link
       const finalTableY = (doc as any).lastAutoTable.finalY;
+      if (transaction.coinbaseUrl) {
+        doc.setFontSize(12);
+        doc.text("View on Coinbase:", 14, finalTableY + 15);
+        doc.setTextColor(0, 0, 255);
+        doc.text(transaction.coinbaseUrl, 14, finalTableY + 25);
+        doc.setTextColor(0);
+      }
+
+      // Footer
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        `Generated on ${new Date().toLocaleString('en-US')}. This is a computer-generated transaction receipt.`,
+        `Generated on ${new Date().toLocaleString('en-US')}. This is a computer-generated transaction receipt from Coinbase.`,
         14,
-        finalTableY + 20,
+        finalTableY + 40,
         { maxWidth: 180 }
       );
 
       // Security notice
       doc.text(
-        `Transaction Hash: ${transaction.transactionId.toUpperCase()}`,
+        `Transaction Hash: ${(transaction.transactionHash || transaction.transactionId).toUpperCase()}`,
         14,
-        finalTableY + 35,
+        finalTableY + 55,
         { maxWidth: 180 }
       );
       
-      doc.save(`crypto-transaction-${transaction.transactionId}.pdf`);
+      doc.save(`coinbase-crypto-transaction-${transaction.transactionId}.pdf`);
       toast.success('Transaction receipt downloaded successfully!');
 
     } catch (error) {
