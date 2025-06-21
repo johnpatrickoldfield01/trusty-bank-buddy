@@ -1,19 +1,24 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createHash, createHmac } from "https://deno.land/std@0.168.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to create Coinbase API signature
-function createSignature(timestamp: string, method: string, requestPath: string, body: string, secret: string) {
+// Helper function to create Coinbase API signature using Web Crypto API
+async function createSignature(timestamp: string, method: string, requestPath: string, body: string, secret: string) {
   const message = timestamp + method + requestPath + body;
-  const hmac = createHmac("sha256", secret);
-  hmac.update(message);
-  return Array.from(hmac.digest()).map(b => b.toString(16).padStart(2, '0')).join('');
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
+  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 serve(async (req) => {
@@ -41,7 +46,7 @@ serve(async (req) => {
 
     // First, get account information for the cryptocurrency
     const accountsPath = '/v2/accounts';
-    const accountsSignature = createSignature(timestamp, 'GET', accountsPath, '', apiSecret);
+    const accountsSignature = await createSignature(timestamp, 'GET', accountsPath, '', apiSecret);
     
     console.log('Fetching accounts from Coinbase...');
     const accountsResponse = await fetch(`${baseUrl}${accountsPath}`, {
@@ -93,7 +98,7 @@ serve(async (req) => {
     });
 
     const transactionTimestamp = Math.floor(Date.now() / 1000).toString();
-    const transactionSignature = createSignature(
+    const transactionSignature = await createSignature(
       transactionTimestamp, 
       'POST', 
       transactionPath, 
@@ -128,7 +133,7 @@ serve(async (req) => {
     // Get updated account balance
     const updatedAccountTimestamp = Math.floor(Date.now() / 1000).toString();
     const updatedAccountPath = `/v2/accounts/${cryptoAccount.id}`;
-    const updatedAccountSignature = createSignature(
+    const updatedAccountSignature = await createSignature(
       updatedAccountTimestamp, 
       'GET', 
       updatedAccountPath, 
