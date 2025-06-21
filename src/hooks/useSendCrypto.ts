@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -19,6 +18,7 @@ interface SendCryptoParams {
 export const useSendCrypto = () => {
   const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, onSuccess }: SendCryptoParams) => {
     try {
+      console.log('Starting crypto send:', { crypto: crypto.symbol, amount, toAddress });
       toast.info('Processing transaction with Coinbase...');
 
       // Call the Coinbase integration edge function
@@ -30,15 +30,26 @@ export const useSendCrypto = () => {
         }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
-        throw new Error(error.message);
+        console.error('Edge function error:', error);
+        throw new Error(`Edge function error: ${error.message}`);
+      }
+
+      if (!data) {
+        console.error('No data returned from edge function');
+        throw new Error('No response data from Coinbase API');
       }
 
       if (!data.success) {
+        console.error('Transaction failed:', data.error);
         throw new Error(data.error || 'Transaction failed');
       }
 
-      // Generate PDF proof with real transaction data
+      console.log('Transaction successful:', data);
+
+      // Generate PDF proof with transaction data
       await generateTransactionPDF({
         transactionId: data.transactionId,
         crypto,
@@ -51,7 +62,7 @@ export const useSendCrypto = () => {
         coinbaseUrl: data.coinbaseTransactionUrl
       });
 
-      // Update balance with real Coinbase balance
+      // Update balance
       onSuccess(data.newBalance);
       
       toast.success(`Successfully sent ${amount} ${crypto.symbol} via Coinbase!`);
