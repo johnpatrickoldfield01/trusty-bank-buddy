@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCapacitor } from '@/hooks/useCapacitor';
+import { cn } from '@/lib/utils';
 
 export type Profile = {
   id: string;

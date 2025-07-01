@@ -6,7 +6,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { App } from '@capacitor/app';
 import { Device } from '@capacitor/device';
 import { Network } from '@capacitor/network';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
 export const useCapacitor = () => {
   const [isNative, setIsNative] = useState(false);
@@ -65,7 +65,7 @@ export const useCapacitor = () => {
 
   const triggerNotificationHaptic = async () => {
     if (isNative) {
-      await Haptics.notification({ type: 'SUCCESS' });
+      await Haptics.notification({ type: NotificationType.Success });
     }
   };
 
