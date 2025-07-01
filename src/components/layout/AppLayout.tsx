@@ -4,8 +4,11 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/mobile/MobileBottomNav';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useCapacitor } from '@/hooks/useCapacitor';
 
 export type Profile = {
   id: string;
@@ -17,6 +20,8 @@ const AppLayout = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const isMobile = useIsMobile();
+  const { isNative } = useCapacitor();
 
   useEffect(() => {
     if (!loading && !session) {
@@ -69,12 +74,19 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={cn(
+      "min-h-screen flex flex-col",
+      isNative && "safe-area-inset-top"
+    )}>
       <Header />
-      <main className="flex-1">
+      <main className={cn(
+        "flex-1",
+        (isMobile || isNative) && "pb-20" // Add bottom padding for mobile nav
+      )}>
         <Outlet context={{ profile }} />
       </main>
-      <Footer />
+      {!isNative && <Footer />}
+      {(isMobile || isNative) && <MobileBottomNav />}
     </div>
   );
 };
