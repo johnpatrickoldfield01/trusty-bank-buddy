@@ -58,7 +58,7 @@ const AuthPage = () => {
     });
 
     if (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred during sign up");
     } else {
       toast.success("Check your email for the confirmation link!");
     }
@@ -73,7 +73,7 @@ const AuthPage = () => {
     });
 
     if (error) {
-      toast.error(error.message);
+      toast.error(error.message || "An error occurred during sign in");
     } else {
       toast.success("Signed in successfully!");
       navigate('/');
