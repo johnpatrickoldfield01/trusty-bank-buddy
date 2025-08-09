@@ -12,17 +12,40 @@ interface SendCryptoParams {
   amount: number;
   toAddress: string;
   fromBalance: number;
+  exchange: string;
   onSuccess: (newBalance: number) => void;
 }
 
 export const useSendCrypto = () => {
-  const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, onSuccess }: SendCryptoParams) => {
+  const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, exchange, onSuccess }: SendCryptoParams) => {
     try {
-      console.log('Starting crypto send:', { crypto: crypto.symbol, amount, toAddress });
-      toast.info('Processing transaction with Coinbase...');
+      console.log('Starting crypto send:', { crypto: crypto.symbol, amount, toAddress, exchange });
+      toast.info(`Processing transaction with ${exchange}...`);
 
-      // Call the Coinbase integration edge function
-      const { data, error } = await supabase.functions.invoke('coinbase-crypto-send', {
+      // Route to different exchange integrations
+      let edgeFunctionName = '';
+      switch (exchange) {
+        case 'coinbase':
+          edgeFunctionName = 'coinbase-crypto-send';
+          break;
+        case 'binance':
+          edgeFunctionName = 'binance-crypto-send';
+          break;
+        case 'kraken':
+          edgeFunctionName = 'kraken-crypto-send';
+          break;
+        case 'gemini':
+          edgeFunctionName = 'gemini-crypto-send';
+          break;
+        case 'bitfinex':
+          edgeFunctionName = 'bitfinex-crypto-send';
+          break;
+        default:
+          throw new Error(`Unsupported exchange: ${exchange}`);
+      }
+
+      // Call the appropriate exchange integration edge function
+      const { data, error } = await supabase.functions.invoke(edgeFunctionName, {
         body: {
           crypto,
           amount,
@@ -39,7 +62,7 @@ export const useSendCrypto = () => {
 
       if (!data) {
         console.error('No data returned from edge function');
-        throw new Error('No response data from Coinbase API');
+        throw new Error(`No response data from ${exchange} API`);
       }
 
       if (!data.success) {
@@ -59,13 +82,14 @@ export const useSendCrypto = () => {
         timestamp: new Date(),
         transactionHash: data.transactionHash,
         status: data.status,
-        coinbaseUrl: data.coinbaseTransactionUrl
+        exchangeUrl: data.exchangeUrl,
+        exchange: exchange.charAt(0).toUpperCase() + exchange.slice(1)
       });
 
       // Update balance
       onSuccess(data.newBalance);
       
-      toast.success(`Successfully sent ${amount} ${crypto.symbol} via Coinbase!`);
+      toast.success(`Successfully sent ${amount} ${crypto.symbol} via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}!`);
       
     } catch (error) {
       console.error('Send crypto error:', error);
@@ -83,14 +107,15 @@ export const useSendCrypto = () => {
     timestamp: Date;
     transactionHash?: string;
     status?: string;
-    coinbaseUrl?: string;
+    exchangeUrl?: string;
+    exchange: string;
   }) => {
     try {
       const doc = new jsPDF();
 
       // Header
       doc.setFontSize(22);
-      doc.text("Coinbase Cryptocurrency Transaction Receipt", 14, 22);
+      doc.text(`${transaction.exchange} Cryptocurrency Transaction Receipt`, 14, 22);
       doc.setFontSize(12);
 
       // Add a line separator
@@ -112,7 +137,7 @@ export const useSendCrypto = () => {
           ['Amount Sent', `${transaction.amount.toLocaleString()} ${transaction.crypto.symbol}`],
           ['USD Value', `$${transaction.usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
           ['Price per Unit', `$${transaction.crypto.price.toFixed(2)}`],
-          ['Network', 'Coinbase'],
+          ['Exchange', transaction.exchange],
         ],
         theme: 'plain',
         styles: { cellPadding: 2, fontSize: 10 },
@@ -129,7 +154,7 @@ export const useSendCrypto = () => {
         startY: lastTableY + 20,
         body: [
           ['Recipient Address', transaction.toAddress],
-          ['Network', 'Coinbase API'],
+          ['Network', transaction.exchange + ' API'],
           ['Confirmation Status', transaction.status || 'Confirmed'],
         ],
         theme: 'plain',
@@ -138,13 +163,13 @@ export const useSendCrypto = () => {
         columnStyles: { 0: { fontStyle: 'bold' } }
       });
 
-      // Coinbase Link
+      // Exchange Link
       const finalTableY = (doc as any).lastAutoTable.finalY;
-      if (transaction.coinbaseUrl) {
+      if (transaction.exchangeUrl) {
         doc.setFontSize(12);
-        doc.text("View on Coinbase:", 14, finalTableY + 15);
+        doc.text(`View on ${transaction.exchange}:`, 14, finalTableY + 15);
         doc.setTextColor(0, 0, 255);
-        doc.text(transaction.coinbaseUrl, 14, finalTableY + 25);
+        doc.text(transaction.exchangeUrl, 14, finalTableY + 25);
         doc.setTextColor(0);
       }
 
@@ -152,7 +177,7 @@ export const useSendCrypto = () => {
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        `Generated on ${new Date().toLocaleString('en-US')}. This is a computer-generated transaction receipt from Coinbase.`,
+        `Generated on ${new Date().toLocaleString('en-US')}. This is a computer-generated transaction receipt from ${transaction.exchange}.`,
         14,
         finalTableY + 40,
         { maxWidth: 180 }
@@ -166,7 +191,7 @@ export const useSendCrypto = () => {
         { maxWidth: 180 }
       );
       
-      doc.save(`coinbase-crypto-transaction-${transaction.transactionId}.pdf`);
+      doc.save(`${transaction.exchange.toLowerCase()}-crypto-transaction-${transaction.transactionId}.pdf`);
       toast.success('Transaction receipt downloaded successfully!');
 
     } catch (error) {

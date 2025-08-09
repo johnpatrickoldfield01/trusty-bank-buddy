@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendCrypto } from '@/hooks/useSendCrypto';
@@ -23,8 +24,17 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
+  const [selectedExchange, setSelectedExchange] = useState('coinbase');
   const [isLoading, setIsLoading] = useState(false);
   const { sendCrypto } = useSendCrypto();
+
+  const exchanges = [
+    { value: 'coinbase', label: 'Coinbase Pro', description: 'Professional trading platform' },
+    { value: 'binance', label: 'Binance', description: 'Global crypto exchange' },
+    { value: 'kraken', label: 'Kraken', description: 'Secure crypto platform' },
+    { value: 'gemini', label: 'Gemini', description: 'Regulated exchange' },
+    { value: 'bitfinex', label: 'Bitfinex', description: 'Advanced trading features' },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +55,11 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
       return;
     }
 
+    if (!selectedExchange) {
+      toast.error('Please select an exchange');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -53,11 +68,13 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
         amount: sendAmount,
         toAddress: address,
         fromBalance: balance,
+        exchange: selectedExchange,
         onSuccess: (newBalance) => {
           onBalanceUpdate(newBalance);
           setOpen(false);
           setAmount('');
           setAddress('');
+          setSelectedExchange('coinbase');
         }
       });
     } catch (error) {
@@ -85,6 +102,25 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="exchange">Exchange</Label>
+            <Select value={selectedExchange} onValueChange={setSelectedExchange} disabled={isLoading}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select exchange" />
+              </SelectTrigger>
+              <SelectContent>
+                {exchanges.map((exchange) => (
+                  <SelectItem key={exchange.value} value={exchange.value}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{exchange.label}</span>
+                      <span className="text-xs text-muted-foreground">{exchange.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div>
             <Label htmlFor="amount">Amount</Label>
             <Input
@@ -129,10 +165,10 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !amount || !address}
+              disabled={isLoading || !amount || !address || !selectedExchange}
               className="flex-1"
             >
-              {isLoading ? 'Sending...' : 'Send'}
+              {isLoading ? 'Sending...' : `Send via ${exchanges.find(e => e.value === selectedExchange)?.label}`}
             </Button>
           </div>
         </form>
