@@ -7,18 +7,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to create Coinbase API signature using Web Crypto API (returns base64)
+// Helper function to create Coinbase Exchange API signature (base64 HMAC-SHA256)
 async function createSignature(timestamp: string, method: string, requestPath: string, body: string, secret: string) {
   const message = timestamp + method + requestPath + body;
+  // Coinbase Exchange secrets are base64-encoded; decode before using as key
+  const secretBytes = Uint8Array.from(atob(secret), c => c.charCodeAt(0));
   const key = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(secret),
+    secretBytes,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"]
   );
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  // Coinbase expects base64-encoded HMAC digest
   const bytes = new Uint8Array(signature);
   let binary = "";
   for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
@@ -38,18 +39,18 @@ serve(async (req) => {
     const apiSecret = Deno.env.get('COINBASE_API_SECRET');
     const passphrase = Deno.env.get('COINBASE_PASSPHRASE');
 
-    if (!apiKey || !apiSecret) {
+    if (!apiKey || !apiSecret || !passphrase) {
       console.error('Missing Coinbase API credentials');
       throw new Error('Coinbase API credentials not configured');
     }
 
     console.log('API credentials found, proceeding with Coinbase API calls');
 
-    const baseUrl = 'https://api.coinbase.com';
+    const baseUrl = 'https://api.exchange.coinbase.com';
     const timestamp = Math.floor(Date.now() / 1000).toString();
 
     // First, get account information for the cryptocurrency
-    const accountsPath = '/v2/accounts';
+    const accountsPath = '/accounts';
     const accountsSignature = await createSignature(timestamp, 'GET', accountsPath, '', apiSecret);
     
     console.log('Fetching accounts from Coinbase...');
@@ -59,7 +60,7 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': accountsSignature,
         'CB-ACCESS-TIMESTAMP': timestamp,
-        'CB-VERSION': '2023-01-05',
+        'CB-ACCESS-PASSPHRASE': passphrase,
         'Content-Type': 'application/json',
       },
     });
@@ -74,8 +75,8 @@ serve(async (req) => {
     console.log('Accounts response:', accountsData);
 
     // Find the account for the specified cryptocurrency
-    const cryptoAccount = accountsData.data?.find(
-      (account: any) => account.currency?.code === crypto.symbol
+    const cryptoAccount = accountsData.find(
+      (account: any) => account.currency === crypto.symbol || account.currency?.code === crypto.symbol
     );
 
     if (!cryptoAccount) {
@@ -92,12 +93,11 @@ serve(async (req) => {
     }
 
     // Create a send transaction
-    const transactionPath = `/v2/accounts/${cryptoAccount.id}/transactions`;
+    const transactionPath = `/withdrawals/crypto`;
     const transactionBody = JSON.stringify({
-      type: 'send',
-      to: toAddress,
       amount: amount.toString(),
       currency: crypto.symbol,
+      crypto_address: toAddress,
     });
 
     const transactionTimestamp = Math.floor(Date.now() / 1000).toString();
@@ -117,7 +117,7 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': transactionSignature,
         'CB-ACCESS-TIMESTAMP': transactionTimestamp,
-        'CB-VERSION': '2023-01-05',
+        'CB-ACCESS-PASSPHRASE': passphrase,
         'Content-Type': 'application/json',
       },
       body: transactionBody,
@@ -134,7 +134,7 @@ serve(async (req) => {
 
     // Get updated account balance
     const updatedAccountTimestamp = Math.floor(Date.now() / 1000).toString();
-    const updatedAccountPath = `/v2/accounts/${cryptoAccount.id}`;
+    const updatedAccountPath = `/accounts/${cryptoAccount.id}`;
     const updatedAccountSignature = await createSignature(
       updatedAccountTimestamp, 
       'GET', 
@@ -149,7 +149,7 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': updatedAccountSignature,
         'CB-ACCESS-TIMESTAMP': updatedAccountTimestamp,
-        'CB-VERSION': '2023-01-05',
+        'CB-ACCESS-PASSPHRASE': passphrase,
         'Content-Type': 'application/json',
       },
     });
@@ -163,13 +163,13 @@ serve(async (req) => {
 
     const response = {
       success: true,
-      transactionId: transactionData.data?.id || 'unknown',
+      transactionId: transactionData?.id || transactionData?.data?.id || 'unknown',
       newBalance: Math.round(newBalance * 1000000), // Convert to match frontend format
-      transactionHash: transactionData.data?.network?.hash || 'pending',
-      status: transactionData.data?.status || 'pending',
-      coinbaseTransactionUrl: `https://www.coinbase.com/transactions/${transactionData.data?.id}`,
-      network: transactionData.data?.network?.name || 'Coinbase',
-      fee: transactionData.data?.network?.transaction_fee?.amount || '0',
+      transactionHash: transactionData?.txid || transactionData?.data?.network?.hash || 'pending',
+      status: transactionData?.completed ? 'completed' : (transactionData?.data?.status || 'pending'),
+      coinbaseTransactionUrl: undefined,
+      network: 'Coinbase Exchange',
+      fee: transactionData?.fee || transactionData?.data?.network?.transaction_fee?.amount || '0',
     };
 
     console.log('Returning successful response:', response);
