@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to create Coinbase API signature using Web Crypto API
+// Helper function to create Coinbase API signature using Web Crypto API (returns base64)
 async function createSignature(timestamp: string, method: string, requestPath: string, body: string, secret: string) {
   const message = timestamp + method + requestPath + body;
   const key = await crypto.subtle.importKey(
@@ -18,7 +18,11 @@ async function createSignature(timestamp: string, method: string, requestPath: s
     ["sign"]
   );
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
-  return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // Coinbase expects base64-encoded HMAC digest
+  const bytes = new Uint8Array(signature);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
 }
 
 serve(async (req) => {
@@ -34,7 +38,7 @@ serve(async (req) => {
     const apiSecret = Deno.env.get('COINBASE_API_SECRET');
     const passphrase = Deno.env.get('COINBASE_PASSPHRASE');
 
-    if (!apiKey || !apiSecret || !passphrase) {
+    if (!apiKey || !apiSecret) {
       console.error('Missing Coinbase API credentials');
       throw new Error('Coinbase API credentials not configured');
     }
@@ -55,7 +59,6 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': accountsSignature,
         'CB-ACCESS-TIMESTAMP': timestamp,
-        'CB-ACCESS-PASSPHRASE': passphrase,
         'CB-VERSION': '2023-01-05',
         'Content-Type': 'application/json',
       },
@@ -114,7 +117,6 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': transactionSignature,
         'CB-ACCESS-TIMESTAMP': transactionTimestamp,
-        'CB-ACCESS-PASSPHRASE': passphrase,
         'CB-VERSION': '2023-01-05',
         'Content-Type': 'application/json',
       },
@@ -147,7 +149,6 @@ serve(async (req) => {
         'CB-ACCESS-KEY': apiKey,
         'CB-ACCESS-SIGN': updatedAccountSignature,
         'CB-ACCESS-TIMESTAMP': updatedAccountTimestamp,
-        'CB-ACCESS-PASSPHRASE': passphrase,
         'CB-VERSION': '2023-01-05',
         'Content-Type': 'application/json',
       },
