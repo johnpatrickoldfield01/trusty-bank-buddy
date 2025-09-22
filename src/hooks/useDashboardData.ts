@@ -4,7 +4,7 @@ import { useTransactions } from '@/hooks/useTransactions';
 import { useMonthlySpending } from '@/hooks/useMonthlySpending';
 
 export const useDashboardData = () => {
-  const { accounts, isLoadingAccounts } = useAccounts();
+  const { accounts, isLoadingAccounts, refreshAccounts } = useAccounts();
   const { transactions, isLoadingTransactions } = useTransactions();
   const { spendingThisMonth, isLoadingSpending } = useMonthlySpending();
   
@@ -49,5 +49,6 @@ export const useDashboardData = () => {
     businessLoanAccountNumber,
     homeLoanAccountNumber,
     totalBalance,
+    refreshAccounts,
   };
 };

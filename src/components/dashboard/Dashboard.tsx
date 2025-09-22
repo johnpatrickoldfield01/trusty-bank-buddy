@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import AccountSummary from '@/components/dashboard/AccountSummary';
 import TransactionList from '@/components/dashboard/TransactionList';
 import QuickActions from '@/components/dashboard/QuickActions';
@@ -19,6 +19,13 @@ interface DashboardProps {
 const Dashboard = ({ profile }: DashboardProps) => {
   const data = useDashboardData();
   const actions = useDashboardActions({ profile, ...data });
+
+  // Force refresh accounts on component mount to ensure latest data
+  useEffect(() => {
+    if (data.refreshAccounts) {
+      data.refreshAccounts();
+    }
+  }, []);
 
   return (
     <div>

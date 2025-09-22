@@ -101,5 +101,10 @@ export const useAccounts = () => {
     }
   }, [user, accounts, isSuccess, initializeAccounts, addHomeLoanAccount, queryClient]);
 
-  return { accounts, isLoadingAccounts };
+  // Force refresh function
+  const refreshAccounts = () => {
+    queryClient.invalidateQueries({ queryKey: ['accounts', user?.id] });
+  };
+
+  return { accounts, isLoadingAccounts, refreshAccounts };
 };
