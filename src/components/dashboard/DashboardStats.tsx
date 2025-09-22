@@ -25,12 +25,8 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ isLoading, totalBalance
                 <Skeleton className="h-5 w-5" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  <Skeleton className="h-8 w-48" />
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  <Skeleton className="h-3 w-32" />
-                </p>
+                <Skeleton className="h-8 w-48 mb-2" />
+                <Skeleton className="h-3 w-32" />
               </CardContent>
             </Card>
           ))}
