@@ -8,9 +8,13 @@ export const useDashboardData = () => {
   const { transactions, isLoadingTransactions } = useTransactions();
   const { spendingThisMonth, isLoadingSpending } = useMonthlySpending();
   
-  const mainAccount = accounts?.find(acc => acc.account_type === 'main');
-  const savingsAccount = accounts?.find(acc => acc.account_type === 'savings');
-  const creditAccount = accounts?.find(acc => acc.account_type === 'credit');
+  // Find the most recent accounts of each type (with latest created_at)
+  const mainAccount = accounts?.filter(acc => acc.account_type === 'main')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+  const savingsAccount = accounts?.filter(acc => acc.account_type === 'savings')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+  const creditAccount = accounts?.filter(acc => acc.account_type === 'credit')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
   const businessLoanAccount = accounts?.find(acc => acc.account_name === 'Business Loan');
   const homeLoanAccount = accounts?.find(acc => acc.account_name === 'Home Loan');
 
