@@ -1,5 +1,5 @@
 
-import { Home, CreditCard, Send, Coins, User } from 'lucide-react';
+import { Home, CreditCard, Send, Coins, Calculator } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useCapacitor } from '@/hooks/useCapacitor';
@@ -14,6 +14,7 @@ const MobileBottomNav = () => {
     { icon: Home, label: 'Home', path: '/' },
     { icon: CreditCard, label: 'Cards', path: '/cards' },
     { icon: Send, label: 'Send', path: '/payments' },
+    { icon: Calculator, label: 'Tax', path: '/taxation' },
     { icon: Coins, label: 'Crypto', path: '/crypto' },
   ];
 
