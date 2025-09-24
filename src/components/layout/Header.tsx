@@ -34,6 +34,41 @@ const Header = () => {
     { name: 'TymeBank', url: 'https://www.tymebank.co.za' },
   ];
 
+  const internationalBanks = {
+    'United States': [
+      { name: 'JPMorgan Chase', url: 'https://www.jpmorganchase.com' },
+      { name: 'Bank of America', url: 'https://www.bankofamerica.com' },
+      { name: 'Wells Fargo', url: 'https://www.wellsfargo.com' },
+      { name: 'Citibank', url: 'https://www.citibank.com' },
+    ],
+    'United Kingdom': [
+      { name: 'HSBC', url: 'https://www.hsbc.co.uk' },
+      { name: 'Barclays', url: 'https://www.barclays.co.uk' },
+      { name: 'Lloyds Bank', url: 'https://www.lloydsbank.com' },
+      { name: 'NatWest', url: 'https://www.natwest.com' },
+    ],
+    'Germany': [
+      { name: 'Deutsche Bank', url: 'https://www.deutsche-bank.de' },
+      { name: 'Commerzbank', url: 'https://www.commerzbank.de' },
+      { name: 'DZ Bank', url: 'https://www.dzbank.de' },
+    ],
+    'France': [
+      { name: 'BNP Paribas', url: 'https://www.bnpparibas.fr' },
+      { name: 'Crédit Agricole', url: 'https://www.credit-agricole.fr' },
+      { name: 'Société Générale', url: 'https://www.societegenerale.fr' },
+    ],
+    'Japan': [
+      { name: 'Mitsubishi UFJ', url: 'https://www.mufg.jp' },
+      { name: 'Sumitomo Mitsui', url: 'https://www.smbc.co.jp' },
+      { name: 'Mizuho Bank', url: 'https://www.mizuhobank.com' },
+    ],
+    'Canada': [
+      { name: 'Royal Bank of Canada', url: 'https://www.rbc.com' },
+      { name: 'TD Bank', url: 'https://www.td.com' },
+      { name: 'Bank of Montreal', url: 'https://www.bmo.com' },
+    ],
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur">
       <div className="container flex h-16 items-center justify-between">
@@ -68,6 +103,36 @@ const Header = () => {
                     {bank.name}
                   </a>
                 </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 text-sm font-medium hover:text-bank-primary transition-colors">
+                International Banks
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-800 z-50 max-h-96 overflow-y-auto">
+              {Object.entries(internationalBanks).map(([country, banks]) => (
+                <div key={country}>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">
+                    {country}
+                  </div>
+                  {banks.map((bank) => (
+                    <DropdownMenuItem key={`${country}-${bank.name}`} asChild>
+                      <a
+                        href={bank.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        {bank.name}
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
