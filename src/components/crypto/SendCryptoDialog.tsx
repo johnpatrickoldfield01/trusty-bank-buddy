@@ -24,11 +24,12 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [address, setAddress] = useState('');
-  const [selectedExchange, setSelectedExchange] = useState('coinbase');
+  const [selectedExchange, setSelectedExchange] = useState('luno');
   const [isLoading, setIsLoading] = useState(false);
   const { sendCrypto } = useSendCrypto();
 
   const exchanges = [
+    { value: 'luno', label: 'Luno', description: 'Your connected exchange' },
     { value: 'coinbase', label: 'Coinbase Pro', description: 'Professional trading platform' },
     { value: 'binance', label: 'Binance', description: 'Global crypto exchange' },
     { value: 'kraken', label: 'Kraken', description: 'Secure crypto platform' },
@@ -74,7 +75,7 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
           setOpen(false);
           setAmount('');
           setAddress('');
-          setSelectedExchange('coinbase');
+          setSelectedExchange('luno');
         }
       });
     } catch (error) {

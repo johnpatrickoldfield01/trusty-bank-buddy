@@ -31,6 +31,9 @@ export const useSendCrypto = () => {
         case 'binance':
           edgeFunctionName = 'binance-crypto-send';
           break;
+        case 'luno':
+          edgeFunctionName = 'luno-crypto-send';
+          break;
         case 'kraken':
           edgeFunctionName = 'kraken-crypto-send';
           break;
