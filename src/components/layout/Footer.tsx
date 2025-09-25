@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -44,6 +45,7 @@ const Footer = () => {
               <li><a href="#" className="text-sm text-muted-foreground hover:text-bank-primary">Terms</a></li>
               <li><a href="#" className="text-sm text-muted-foreground hover:text-bank-primary">Cookie Policy</a></li>
               <li><a href="#" className="text-sm text-muted-foreground hover:text-bank-primary">Licenses</a></li>
+              <li><Link to="/compliance" className="text-sm text-muted-foreground hover:text-bank-primary">Compliance</Link></li>
             </ul>
           </div>
         </div>
