@@ -6,25 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface LunoSendRequest {
-  amount: string;
-  currency: string;
-  address: string;
-  description?: string;
-}
-
-interface LunoWithdrawal {
-  id: string;
-  status: string;
-  type: string;
-  amount: string;
-  currency: string;
-  created_at: number;
-  completed_at?: number;
-  fee: string;
-  external_id?: string;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -40,20 +21,20 @@ serve(async (req) => {
     console.log('Credential check:', { 
       keyIdExists: !!keyId, 
       secretExists: !!secret,
-      keyIdLength: keyId?.length,
-      secretLength: secret?.length 
+      keyIdLength: keyId?.length || 0,
+      secretLength: secret?.length || 0
     });
 
     if (!keyId || !secret) {
-      console.error('Missing credentials:', { keyId: !!keyId, secret: !!secret });
+      console.error('Missing credentials');
       throw new Error('Luno API credentials not configured');
     }
+
+    console.log('Using Luno API with Key ID:', keyId.substring(0, 8) + '...');
 
     // Prepare authentication header
     const credentials = btoa(`${keyId}:${secret}`);
     const authHeader = `Basic ${credentials}`;
-
-    console.log('Using Luno API with Key ID:', keyId.substring(0, 8) + '...');
 
     // First, get account balance to verify sufficient funds
     const balanceResponse = await fetch('https://api.luno.com/api/1/balance', {
@@ -64,6 +45,8 @@ serve(async (req) => {
       },
     });
 
+    console.log('Balance response status:', balanceResponse.status);
+
     if (!balanceResponse.ok) {
       const balanceError = await balanceResponse.text();
       console.error('Luno balance check failed:', balanceError);
@@ -71,7 +54,7 @@ serve(async (req) => {
     }
 
     const balanceData = await balanceResponse.json();
-    console.log('Luno balance response:', balanceData);
+    console.log('Luno balance response received');
 
     // Find the account for the specific cryptocurrency
     const cryptoAccount = balanceData.balance?.find((acc: any) => 
@@ -90,14 +73,14 @@ serve(async (req) => {
     }
 
     // Prepare withdrawal request
-    const withdrawalRequest: LunoSendRequest = {
+    const withdrawalParams = new URLSearchParams({
       amount: amount.toString(),
       currency: crypto.symbol.toUpperCase(),
       address: toAddress,
       description: `Crypto transfer via app - ${crypto.symbol} to ${toAddress.substring(0, 10)}...`
-    };
+    });
 
-    console.log('Sending withdrawal request:', withdrawalRequest);
+    console.log('Sending withdrawal request');
 
     // Send cryptocurrency withdrawal
     const withdrawalResponse = await fetch('https://api.luno.com/api/1/send', {
@@ -106,8 +89,10 @@ serve(async (req) => {
         'Authorization': authHeader,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams(withdrawalRequest as any),
+      body: withdrawalParams,
     });
+
+    console.log('Withdrawal response status:', withdrawalResponse.status);
 
     if (!withdrawalResponse.ok) {
       const withdrawalError = await withdrawalResponse.text();
@@ -125,38 +110,21 @@ serve(async (req) => {
       throw new Error(`Luno withdrawal failed: ${withdrawalError}`);
     }
 
-    const withdrawalData: LunoWithdrawal = await withdrawalResponse.json();
-    console.log('Luno withdrawal success:', withdrawalData);
+    const withdrawalData = await withdrawalResponse.json();
+    console.log('Luno withdrawal success:', withdrawalData.id);
 
-    // Get updated balance after withdrawal
-    const updatedBalanceResponse = await fetch('https://api.luno.com/api/1/balance', {
-      method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    let newBalance = availableBalance - amount;
-    if (updatedBalanceResponse.ok) {
-      const updatedBalanceData = await updatedBalanceResponse.json();
-      const updatedCryptoAccount = updatedBalanceData.balance?.find((acc: any) => 
-        acc.asset === crypto.symbol.toUpperCase()
-      );
-      if (updatedCryptoAccount) {
-        newBalance = parseFloat(updatedCryptoAccount.balance);
-      }
-    }
+    // Calculate new balance
+    const newBalance = availableBalance - amount;
 
     const response = {
       success: true,
       transactionId: withdrawalData.id,
       newBalance: newBalance,
       transactionHash: withdrawalData.external_id || withdrawalData.id,
-      status: withdrawalData.status,
+      status: withdrawalData.status || 'pending',
       exchangeUrl: `https://www.luno.com/wallet/transactions/${withdrawalData.id}`,
       network: 'Luno',
-      fee: withdrawalData.fee,
+      fee: withdrawalData.fee || '0.001',
       completedAt: withdrawalData.completed_at,
       regulatory_info: {
         exchange: 'Luno',
@@ -166,19 +134,19 @@ serve(async (req) => {
       }
     };
 
-    console.log('Returning Luno response:', response);
+    console.log('Returning successful response');
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Luno API error:', error);
     
     // Provide detailed regulatory compliance information for failures
     const errorResponse = {
       success: false,
-      error: error.message,
+      error: error?.message || 'Unknown error',
       regulatory_requirements: {
         verification_needed: [
           'KYC (Know Your Customer) verification',

@@ -42,10 +42,10 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Standard Bank integration error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      JSON.stringify({ error: 'Internal server error', details: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -96,10 +96,10 @@ async function handleSelfRegistration(registrationData: SelfRegistrationRequest)
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Self-registration error:', error);
     return new Response(
-      JSON.stringify({ error: 'Registration failed', details: error.message }),
+      JSON.stringify({ error: 'Registration failed', details: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -136,10 +136,10 @@ async function handleApiCall(apiRequest: StandardBankApiRequest) {
       { status: response.ok ? 200 : response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('API call error:', error);
     return new Response(
-      JSON.stringify({ error: 'API call failed', details: error.message }),
+      JSON.stringify({ error: 'API call failed', details: error?.message || 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

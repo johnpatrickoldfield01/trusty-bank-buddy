@@ -18,7 +18,7 @@ serve(async (req) => {
 
     // For now, return a mock success response
     // In a real implementation, you would integrate with Binance API
-    toast.info('Binance integration coming soon! This is a demo response.');
+    console.log('Binance integration coming soon! This is a demo response.');
     
     const mockResponse = {
       success: true,
@@ -37,11 +37,11 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Binance mock API error:', error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: `Binance integration: ${error.message}` 
+      error: `Binance integration: ${error?.message || 'Unknown error'}` 
     }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
