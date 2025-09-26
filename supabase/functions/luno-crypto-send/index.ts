@@ -37,7 +37,15 @@ serve(async (req) => {
     const keyId = Deno.env.get('LUNO_API_KEY_ID');
     const secret = Deno.env.get('LUNO_API_SECRET');
 
+    console.log('Credential check:', { 
+      keyIdExists: !!keyId, 
+      secretExists: !!secret,
+      keyIdLength: keyId?.length,
+      secretLength: secret?.length 
+    });
+
     if (!keyId || !secret) {
+      console.error('Missing credentials:', { keyId: !!keyId, secret: !!secret });
       throw new Error('Luno API credentials not configured');
     }
 
@@ -45,7 +53,7 @@ serve(async (req) => {
     const credentials = btoa(`${keyId}:${secret}`);
     const authHeader = `Basic ${credentials}`;
 
-    console.log('Using Luno API with Key ID:', keyId);
+    console.log('Using Luno API with Key ID:', keyId.substring(0, 8) + '...');
 
     // First, get account balance to verify sufficient funds
     const balanceResponse = await fetch('https://api.luno.com/api/1/balance', {
