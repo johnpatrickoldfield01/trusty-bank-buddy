@@ -23,6 +23,10 @@ import CryptoPage from "./pages/CryptoPage";
 import CryptoDetailsPage from "./pages/CryptoDetailsPage";
 import TaxationPage from "./pages/TaxationPage";
 import CompliancePage from "./pages/CompliancePage";
+import CBSDashboard from "./pages/CBSDashboard";
+import TreasuryDashboard from "./pages/TreasuryDashboard";
+import JobPortalDashboard from "./pages/JobPortalDashboard";
+import StockExchangeDashboard from "./pages/StockExchangeDashboard";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
 
@@ -59,6 +63,10 @@ const AppContent = () => {
           <Route path="/crypto/:symbol" element={<CryptoDetailsPage />} />
           <Route path="/taxation" element={<TaxationPage />} />
           <Route path="/compliance" element={<CompliancePage />} />
+          <Route path="/cbs" element={<CBSDashboard />} />
+          <Route path="/treasury" element={<TreasuryDashboard />} />
+          <Route path="/jobs" element={<JobPortalDashboard />} />
+          <Route path="/stock-exchange" element={<StockExchangeDashboard />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

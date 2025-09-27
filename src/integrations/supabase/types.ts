@@ -44,6 +44,273 @@ export type Database = {
         }
         Relationships: []
       }
+      cbs_balance_updates: {
+        Row: {
+          account_id: string
+          adjustment_amount: number
+          compliance_approved: boolean | null
+          id: string
+          new_balance: number
+          old_balance: number
+          reason: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          account_id: string
+          adjustment_amount: number
+          compliance_approved?: boolean | null
+          id?: string
+          new_balance: number
+          old_balance: number
+          reason: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          account_id?: string
+          adjustment_amount?: number
+          compliance_approved?: boolean | null
+          id?: string
+          new_balance?: number
+          old_balance?: number
+          reason?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
+      cbs_lawyer_letters: {
+        Row: {
+          account_to_credit: string
+          credit_amount: number
+          id: string
+          letter_content: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          title: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          account_to_credit: string
+          credit_amount: number
+          id?: string
+          letter_content: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          account_to_credit?: string
+          credit_amount?: number
+          id?: string
+          letter_content?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          title?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      cbs_notes: {
+        Row: {
+          account_reference: string
+          amount: number
+          compliance_status: string
+          created_at: string
+          description: string
+          id: string
+          note_type: string
+          processed_at: string | null
+          processed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_reference: string
+          amount: number
+          compliance_status?: string
+          created_at?: string
+          description: string
+          id?: string
+          note_type: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_reference?: string
+          amount?: number
+          compliance_status?: string
+          created_at?: string
+          description?: string
+          id?: string
+          note_type?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      job_categories: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      job_listings: {
+        Row: {
+          category_id: string
+          created_at: string
+          currency: string
+          description: string
+          expected_salary_max: number
+          expected_salary_min: number
+          experience_level: string
+          id: string
+          location: string
+          remote_available: boolean | null
+          requirements: string
+          title: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          currency?: string
+          description: string
+          expected_salary_max: number
+          expected_salary_min: number
+          experience_level: string
+          id?: string
+          location: string
+          remote_available?: boolean | null
+          requirements: string
+          title: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          expected_salary_max?: number
+          expected_salary_min?: number
+          experience_level?: string
+          id?: string
+          location?: string
+          remote_available?: boolean | null
+          requirements?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_job_listings_category"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "job_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_applications: {
+        Row: {
+          applicant_email: string
+          application_data: Json | null
+          company_name: string
+          created_at: string
+          documents_uploaded: Json | null
+          exchange_id: string
+          id: string
+          status: string
+          submitted_at: string | null
+        }
+        Insert: {
+          applicant_email: string
+          application_data?: Json | null
+          company_name: string
+          created_at?: string
+          documents_uploaded?: Json | null
+          exchange_id: string
+          id?: string
+          status?: string
+          submitted_at?: string | null
+        }
+        Update: {
+          applicant_email?: string
+          application_data?: Json | null
+          company_name?: string
+          created_at?: string
+          documents_uploaded?: Json | null
+          exchange_id?: string
+          id?: string
+          status?: string
+          submitted_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_listing_applications_exchange"
+            columns: ["exchange_id"]
+            isOneToOne: false
+            referencedRelation: "stock_exchanges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_requirements: {
+        Row: {
+          description: string
+          documents_required: string[] | null
+          exchange_id: string
+          id: string
+          mandatory: boolean | null
+          requirement_type: string
+        }
+        Insert: {
+          description: string
+          documents_required?: string[] | null
+          exchange_id: string
+          id?: string
+          mandatory?: boolean | null
+          requirement_type: string
+        }
+        Update: {
+          description?: string
+          documents_required?: string[] | null
+          exchange_id?: string
+          id?: string
+          mandatory?: boolean | null
+          requirement_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_listing_requirements_exchange"
+            columns: ["exchange_id"]
+            isOneToOne: false
+            referencedRelation: "stock_exchanges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           full_name: string | null
@@ -56,6 +323,42 @@ export type Database = {
         Update: {
           full_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      stock_exchanges: {
+        Row: {
+          country: string
+          created_at: string
+          currency: string
+          id: string
+          market_cap_requirement: number | null
+          name: string
+          region: string
+          trading_hours: string
+          website: string | null
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          currency: string
+          id?: string
+          market_cap_requirement?: number | null
+          name: string
+          region: string
+          trading_hours: string
+          website?: string | null
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          market_cap_requirement?: number | null
+          name?: string
+          region?: string
+          trading_hours?: string
+          website?: string | null
         }
         Relationships: []
       }
@@ -108,6 +411,105 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      treasury_holdings: {
+        Row: {
+          amount: number
+          currency_code: string
+          currency_name: string
+          id: string
+          last_updated: string
+          liquidity_ratio: number
+          reserve_ratio: number
+          risk_weight: number
+          updated_by: string | null
+        }
+        Insert: {
+          amount?: number
+          currency_code: string
+          currency_name: string
+          id?: string
+          last_updated?: string
+          liquidity_ratio?: number
+          reserve_ratio?: number
+          risk_weight?: number
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          currency_code?: string
+          currency_name?: string
+          id?: string
+          last_updated?: string
+          liquidity_ratio?: number
+          reserve_ratio?: number
+          risk_weight?: number
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      treasury_transactions: {
+        Row: {
+          amount: number
+          exchange_rate: number
+          executed_at: string
+          executed_by: string
+          from_currency: string
+          id: string
+          reason: string | null
+          to_currency: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          exchange_rate: number
+          executed_at?: string
+          executed_by: string
+          from_currency: string
+          id?: string
+          reason?: string | null
+          to_currency: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          exchange_rate?: number
+          executed_at?: string
+          executed_by?: string
+          from_currency?: string
+          id?: string
+          reason?: string | null
+          to_currency?: string
+          transaction_type?: string
+        }
+        Relationships: []
+      }
+      treasury_users: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          password_hash: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          password_hash: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          password_hash?: string
+          role?: string
+        }
+        Relationships: []
       }
     }
     Views: {
