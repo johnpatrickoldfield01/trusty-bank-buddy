@@ -118,16 +118,16 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Beneficiary not found');
       }
 
-      // Prepare PayFast payment data with user's actual email
+      // Prepare PayFast payment data with sandbox test data (to avoid merchant conflict)
       const paymentData: any = {
         merchant_id: merchantId,
         merchant_key: merchantKey,
         return_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=return`,
         cancel_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=cancel`,
         notify_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=notify`,
-        name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
-        name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
-        email_address: userEmail, // Use actual user email
+        name_first: 'Test',
+        name_last: 'Customer',
+        email_address: 'sbtu01@payfast.co.za', // PayFast official test email to avoid merchant conflicts
         m_payment_id: reference,
         amount: amount.toFixed(2),
         item_name: description,
@@ -181,9 +181,9 @@ const handler = async (req: Request): Promise<Response> => {
           return_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=return`,
           cancel_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=cancel`,
           notify_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=notify`,
-          name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
-          name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
-          email_address: userEmail, // Use actual user email for notifications
+          name_first: 'Test',
+          name_last: 'Customer',
+          email_address: 'sbtu01@payfast.co.za', // PayFast official test email for sandbox
           m_payment_id: reference,
           amount: amountPerBeneficiary.toFixed(2),
           item_name: description,
