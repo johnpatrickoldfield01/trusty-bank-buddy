@@ -53,7 +53,7 @@ const ComplianceCertificate = () => {
     doc.setFont('helvetica', 'normal');
     yPosition += 25;
     
-    doc.text('This certificate is valid from January 1, 2024 to December 31, 2025', 20, yPosition);
+    doc.text('This certificate is valid from January 1, 2024 to December 31, 2030', 20, yPosition);
     doc.text('and covers all digital banking operations, payments processing,', 20, yPosition + 10);
     doc.text('foreign exchange services, and cryptocurrency transactions.', 20, yPosition + 20);
     

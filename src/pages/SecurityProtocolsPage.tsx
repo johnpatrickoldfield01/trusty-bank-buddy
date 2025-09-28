@@ -345,7 +345,7 @@ const SecurityProtocolsPage = () => {
           <p className="text-sm text-blue-800 dark:text-blue-200">
             <strong>Security Certificate Number:</strong> TRB-SEC-2024-001 | 
             <strong> Issue Date:</strong> {new Date().toLocaleDateString()} | 
-            <strong> Next Audit:</strong> {new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+            <strong> Next Audit:</strong> December 31, 2030
           </p>
         </div>
       </Card>

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -26,7 +26,7 @@ const beneficiarySchema = z.object({
   beneficiary_email: z.string().email().optional().or(z.literal('')),
 });
 
-const BANKS = [
+const DEFAULT_BANKS = [
   'Capitec Bank',
   'Standard Bank',
   'First National Bank (FNB)',
@@ -49,6 +49,12 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [customBanks, setCustomBanks] = useState<string[]>(() => {
+    const saved = localStorage.getItem('customBanks');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isAddingNewBank, setIsAddingNewBank] = useState(false);
+  const [newBankName, setNewBankName] = useState('');
   const [formData, setFormData] = useState({
     beneficiary_name: beneficiaryToEdit?.beneficiary_name || '',
     bank_name: beneficiaryToEdit?.bank_name || '',
@@ -57,6 +63,8 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
     branch_code: beneficiaryToEdit?.branch_code || '',
     beneficiary_email: beneficiaryToEdit?.beneficiary_email || '',
   });
+
+  const allBanks = [...DEFAULT_BANKS, ...customBanks].sort();
 
   React.useEffect(() => {
     if (beneficiaryToEdit) {
@@ -130,6 +138,27 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
     }
   });
 
+  const handleAddCustomBank = () => {
+    if (newBankName.trim() && !allBanks.includes(newBankName.trim())) {
+      const updatedCustomBanks = [...customBanks, newBankName.trim()];
+      setCustomBanks(updatedCustomBanks);
+      localStorage.setItem('customBanks', JSON.stringify(updatedCustomBanks));
+      setFormData(prev => ({ ...prev, bank_name: newBankName.trim() }));
+      setNewBankName('');
+      setIsAddingNewBank(false);
+      toast.success('Bank added successfully');
+    } else {
+      toast.error('Bank name already exists or is empty');
+    }
+  };
+
+  const handleRemoveCustomBank = (bankToRemove: string) => {
+    const updatedCustomBanks = customBanks.filter(bank => bank !== bankToRemove);
+    setCustomBanks(updatedCustomBanks);
+    localStorage.setItem('customBanks', JSON.stringify(updatedCustomBanks));
+    toast.success('Bank removed successfully');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -171,19 +200,88 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
             </div>
             <div className="space-y-2">
               <Label htmlFor="bank_name">Bank *</Label>
-              <Select 
-                value={formData.bank_name} 
-                onValueChange={(value) => setFormData(prev => ({ ...prev, bank_name: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select bank" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BANKS.map(bank => (
-                    <SelectItem key={bank} value={bank}>{bank}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <Select 
+                  value={formData.bank_name} 
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, bank_name: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select bank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allBanks.map(bank => (
+                      <SelectItem key={bank} value={bank}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>{bank}</span>
+                          {customBanks.includes(bank) && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 ml-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveCustomBank(bank);
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {isAddingNewBank ? (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new bank name"
+                      value={newBankName}
+                      onChange={(e) => setNewBankName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomBank();
+                        }
+                        if (e.key === 'Escape') {
+                          setIsAddingNewBank(false);
+                          setNewBankName('');
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      onClick={handleAddCustomBank}
+                      disabled={!newBankName.trim()}
+                    >
+                      Add
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setIsAddingNewBank(false);
+                        setNewBankName('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setIsAddingNewBank(true)}
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Bank
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
