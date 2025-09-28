@@ -57,14 +57,22 @@ const BeneficiaryManager = ({
       const beneficiary = beneficiaries?.find(b => b.id === beneficiaryId);
       if (!beneficiary) throw new Error('Beneficiary not found');
 
-      // Simulate transfer with potential error from recipient bank
-      const hasError = Math.random() < 0.3; // 30% chance of error for demo
+      // Enhanced error simulation with SARB and regulatory compliance
+      const hasError = Math.random() < 0.4; // 40% chance of error for comprehensive testing
       
       if (hasError) {
-        const errorCodes = ['INSUF_FUNDS', 'ACCT_CLOSED', 'INVALID_SWIFT', 'DAILY_LIMIT'];
+        const errorCategories = {
+          sarb_regulatory: ['SARB_LIMIT_EXCEED', 'SARB_CDD_REQUIRED', 'SARB_SANCTIONS_CHECK', 'SARB_REPORTING_FAILURE'],
+          receiver_bank: ['RB_ACCOUNT_FROZEN', 'RB_INSUFFICIENT_INFO', 'RB_SYSTEM_DOWN', 'RB_COMPLIANCE_HOLD'],
+          receiver_supplier: ['RS_INVALID_DETAILS', 'RS_BLOCKED_ENTITY', 'RS_TAX_COMPLIANCE', 'RS_LEGAL_DISPUTE'],
+          technical: ['NETWORK_TIMEOUT', 'ENCRYPTION_FAILURE', 'DATABASE_ERROR', 'API_RATE_LIMIT']
+        };
+        
+        const category = Object.keys(errorCategories)[Math.floor(Math.random() * Object.keys(errorCategories).length)];
+        const errorCodes = errorCategories[category as keyof typeof errorCategories];
         const errorCode = errorCodes[Math.floor(Math.random() * errorCodes.length)];
         
-        // Insert error record
+        // Insert comprehensive error record
         const { error: insertError } = await supabase
           .from('bank_transfer_errors')
           .insert({
@@ -72,28 +80,33 @@ const BeneficiaryManager = ({
             beneficiary_id: beneficiaryId,
             transfer_amount: amount,
             error_code: errorCode,
-            error_message: `Transfer failed due to ${errorCode}`,
-            error_source: 'recipient_bank',
-            fix_provisions: getFixProvision(errorCode)
+            error_message: getErrorMessage(errorCode),
+            error_source: category,
+            fix_provisions: getFixProvision(errorCode),
+            compliance_required: getSarbComplianceRequired(errorCode),
+            legal_arbitrage_required: getLegalArbitrageRequired(errorCode)
           });
 
         if (insertError) throw insertError;
 
-        // Send notification
+        // Enhanced notification with regulatory details
         await supabase.functions.invoke('send-bank-error-notification', {
           body: {
             userEmail: user?.email,
             userPhone: '+27123456789',
             errorCode,
-            errorMessage: `Transfer failed due to ${errorCode}`,
+            errorCategory: category,
+            errorMessage: getErrorMessage(errorCode),
             transferAmount: amount,
             beneficiaryName: beneficiary.beneficiary_name,
             bankName: beneficiary.bank_name,
-            fixProvisions: getFixProvision(errorCode)
+            fixProvisions: getFixProvision(errorCode),
+            sarbCompliance: getSarbComplianceRequired(errorCode),
+            legalArbitrage: getLegalArbitrageRequired(errorCode)
           }
         });
 
-        throw new Error(`Transfer failed: ${errorCode}`);
+        throw new Error(`Transfer failed: ${errorCode} - ${getErrorMessage(errorCode)}`);
       }
 
       // Successful transfer simulation
@@ -143,14 +156,84 @@ const BeneficiaryManager = ({
     onSelectionChange?.(newSelection);
   };
 
+  const getErrorMessage = (errorCode: string): string => {
+    const messages: Record<string, string> = {
+      // SARB Regulatory Errors
+      'SARB_LIMIT_EXCEED': 'Transfer exceeds SARB regulatory limits for cross-border transactions',
+      'SARB_CDD_REQUIRED': 'Additional Customer Due Diligence required by SARB regulations',
+      'SARB_SANCTIONS_CHECK': 'Transaction flagged for SARB sanctions screening review',
+      'SARB_REPORTING_FAILURE': 'Failed to comply with SARB reporting requirements',
+      
+      // Receiver Bank Errors
+      'RB_ACCOUNT_FROZEN': 'Recipient account has been frozen by receiving bank',
+      'RB_INSUFFICIENT_INFO': 'Receiving bank requires additional transaction information',
+      'RB_SYSTEM_DOWN': 'Receiving bank systems are temporarily unavailable',
+      'RB_COMPLIANCE_HOLD': 'Transaction on hold pending receiving bank compliance review',
+      
+      // Receiver Supplier Errors
+      'RS_INVALID_DETAILS': 'Supplier details do not match bank records',
+      'RS_BLOCKED_ENTITY': 'Supplier is on blocked entity list',
+      'RS_TAX_COMPLIANCE': 'Supplier tax compliance verification required',
+      'RS_LEGAL_DISPUTE': 'Supplier has pending legal disputes affecting payments',
+      
+      // Technical Errors
+      'NETWORK_TIMEOUT': 'Network timeout during transaction processing',
+      'ENCRYPTION_FAILURE': 'Transaction encryption failed security validation',
+      'DATABASE_ERROR': 'Database error during transaction recording',
+      'API_RATE_LIMIT': 'API rate limit exceeded, retry in 5 minutes',
+      
+      // Legacy errors
+      'INSUF_FUNDS': 'Insufficient funds in sender account',
+      'ACCT_CLOSED': 'Recipient account has been closed',
+      'INVALID_SWIFT': 'Invalid or incorrect SWIFT code provided',
+      'DAILY_LIMIT': 'Daily transfer limit exceeded'
+    };
+    return messages[errorCode] || 'Unknown error occurred during transfer';
+  };
+
   const getFixProvision = (errorCode: string): string => {
     const fixes: Record<string, string> = {
+      // SARB Regulatory Fixes
+      'SARB_LIMIT_EXCEED': 'Split transfer into smaller amounts or apply for SARB exemption. Contact SARB directly for large transaction approval.',
+      'SARB_CDD_REQUIRED': 'Submit enhanced KYC documentation including source of funds and business relationship details.',
+      'SARB_SANCTIONS_CHECK': 'Provide additional beneficiary information and wait 3-5 business days for SARB clearance.',
+      'SARB_REPORTING_FAILURE': 'Ensure all cross-border transaction reporting is submitted to SARB within required timeframes.',
+      
+      // Receiver Bank Fixes
+      'RB_ACCOUNT_FROZEN': 'Contact receiving bank compliance department. Beneficiary must resolve account status.',
+      'RB_INSUFFICIENT_INFO': 'Provide complete transaction purpose, supporting invoices, and beneficiary relationship details.',
+      'RB_SYSTEM_DOWN': 'Retry transaction after receiving bank system maintenance window (typically 2-4 hours).',
+      'RB_COMPLIANCE_HOLD': 'Submit additional transaction documentation to receiving bank compliance team.',
+      
+      // Receiver Supplier Fixes
+      'RS_INVALID_DETAILS': 'Verify and update supplier bank details with current account information and beneficial ownership.',
+      'RS_BLOCKED_ENTITY': 'Remove supplier from transaction or obtain compliance clearance through legal channels.',
+      'RS_TAX_COMPLIANCE': 'Obtain supplier tax clearance certificate and SARS compliance status verification.',
+      'RS_LEGAL_DISPUTE': 'Resolve legal disputes through arbitration or wait for court resolution before proceeding.',
+      
+      // Technical Fixes
+      'NETWORK_TIMEOUT': 'Retry transaction with stable internet connection or contact technical support.',
+      'ENCRYPTION_FAILURE': 'Update browser/app and retry. Contact IT security if issue persists.',
+      'DATABASE_ERROR': 'Contact system administrator. Transaction may need manual processing.',
+      'API_RATE_LIMIT': 'Wait 5-10 minutes before retrying or upgrade to higher API tier.',
+      
+      // Legacy fixes
       'INSUF_FUNDS': 'Contact recipient to confirm account details and ensure account is active',
       'ACCT_CLOSED': 'Obtain new account details from beneficiary or use alternative payment method',
       'INVALID_SWIFT': 'Verify SWIFT code with beneficiary bank and update beneficiary details',
       'DAILY_LIMIT': 'Transfer amount exceeds daily limit. Split transfer or try again tomorrow'
     };
-    return fixes[errorCode] || 'Contact recipient bank for more information';
+    return fixes[errorCode] || 'Contact customer support for assistance with this error';
+  };
+
+  const getSarbComplianceRequired = (errorCode: string): boolean => {
+    const sarbCodes = ['SARB_LIMIT_EXCEED', 'SARB_CDD_REQUIRED', 'SARB_SANCTIONS_CHECK', 'SARB_REPORTING_FAILURE'];
+    return sarbCodes.includes(errorCode);
+  };
+
+  const getLegalArbitrageRequired = (errorCode: string): boolean => {
+    const legalCodes = ['RS_BLOCKED_ENTITY', 'RS_LEGAL_DISPUTE', 'RB_ACCOUNT_FROZEN', 'SARB_SANCTIONS_CHECK'];
+    return legalCodes.includes(errorCode);
   };
 
   if (isLoading) {
