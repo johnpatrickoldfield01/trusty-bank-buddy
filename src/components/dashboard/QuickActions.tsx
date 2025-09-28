@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download, Landmark, Globe } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Wallet, PiggyBank, TrendingUp, Download, Landmark, Globe, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SendMoneyDialog from './SendMoneyDialog';
 import LocalTransferDialog from './LocalTransferDialog';
 import { type LocalTransferFormValues } from '@/schemas/localTransferSchema';
@@ -94,6 +95,18 @@ const QuickActions = ({ onSendMoney, onDownloadCashflowForecast, onDownloadBalan
                 <Globe className="h-4 w-4 text-teal-600" />
               </div>
               <span className="text-xs font-normal text-center">International<br/>Account Transfer</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto flex-col gap-2 py-4"
+              asChild
+            >
+              <Link to="/bulk-payments">
+                <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-orange-600" />
+                </div>
+                <span className="text-xs font-normal text-center">Bulk<br/>Payments</span>
+              </Link>
             </Button>
           </div>
         </CardContent>

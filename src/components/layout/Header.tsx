@@ -83,6 +83,7 @@ const Header = () => {
           <Link to="/foreign-exchange" className="text-sm font-medium hover:text-bank-primary transition-colors">Foreign Exchange</Link>
           <Link to="/cards" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</Link>
           <Link to="/payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</Link>
+          <Link to="/bulk-payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Bulk Payments</Link>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
