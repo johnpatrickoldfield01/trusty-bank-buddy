@@ -144,6 +144,7 @@ const Header = () => {
           <Link to="/treasury" className="text-sm font-medium hover:text-bank-primary transition-colors">Treasury</Link>
           <Link to="/jobs" className="text-sm font-medium hover:text-bank-primary transition-colors">Jobs</Link>
           <Link to="/stock-exchange" className="text-sm font-medium hover:text-bank-primary transition-colors">Stock Exchange</Link>
+          <Link to="/digital-documents" className="text-sm font-medium hover:text-bank-primary transition-colors">Digital Documents</Link>
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Support</a>
         </nav>
         

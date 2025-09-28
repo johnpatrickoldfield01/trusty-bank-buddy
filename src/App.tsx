@@ -30,6 +30,10 @@ import StockExchangeDashboard from "./pages/StockExchangeDashboard";
 import BankingCertificatePage from "./pages/BankingCertificatePage";
 import BulkPaymentsPage from "./pages/BulkPaymentsPage";
 import SecurityProtocolsPage from "./pages/SecurityProtocolsPage";
+import DigitalDocumentsPage from "./pages/DigitalDocumentsPage";
+import BudgetingPage from "./pages/BudgetingPage";
+import ForeignExchangeDetailsPage from "./pages/ForeignExchangeDetailsPage";
+import CryptoTransactionsPage from "./pages/CryptoTransactionsPage";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
 
@@ -73,6 +77,10 @@ const AppContent = () => {
           <Route path="/banking-certificate" element={<BankingCertificatePage />} />
           <Route path="/bulk-payments" element={<BulkPaymentsPage />} />
           <Route path="/security-protocols" element={<SecurityProtocolsPage />} />
+          <Route path="/digital-documents" element={<DigitalDocumentsPage />} />
+          <Route path="/budgeting" element={<BudgetingPage />} />
+          <Route path="/foreign-exchange/:currency" element={<ForeignExchangeDetailsPage />} />
+          <Route path="/crypto/:symbol/transactions" element={<CryptoTransactionsPage />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
