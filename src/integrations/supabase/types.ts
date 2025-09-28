@@ -396,6 +396,7 @@ export type Database = {
           id: string
           status: string
           submitted_at: string | null
+          user_id: string
         }
         Insert: {
           applicant_email: string
@@ -407,6 +408,7 @@ export type Database = {
           id?: string
           status?: string
           submitted_at?: string | null
+          user_id: string
         }
         Update: {
           applicant_email?: string
@@ -418,6 +420,7 @@ export type Database = {
           id?: string
           status?: string
           submitted_at?: string | null
+          user_id?: string
         }
         Relationships: [
           {
