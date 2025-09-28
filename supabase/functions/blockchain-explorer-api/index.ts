@@ -24,11 +24,11 @@ serve(async (req) => {
     console.log(`Blockchain Explorer API: Full path: ${url.pathname}`);
     console.log(`Parsed - endpoint: ${endpoint}, identifier: ${identifier}`);
 
-    // Mock blockchain explorer database - in real scenario this would be a proper database
+    // Mock blockchain explorer database - Bitcoin txids are 64-character hex strings
     const mockTransactions = new Map([
       ['BXLC2CJ7HNB88UIYAMQN', {
-        txid: 'BXLC2CJ7HNB88UIYAMQN',
-        hash: '0xa3552867d759',
+        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456', // 64-char hex
+        hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
         blockHeight: 867543,
         blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
         confirmations: 6,
@@ -65,9 +65,9 @@ serve(async (req) => {
         network: 'bitcoin-testnet',
         explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`
       }],
-      ['0xa3552867d759', {
-        txid: 'BXLC2CJ7HNB88UIYAMQN',
-        hash: '0xa3552867d759',
+      ['0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12', {
+        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
+        hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
         blockHeight: 867543,
         blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
         confirmations: 6,
@@ -153,10 +153,10 @@ serve(async (req) => {
         }
       },
       raw_data_available: true,
-      alternative_formats: [
-        `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${transaction.txid}`,
-        `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${transaction.hash}`
-      ]
+        alternative_formats: [
+          `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456`,
+          `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12`
+        ]
     };
 
     console.log(`Transaction found: ${transaction.txid}, Status: ${transaction.status}`);

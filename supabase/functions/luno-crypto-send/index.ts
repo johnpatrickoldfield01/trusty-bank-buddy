@@ -26,7 +26,9 @@ serve(async (req) => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Generate mock Luno response matching their API structure
+    // Generate proper 64-character Bitcoin transaction ID
     const mockWithdrawalId = `BXLC2CJ7HNB88U${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    const mockTxId = 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'; // 64-char Bitcoin txid
     const mockExternalId = `ext_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const mockFee = parseFloat((amount * 0.0005).toFixed(8)); // 0.05% fee
     
@@ -34,15 +36,16 @@ serve(async (req) => {
     const mockCurrentBalance = 5.25; 
     const newBalance = Math.max(0, mockCurrentBalance - amount - mockFee);
 
-    // Generate consistent transaction hash for blockchain explorer
+    // Generate consistent transaction hash for blockchain explorer  
     const transactionHash = crypto.symbol === 'BTC' && mockWithdrawalId === 'BXLC2CJ7HNB88UIYAMQN' 
-      ? '0xa3552867d759' 
-      : `0x${Math.random().toString(16).substr(2, 12)}`;
+      ? '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12' 
+      : `0x${Math.random().toString(16).padStart(62, '0').substr(0, 62)}`;
 
     // Mock successful Luno send response structure
     const lunoResponse = {
       success: true,
       withdrawal_id: mockWithdrawalId,
+      bitcoin_txid: mockTxId, // Proper 64-character Bitcoin transaction ID
       external_id: mockExternalId,
       currency: crypto.symbol,
       amount: amount.toString(),
@@ -52,10 +55,10 @@ serve(async (req) => {
       created_at: Date.now(),
       // Additional fields for our integration
       newBalance: newBalance,
-      transactionId: mockWithdrawalId,
+      transactionId: mockTxId, // Use proper Bitcoin txid
       transactionHash: transactionHash,
       exchangeUrl: `https://www.luno.com/wallet/transactions/${mockWithdrawalId}`,
-      blockchainExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${mockWithdrawalId}`,
+      blockchainExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${mockTxId}`,
       alternativeExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${transactionHash}`,
       network: 'Bitcoin Testnet (Simulated)',
       permissions_used: [
