@@ -5,7 +5,7 @@ import { useSession } from '@/hooks/useSession';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, CheckCircle, ArrowRightLeft } from 'lucide-react';
+import { Users, CheckCircle, ArrowRightLeft, Edit, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import AddBeneficiaryDialog from './AddBeneficiaryDialog';
 
@@ -21,9 +21,20 @@ interface Beneficiary {
   created_at: string;
 }
 
-const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (beneficiary: Beneficiary) => void }) => {
+const BeneficiaryManager = ({ 
+  onSelectBeneficiary,
+  selectionMode = false,
+  selectedBeneficiaries = [],
+  onSelectionChange
+}: { 
+  onSelectBeneficiary?: (beneficiary: Beneficiary) => void;
+  selectionMode?: boolean;
+  selectedBeneficiaries?: string[];
+  onSelectionChange?: (ids: string[]) => void;
+}) => {
   const { user } = useSession();
   const queryClient = useQueryClient();
+  const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
 
   const { data: beneficiaries, isLoading } = useQuery({
     queryKey: ['beneficiaries', user?.id],
@@ -97,6 +108,41 @@ const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (be
     }
   });
 
+  const deleteBeneficiary = useMutation({
+    mutationFn: async (beneficiaryId: string) => {
+      const { error } = await supabase
+        .from('beneficiaries')
+        .delete()
+        .eq('id', beneficiaryId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Beneficiary deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete beneficiary: ${error.message}`);
+    }
+  });
+
+  const handleBeneficiarySelection = (beneficiaryId: string) => {
+    if (!selectionMode) return;
+    
+    const newSelection = selectedBeneficiaries.includes(beneficiaryId)
+      ? selectedBeneficiaries.filter(id => id !== beneficiaryId)
+      : selectedBeneficiaries.length < 20 
+        ? [...selectedBeneficiaries, beneficiaryId]
+        : selectedBeneficiaries;
+    
+    if (selectedBeneficiaries.length >= 20 && !selectedBeneficiaries.includes(beneficiaryId)) {
+      toast.warning('Maximum 20 beneficiaries can be selected per batch');
+      return;
+    }
+    
+    onSelectionChange?.(newSelection);
+  };
+
   const getFixProvision = (errorCode: string): string => {
     const fixes: Record<string, string> = {
       'INSUF_FUNDS': 'Contact recipient to confirm account details and ensure account is active',
@@ -112,27 +158,47 @@ const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (be
   }
 
   return (
-    <div className="space-y-4">
+      <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">KYC-Verified Beneficiaries</h3>
+          <h3 className="text-lg font-medium">Real Bank Account Beneficiaries</h3>
+          {selectionMode && (
+            <Badge variant="outline" className="ml-2">
+              {selectedBeneficiaries.length}/20 selected
+            </Badge>
+          )}
         </div>
-        <AddBeneficiaryDialog />
+        <div className="flex gap-2">
+          <AddBeneficiaryDialog />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         {beneficiaries?.map((beneficiary) => (
-          <Card key={beneficiary.id} className="hover:shadow-md transition-shadow">
+          <Card 
+            key={beneficiary.id} 
+            className={`hover:shadow-md transition-shadow ${
+              selectionMode && selectedBeneficiaries.includes(beneficiary.id) 
+                ? 'ring-2 ring-primary' 
+                : ''
+            } ${selectionMode ? 'cursor-pointer' : ''}`}
+            onClick={() => selectionMode && handleBeneficiarySelection(beneficiary.id)}
+          >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">{beneficiary.beneficiary_name}</CardTitle>
-                {beneficiary.kyc_verified && (
-                  <Badge variant="secondary" className="text-green-600">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    KYC Verified
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {beneficiary.kyc_verified && (
+                    <Badge variant="secondary" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Real Account
+                    </Badge>
+                  )}
+                  {selectionMode && selectedBeneficiaries.includes(beneficiary.id) && (
+                    <Badge variant="default">Selected</Badge>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -142,26 +208,48 @@ const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (be
                 {beneficiary.swift_code && (
                   <div><span className="font-medium">SWIFT:</span> {beneficiary.swift_code}</div>
                 )}
+                {beneficiary.branch_code && (
+                  <div><span className="font-medium">Branch:</span> {beneficiary.branch_code}</div>
+                )}
+                {beneficiary.beneficiary_email && (
+                  <div><span className="font-medium">Email:</span> {beneficiary.beneficiary_email}</div>
+                )}
               </div>
               
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => onSelectBeneficiary?.(beneficiary)}
-                  className="flex-1"
-                >
-                  <ArrowRightLeft className="h-4 w-4 mr-2" />
-                  Quick Transfer
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => transferToBeneficiary.mutate({ beneficiaryId: beneficiary.id, amount: 1000 })}
-                  disabled={transferToBeneficiary.isPending}
-                >
-                  Test R1,000
-                </Button>
-              </div>
+              {!selectionMode && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => onSelectBeneficiary?.(beneficiary)}
+                    className="flex-1"
+                  >
+                    <ArrowRightLeft className="h-4 w-4 mr-2" />
+                    Quick Transfer
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditingBeneficiary(beneficiary)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => transferToBeneficiary.mutate({ beneficiaryId: beneficiary.id, amount: 1000 })}
+                    disabled={transferToBeneficiary.isPending}
+                  >
+                    Test R1K
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => deleteBeneficiary.mutate(beneficiary.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -170,10 +258,19 @@ const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (be
       {(!beneficiaries || beneficiaries.length === 0) && (
         <Card>
           <CardContent className="text-center py-8">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No beneficiaries found. Add your KYC-verified recipients to get started.</p>
+            <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No real bank accounts found. Add your actual bank accounts from Capitec, Standard Bank, FNB, Discovery, HSBC HK, and BOC HK for testing.
+            </p>
           </CardContent>
         </Card>
+      )}
+
+      {editingBeneficiary && (
+        <AddBeneficiaryDialog
+          beneficiaryToEdit={editingBeneficiary}
+          onClose={() => setEditingBeneficiary(null)}
+        />
       )}
     </div>
   );

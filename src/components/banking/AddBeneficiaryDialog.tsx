@@ -41,43 +41,78 @@ const BANKS = [
 
 interface AddBeneficiaryDialogProps {
   trigger?: React.ReactNode;
+  beneficiaryToEdit?: any;
+  onClose?: () => void;
 }
 
-const AddBeneficiaryDialog = ({ trigger }: AddBeneficiaryDialogProps) => {
+const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBeneficiaryDialogProps) => {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    beneficiary_name: '',
-    bank_name: '',
-    account_number: '',
-    swift_code: '',
-    branch_code: '',
-    beneficiary_email: '',
+    beneficiary_name: beneficiaryToEdit?.beneficiary_name || '',
+    bank_name: beneficiaryToEdit?.bank_name || '',
+    account_number: beneficiaryToEdit?.account_number || '',
+    swift_code: beneficiaryToEdit?.swift_code || '',
+    branch_code: beneficiaryToEdit?.branch_code || '',
+    beneficiary_email: beneficiaryToEdit?.beneficiary_email || '',
   });
+
+  React.useEffect(() => {
+    if (beneficiaryToEdit) {
+      setFormData({
+        beneficiary_name: beneficiaryToEdit.beneficiary_name || '',
+        bank_name: beneficiaryToEdit.bank_name || '',
+        account_number: beneficiaryToEdit.account_number || '',
+        swift_code: beneficiaryToEdit.swift_code || '',
+        branch_code: beneficiaryToEdit.branch_code || '',
+        beneficiary_email: beneficiaryToEdit.beneficiary_email || '',
+      });
+      setOpen(true);
+    }
+  }, [beneficiaryToEdit]);
 
   const addBeneficiary = useMutation({
     mutationFn: async (data: typeof formData) => {
       const validated = beneficiarySchema.parse(data);
       
-      const { data: result, error } = await supabase
-        .from('beneficiaries')
-        .insert([{
-          user_id: user?.id,
-          beneficiary_name: validated.beneficiary_name,
-          bank_name: validated.bank_name,
-          account_number: validated.account_number,
-          swift_code: validated.swift_code || null,
-          branch_code: validated.branch_code || null,
-          beneficiary_email: validated.beneficiary_email || null,
-          kyc_verified: true, // Auto-verify for demo purposes
-        }]);
+      if (beneficiaryToEdit) {
+        // Update existing beneficiary
+        const { data: result, error } = await supabase
+          .from('beneficiaries')
+          .update({
+            beneficiary_name: validated.beneficiary_name,
+            bank_name: validated.bank_name,
+            account_number: validated.account_number,
+            swift_code: validated.swift_code || null,
+            branch_code: validated.branch_code || null,
+            beneficiary_email: validated.beneficiary_email || null,
+          })
+          .eq('id', beneficiaryToEdit.id);
 
-      if (error) throw error;
-      return result;
+        if (error) throw error;
+        return result;
+      } else {
+        // Insert new beneficiary
+        const { data: result, error } = await supabase
+          .from('beneficiaries')
+          .insert([{
+            user_id: user?.id,
+            beneficiary_name: validated.beneficiary_name,
+            bank_name: validated.bank_name,
+            account_number: validated.account_number,
+            swift_code: validated.swift_code || null,
+            branch_code: validated.branch_code || null,
+            beneficiary_email: validated.beneficiary_email || null,
+            kyc_verified: true, // Auto-verify for real bank testing
+          }]);
+
+        if (error) throw error;
+        return result;
+      }
     },
     onSuccess: () => {
-      toast.success('Beneficiary added successfully');
+      toast.success(beneficiaryToEdit ? 'Beneficiary updated successfully' : 'Beneficiary added successfully');
       setOpen(false);
       setFormData({
         beneficiary_name: '',
@@ -88,6 +123,7 @@ const AddBeneficiaryDialog = ({ trigger }: AddBeneficiaryDialogProps) => {
         beneficiary_email: '',
       });
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
+      onClose?.();
     },
     onError: (error) => {
       toast.error(`Failed to add beneficiary: ${error.message}`);
@@ -119,7 +155,7 @@ const AddBeneficiaryDialog = ({ trigger }: AddBeneficiaryDialogProps) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Beneficiary</DialogTitle>
+          <DialogTitle>{beneficiaryToEdit ? 'Edit Beneficiary' : 'Add New Beneficiary'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -200,7 +236,7 @@ const AddBeneficiaryDialog = ({ trigger }: AddBeneficiaryDialogProps) => {
               Cancel
             </Button>
             <Button type="submit" disabled={addBeneficiary.isPending}>
-              Add Beneficiary
+              {beneficiaryToEdit ? 'Update Beneficiary' : 'Add Beneficiary'}
             </Button>
           </div>
         </form>

@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, Play, Pause, Trash2 } from 'lucide-react';
+import { Calendar, Clock, Play, Pause, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import BeneficiaryManager from './BeneficiaryManager';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -27,6 +28,7 @@ const BulkPaymentScheduler = () => {
   const { user } = useSession();
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedBeneficiaries, setSelectedBeneficiaries] = useState<string[]>([]);
   const [newSchedule, setNewSchedule] = useState({
     schedule_name: '',
     amount_per_beneficiary: '',
@@ -72,7 +74,7 @@ const BulkPaymentScheduler = () => {
         .insert([{
           user_id: user?.id,
           schedule_name: scheduleData.schedule_name,
-          beneficiary_ids: beneficiaries?.map(b => b.id) || [],
+          beneficiary_ids: selectedBeneficiaries.length > 0 ? selectedBeneficiaries : beneficiaries?.map(b => b.id) || [],
           amount_per_beneficiary: parseFloat(scheduleData.amount_per_beneficiary),
           frequency: scheduleData.frequency,
           next_execution_date: scheduleData.next_execution_date,
@@ -85,6 +87,7 @@ const BulkPaymentScheduler = () => {
     onSuccess: () => {
       toast.success('Bulk payment schedule created successfully');
       setIsCreating(false);
+      setSelectedBeneficiaries([]);
       setNewSchedule({
         schedule_name: '',
         amount_per_beneficiary: '',
@@ -130,6 +133,11 @@ const BulkPaymentScheduler = () => {
   const handleCreateSchedule = () => {
     if (!newSchedule.schedule_name || !newSchedule.amount_per_beneficiary || !newSchedule.next_execution_date) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (selectedBeneficiaries.length === 0 && (!beneficiaries || beneficiaries.length === 0)) {
+      toast.error('Please select at least one beneficiary');
       return;
     }
 
@@ -208,19 +216,22 @@ const BulkPaymentScheduler = () => {
               </div>
             </div>
 
-            {/* KYC Verified Beneficiaries Selection */}
-            <div className="space-y-2">
-              <Label>KYC Verified Beneficiaries ({beneficiaries?.length || 0} available)</Label>
-              <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
-                {beneficiaries?.map((beneficiary: any) => (
-                  <div key={beneficiary.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                    <div className="text-sm">
-                      <div className="font-medium">{beneficiary.beneficiary_name}</div>
-                      <div className="text-muted-foreground">{beneficiary.bank_name} • {beneficiary.account_number}</div>
-                    </div>
-                    <Badge variant="secondary" className="text-green-600">KYC ✓</Badge>
-                  </div>
-                )) || <p className="text-sm text-muted-foreground">No beneficiaries available</p>}
+            {/* Real Bank Account Selection */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium">Select Real Bank Accounts (Max 20 per batch)</Label>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {selectedBeneficiaries.length}/20 selected
+                </Badge>
+              </div>
+              
+              <div className="border rounded-lg p-4 max-h-96 overflow-y-auto">
+                <BeneficiaryManager
+                  selectionMode={true}
+                  selectedBeneficiaries={selectedBeneficiaries}
+                  onSelectionChange={setSelectedBeneficiaries}
+                />
               </div>
             </div>
 
