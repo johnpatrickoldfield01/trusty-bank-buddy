@@ -690,7 +690,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      treasury_users_safe: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
