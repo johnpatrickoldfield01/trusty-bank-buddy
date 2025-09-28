@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import BeneficiaryManager from './BeneficiaryManager';
 import BulkPaymentPDFDownloader from './BulkPaymentPDFDownloader';
 import SeparatePaymentNotifications from './SeparatePaymentNotifications';
+import PayFastPaymentProcessor from './PayFastPaymentProcessor';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -337,6 +338,18 @@ const BulkPaymentScheduler = () => {
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
+              </div>
+              
+              {/* PayFast Payment Processing Section */}
+              <div className="mt-4 pt-4 border-t">
+                <PayFastPaymentProcessor
+                  selectedBeneficiaries={beneficiaries?.filter(b => schedule.beneficiary_ids.includes(b.id)) || []}
+                  scheduleData={schedule}
+                  onPaymentComplete={() => {
+                    toast.success('Payment processing initiated via PayFast');
+                    queryClient.invalidateQueries({ queryKey: ['bulk_payment_schedules'] });
+                  }}
+                />
               </div>
             </CardContent>
           </Card>
