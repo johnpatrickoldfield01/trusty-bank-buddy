@@ -93,7 +93,15 @@ const AuthPage = () => {
       // Show 2FA screen
       setUserEmail(values.email);
       setShow2FA(true);
-      toast.success("Password verified. Please complete 2FA verification.");
+      
+      // Check if user has existing 2FA setup
+      const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
+      
+      if (hasExisting2FA) {
+        toast.success("Password verified. Please enter your authenticator code.");
+      } else {
+        toast.success("Password verified. Please set up 2FA for enhanced security.");
+      }
     } else {
       // Regular sign in for other users
       const { error } = await supabase.auth.signInWithPassword({

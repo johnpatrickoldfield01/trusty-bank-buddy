@@ -22,13 +22,19 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
   const [totpSecret, setTotpSecret] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [totpSetupComplete, setTotpSetupComplete] = useState(false);
+  const [isExistingUser, setIsExistingUser] = useState(false);
 
   useEffect(() => {
     // Check if TOTP is already set up for this user
     const storedSecret = localStorage.getItem(`totp_secret_${userEmail}`);
-    if (storedSecret) {
+    const userSetupComplete = localStorage.getItem(`totp_setup_complete_${userEmail}`);
+    
+    if (storedSecret && userSetupComplete === 'true') {
       setTotpSetupComplete(true);
       setTotpSecret(storedSecret);
+      setIsExistingUser(true);
+      // For existing users with 2FA, default to TOTP method
+      setSelectedMethod('totp');
     }
   }, [userEmail]);
 
@@ -60,7 +66,9 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
       // In a real app, you'd verify the TOTP code on the server
       // For demo, we'll accept any 6-digit code
       localStorage.setItem(`totp_secret_${userEmail}`, totpSecret);
+      localStorage.setItem(`totp_setup_complete_${userEmail}`, 'true');
       setTotpSetupComplete(true);
+      setIsExistingUser(true);
       toast.success('Google Authenticator setup completed!');
       setVerificationCode('');
     } else {
@@ -136,46 +144,61 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Method Selection */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">Choose Authentication Method</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <Card 
-                className={`cursor-pointer border-2 transition-all ${
-                  selectedMethod === 'email' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setSelectedMethod('email')}
-              >
-                <CardContent className="p-4 text-center">
-                  <Mail className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                  <h3 className="font-medium">Email Code</h3>
-                  <p className="text-sm text-muted-foreground">Receive code via email</p>
-                  {selectedMethod === 'email' && (
-                    <Badge className="mt-2 bg-blue-100 text-blue-800">Selected</Badge>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card 
-                className={`cursor-pointer border-2 transition-all ${
-                  selectedMethod === 'totp' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => setSelectedMethod('totp')}
-              >
-                <CardContent className="p-4 text-center">
-                  <Smartphone className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                  <h3 className="font-medium">Google Authenticator</h3>
-                  <p className="text-sm text-muted-foreground">Use authenticator app</p>
-                  {selectedMethod === 'totp' && (
-                    <Badge className="mt-2 bg-green-100 text-green-800">Selected</Badge>
-                  )}
-                </CardContent>
-              </Card>
+          {/* Show existing user message */}
+          {isExistingUser && (
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                <span className="font-medium text-blue-800">Welcome Back!</span>
+              </div>
+              <p className="text-blue-700 text-sm">
+                Your account has 2FA enabled. Please verify your identity to continue.
+              </p>
             </div>
-          </div>
+          )}
 
-          {/* Email 2FA */}
-          {selectedMethod === 'email' && (
+          {/* Method Selection - only show for new users or if TOTP isn't set up */}
+          {!isExistingUser && (
+            <div>
+              <Label className="text-base font-medium mb-3 block">Choose Authentication Method</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Card 
+                  className={`cursor-pointer border-2 transition-all ${
+                    selectedMethod === 'email' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedMethod('email')}
+                >
+                  <CardContent className="p-4 text-center">
+                    <Mail className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                    <h3 className="font-medium">Email Code</h3>
+                    <p className="text-sm text-muted-foreground">Receive code via email</p>
+                    {selectedMethod === 'email' && (
+                      <Badge className="mt-2 bg-blue-100 text-blue-800">Selected</Badge>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card 
+                  className={`cursor-pointer border-2 transition-all ${
+                    selectedMethod === 'totp' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedMethod('totp')}
+                >
+                  <CardContent className="p-4 text-center">
+                    <Smartphone className="h-8 w-8 mx-auto mb-2 text-green-600" />
+                    <h3 className="font-medium">Google Authenticator</h3>
+                    <p className="text-sm text-muted-foreground">Use authenticator app</p>
+                    {selectedMethod === 'totp' && (
+                      <Badge className="mt-2 bg-green-100 text-green-800">Selected</Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Email 2FA - only show if not existing user or email is selected */}
+          {!isExistingUser && selectedMethod === 'email' && (
             <div className="space-y-4">
               <div className="p-4 bg-blue-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
@@ -223,7 +246,7 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
             </div>
           )}
 
-          {/* TOTP 2FA */}
+          {/* TOTP 2FA - for both new and existing users */}
           {selectedMethod === 'totp' && (
             <div className="space-y-4">
               {!totpSetupComplete ? (
@@ -296,7 +319,12 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
                     <CheckCircle className="h-5 w-5" />
-                    <span>Google Authenticator is set up for your account</span>
+                    <span>
+                      {isExistingUser 
+                        ? 'Please enter your authenticator code to continue' 
+                        : 'Google Authenticator is set up for your account'
+                      }
+                    </span>
                   </div>
 
                   <div>
@@ -323,9 +351,33 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
             </div>
           )}
 
-          <Button variant="outline" onClick={onBack} className="w-full">
-            Back to Login
-          </Button>
+          {/* Reset 2FA option for testing - only show for existing users */}
+          {isExistingUser && (
+            <div className="border-t pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  localStorage.removeItem(`totp_secret_${userEmail}`);
+                  localStorage.removeItem(`totp_setup_complete_${userEmail}`);
+                  setTotpSetupComplete(false);
+                  setIsExistingUser(false);
+                  setSelectedMethod('email');
+                  setVerificationCode('');
+                  toast.success('2FA reset successfully. You can now set up a new method.');
+                }} 
+                className="w-full text-red-600 border-red-200 hover:bg-red-50"
+              >
+                Reset 2FA Setup
+              </Button>
+            </div>
+          )}
+
+          {/* Back button - only show for new users or if they can change method */}
+          {!isExistingUser && (
+            <Button variant="outline" onClick={onBack} className="w-full">
+              Back to Login
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>
