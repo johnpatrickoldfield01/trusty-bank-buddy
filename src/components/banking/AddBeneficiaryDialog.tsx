@@ -24,6 +24,7 @@ const beneficiarySchema = z.object({
   swift_code: z.string().optional(),
   branch_code: z.string().optional(),
   beneficiary_email: z.string().email().optional().or(z.literal('')),
+  bank_email: z.string().email().optional().or(z.literal('')),
 });
 
 const DEFAULT_BANKS = [
@@ -62,6 +63,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
     swift_code: beneficiaryToEdit?.swift_code || '',
     branch_code: beneficiaryToEdit?.branch_code || '',
     beneficiary_email: beneficiaryToEdit?.beneficiary_email || '',
+    bank_email: beneficiaryToEdit?.bank_email || '',
   });
 
   const allBanks = [...DEFAULT_BANKS, ...customBanks].sort();
@@ -75,6 +77,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
         swift_code: beneficiaryToEdit.swift_code || '',
         branch_code: beneficiaryToEdit.branch_code || '',
         beneficiary_email: beneficiaryToEdit.beneficiary_email || '',
+        bank_email: beneficiaryToEdit.bank_email || '',
       });
       setOpen(true);
     }
@@ -95,6 +98,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
             swift_code: validated.swift_code || null,
             branch_code: validated.branch_code || null,
             beneficiary_email: validated.beneficiary_email || null,
+            bank_email: validated.bank_email || null,
           })
           .eq('id', beneficiaryToEdit.id);
 
@@ -112,6 +116,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
             swift_code: validated.swift_code || null,
             branch_code: validated.branch_code || null,
             beneficiary_email: validated.beneficiary_email || null,
+            bank_email: validated.bank_email || null,
             kyc_verified: true, // Auto-verify for real bank testing
           }]);
 
@@ -129,6 +134,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
         swift_code: '',
         branch_code: '',
         beneficiary_email: '',
+        bank_email: '',
       });
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onClose?.();
@@ -318,7 +324,7 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="beneficiary_email">Email</Label>
+              <Label htmlFor="beneficiary_email">Beneficiary Email</Label>
               <Input
                 id="beneficiary_email"
                 type="email"
@@ -327,6 +333,17 @@ const AddBeneficiaryDialog = ({ trigger, beneficiaryToEdit, onClose }: AddBenefi
                 placeholder="john@example.com"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bank_email">Bank Email (for transfer notifications)</Label>
+            <Input
+              id="bank_email"
+              type="email"
+              value={formData.bank_email}
+              onChange={(e) => setFormData(prev => ({ ...prev, bank_email: e.target.value }))}
+              placeholder="transfers@bank.com"
+            />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

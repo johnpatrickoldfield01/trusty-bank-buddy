@@ -86,6 +86,7 @@ export type Database = {
       beneficiaries: {
         Row: {
           account_number: string
+          bank_email: string | null
           bank_name: string
           beneficiary_email: string | null
           beneficiary_name: string
@@ -99,6 +100,7 @@ export type Database = {
         }
         Insert: {
           account_number: string
+          bank_email?: string | null
           bank_name: string
           beneficiary_email?: string | null
           beneficiary_name: string
@@ -112,6 +114,7 @@ export type Database = {
         }
         Update: {
           account_number?: string
+          bank_email?: string | null
           bank_name?: string
           beneficiary_email?: string | null
           beneficiary_name?: string
