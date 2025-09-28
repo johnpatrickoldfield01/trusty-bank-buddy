@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -85,7 +85,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           new Date().toLocaleDateString()
         ]);
         
-        (doc as any).autoTable({
+        autoTable(doc, {
           head: [['#', 'Beneficiary Name', 'Bank', 'Account', 'SWIFT', 'Amount', 'Status', 'Date']],
           body: tableData,
           startY: yPos + 25,
@@ -113,11 +113,20 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
         doc.text(`Total Amount Disbursed: ${currency} ${(schedule.amount_per_beneficiary * beneficiaries.length).toLocaleString()}`, 20, finalY + 20);
         doc.text(`Processing Date: ${new Date().toLocaleDateString()}`, 20, finalY + 30);
         
+        // Legal and Banking Arbitrage Information
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Legal and Banking Arbitrage:', 20, finalY + 45);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        const legalText = 'This payment is subject to banking regulations and exchange control laws. Any disputes arising from this transaction shall be subject to the jurisdiction of South African courts. Exchange rates applied are in accordance with SARB regulations. Transaction fees may apply as per our standard banking tariffs.';
+        doc.text(legalText, 20, finalY + 55, { maxWidth: 170 });
+        
         // Footer
         doc.setFontSize(8);
         doc.setTextColor(100);
-        doc.text('This document serves as confirmation of bulk payment processing.', 20, finalY + 50);
-        doc.text('For queries, contact TrustyBank Support at support@trustybank.com', 20, finalY + 58);
+        doc.text('This document serves as confirmation of bulk payment processing.', 20, finalY + 80);
+        doc.text('For queries, contact TrustyBank Support at support@trustybank.com', 20, finalY + 88);
         
         doc.save(`bulk-payment-summary-${schedule.schedule_name}-${new Date().toISOString().split('T')[0]}.pdf`);
       } else {
@@ -177,6 +186,15 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           const notificationText = `Dear ${beneficiary.beneficiary_name},\n\nThis notification confirms that a payment of ${currency} ${schedule.amount_per_beneficiary.toLocaleString()} has been processed to your account ending in ${beneficiary.account_number.slice(-4)} at ${beneficiary.bank_name}.\n\nThe payment was processed as part of the "${schedule.schedule_name}" bulk payment schedule and should reflect in your account within 1-2 business days.\n\nIf you have any questions regarding this payment, please contact us using the details provided above.`;
           
           doc.text(notificationText, 20, yPos + 25, { maxWidth: 170 });
+          
+          // Legal and Banking Arbitrage for individual payments
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Legal and Banking Arbitrage:', 20, yPos + 85);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          const legalText = 'This payment is subject to banking regulations and exchange control laws. Any disputes arising from this transaction shall be subject to the jurisdiction of South African courts. Exchange rates applied are in accordance with SARB regulations.';
+          doc.text(legalText, 20, yPos + 95, { maxWidth: 170 });
           
           // Footer
           doc.setFontSize(8);
