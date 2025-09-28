@@ -40,7 +40,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
         doc.text('TrustyBank - Bulk Payment Services', 20, 45);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
-        doc.text('Licensed Financial Services Provider | FSP License: 12345', 20, 52);
+        doc.text('Licensed Financial Services Provider | FSP License: [DEMO-PURPOSES-ONLY]', 20, 52);
         
         // Schedule details
         doc.setFontSize(14);
@@ -141,16 +141,16 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           // Company header
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
-          doc.text('TrustyBank - Payment Services', 20, 45);
+          doc.text('TrustyBank - Payment Services', 20, 50);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(10);
-          doc.text('Licensed Financial Services Provider | FSP License: 12345', 20, 52);
-          doc.text('Contact: +27 11 123 4567 | Email: payments@trustybank.com', 20, 59);
+          doc.text('Licensed Financial Services Provider | FSP License: [DEMO-PURPOSES-ONLY]', 20, 58);
+          doc.text('Contact: +27 11 123 4567 | Email: payments@trustybank.com', 20, 66);
           
           // Transaction details
           doc.setFontSize(14);
           doc.setFont('helvetica', 'bold');
-          doc.text('Payment Details:', 20, 75);
+          doc.text('Payment Details:', 20, 85);
           
           doc.setFontSize(12);
           doc.setFont('helvetica', 'normal');
@@ -167,41 +167,41 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
             ['Transaction ID:', `TXN-${Date.now()}-${index + 1}`],
           ];
           
-          let yPos = 85;
+          let yPos = 95;
           paymentDetails.forEach(([label, value]) => {
             doc.setFont('helvetica', 'bold');
             doc.text(label, 20, yPos);
             doc.setFont('helvetica', 'normal');
             doc.text(value, 80, yPos);
-            yPos += 10;
+            yPos += 12;
           });
           
           // Add notification message
           doc.setFontSize(12);
           doc.setFont('helvetica', 'bold');
-          doc.text('Payment Notification:', 20, yPos + 15);
+          doc.text('Payment Notification:', 20, yPos + 20);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(11);
           
           const notificationText = `Dear ${beneficiary.beneficiary_name},\n\nThis notification confirms that a payment of ${currency} ${schedule.amount_per_beneficiary.toLocaleString()} has been processed to your account ending in ${beneficiary.account_number.slice(-4)} at ${beneficiary.bank_name}.\n\nThe payment was processed as part of the "${schedule.schedule_name}" bulk payment schedule and should reflect in your account within 1-2 business days.\n\nIf you have any questions regarding this payment, please contact us using the details provided above.`;
           
-          doc.text(notificationText, 20, yPos + 25, { maxWidth: 170 });
+          doc.text(notificationText, 20, yPos + 35, { maxWidth: 170 });
           
           // Legal and Banking Arbitrage for individual payments
           doc.setFontSize(10);
           doc.setFont('helvetica', 'bold');
-          doc.text('Legal and Banking Arbitrage:', 20, yPos + 85);
+          doc.text('Legal and Banking Arbitrage:', 20, yPos + 95);
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8);
           const legalText = 'This payment is subject to banking regulations and exchange control laws. Any disputes arising from this transaction shall be subject to the jurisdiction of South African courts. Exchange rates applied are in accordance with SARB regulations.';
-          doc.text(legalText, 20, yPos + 95, { maxWidth: 170 });
+          doc.text(legalText, 20, yPos + 105, { maxWidth: 170 });
           
           // Footer
           doc.setFontSize(8);
           doc.setTextColor(100);
-          doc.text('This is an automatically generated payment notification document.', 20, 250);
-          doc.text('TrustyBank - Your Trusted Financial Partner | www.trustybank.com', 20, 260);
-          doc.text(`Document generated on: ${new Date().toLocaleString()}`, 20, 270);
+          doc.text('This is an automatically generated payment notification document.', 20, yPos + 135);
+          doc.text('TrustyBank - Your Trusted Financial Partner | www.trustybank.com', 20, yPos + 145);
+          doc.text(`Document generated on: ${new Date().toLocaleString()}`, 20, yPos + 155);
         });
         
         doc.save(`payment-notifications-${schedule.schedule_name}-${new Date().toISOString().split('T')[0]}.pdf`);
