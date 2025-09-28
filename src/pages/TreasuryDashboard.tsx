@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Vault, TrendingUp, ArrowRightLeft, DollarSign, AlertCircle, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import TreasuryPasswordProtection from '@/components/treasury/TreasuryPasswordProtection';
 
 interface TreasuryHolding {
   id: string;
@@ -35,6 +36,7 @@ interface TreasuryTransaction {
 }
 
 const TreasuryDashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [holdings, setHoldings] = useState<TreasuryHolding[]>([]);
   const [transactions, setTransactions] = useState<TreasuryTransaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,9 +50,36 @@ const TreasuryDashboard = () => {
   });
   const { toast } = useToast();
 
+  // Check authentication on component mount
   useEffect(() => {
-    fetchData();
+    const checkAuth = () => {
+      const isAuth = sessionStorage.getItem('treasury_authenticated');
+      const authTime = sessionStorage.getItem('treasury_auth_time');
+      
+      if (isAuth && authTime) {
+        const currentTime = Date.now();
+        const sessionTime = parseInt(authTime);
+        const sessionDuration = 30 * 60 * 1000; // 30 minutes
+        
+        if (currentTime - sessionTime < sessionDuration) {
+          setIsAuthenticated(true);
+        } else {
+          // Session expired
+          sessionStorage.removeItem('treasury_authenticated');
+          sessionStorage.removeItem('treasury_auth_time');
+          setIsAuthenticated(false);
+        }
+      }
+    };
+    
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
 
   const fetchData = async () => {
     try {
@@ -166,6 +195,11 @@ const TreasuryDashboard = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // Show password protection if not authenticated
+  if (!isAuthenticated) {
+    return <TreasuryPasswordProtection onAuthenticated={() => setIsAuthenticated(true)} />;
+  }
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">Loading Treasury Dashboard...</div>;
