@@ -27,6 +27,8 @@ import CBSDashboard from "./pages/CBSDashboard";
 import TreasuryDashboard from "./pages/TreasuryDashboard";
 import JobPortalDashboard from "./pages/JobPortalDashboard";
 import StockExchangeDashboard from "./pages/StockExchangeDashboard";
+import BankingCertificatePage from "./pages/BankingCertificatePage";
+import BulkPaymentsPage from "./pages/BulkPaymentsPage";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
 
@@ -67,6 +69,8 @@ const AppContent = () => {
           <Route path="/treasury" element={<TreasuryDashboard />} />
           <Route path="/jobs" element={<JobPortalDashboard />} />
           <Route path="/stock-exchange" element={<StockExchangeDashboard />} />
+          <Route path="/banking-certificate" element={<BankingCertificatePage />} />
+          <Route path="/bulk-payments" element={<BulkPaymentsPage />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

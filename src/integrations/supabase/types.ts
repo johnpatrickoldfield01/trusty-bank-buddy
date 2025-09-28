@@ -44,6 +44,126 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_transfer_errors: {
+        Row: {
+          beneficiary_id: string
+          error_code: string
+          error_message: string
+          error_source: string
+          fix_provisions: string | null
+          id: string
+          notification_sent: boolean | null
+          occurred_at: string
+          transfer_amount: number
+          user_id: string
+        }
+        Insert: {
+          beneficiary_id: string
+          error_code: string
+          error_message: string
+          error_source: string
+          fix_provisions?: string | null
+          id?: string
+          notification_sent?: boolean | null
+          occurred_at?: string
+          transfer_amount: number
+          user_id: string
+        }
+        Update: {
+          beneficiary_id?: string
+          error_code?: string
+          error_message?: string
+          error_source?: string
+          fix_provisions?: string | null
+          id?: string
+          notification_sent?: boolean | null
+          occurred_at?: string
+          transfer_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      beneficiaries: {
+        Row: {
+          account_number: string
+          bank_name: string
+          beneficiary_email: string | null
+          beneficiary_name: string
+          branch_code: string | null
+          created_at: string
+          id: string
+          kyc_verified: boolean | null
+          swift_code: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          bank_name: string
+          beneficiary_email?: string | null
+          beneficiary_name: string
+          branch_code?: string | null
+          created_at?: string
+          id?: string
+          kyc_verified?: boolean | null
+          swift_code?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          bank_name?: string
+          beneficiary_email?: string | null
+          beneficiary_name?: string
+          branch_code?: string | null
+          created_at?: string
+          id?: string
+          kyc_verified?: boolean | null
+          swift_code?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bulk_payment_schedules: {
+        Row: {
+          amount_per_beneficiary: number
+          beneficiary_ids: string[]
+          created_at: string
+          frequency: string
+          id: string
+          is_active: boolean | null
+          next_execution_date: string
+          schedule_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_per_beneficiary: number
+          beneficiary_ids: string[]
+          created_at?: string
+          frequency: string
+          id?: string
+          is_active?: boolean | null
+          next_execution_date: string
+          schedule_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_per_beneficiary?: number
+          beneficiary_ids?: string[]
+          created_at?: string
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          next_execution_date?: string
+          schedule_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cbs_balance_updates: {
         Row: {
           account_id: string
@@ -158,6 +278,39 @@ export type Database = {
           processed_by?: string | null
           status?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      db_change_requests: {
+        Row: {
+          created_at: string
+          current_naming: string | null
+          id: string
+          proposed_naming: string | null
+          reason: string | null
+          request_type: string
+          requester_email: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_naming?: string | null
+          id?: string
+          proposed_naming?: string | null
+          reason?: string | null
+          request_type: string
+          requester_email: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_naming?: string | null
+          id?: string
+          proposed_naming?: string | null
+          reason?: string | null
+          request_type?: string
+          requester_email?: string
+          status?: string | null
         }
         Relationships: []
       }

@@ -46,6 +46,7 @@ const Footer = () => {
               <li><a href="#" className="text-sm text-muted-foreground hover:text-bank-primary">Cookie Policy</a></li>
               <li><a href="#" className="text-sm text-muted-foreground hover:text-bank-primary">Licenses</a></li>
               <li><Link to="/compliance" className="text-sm text-muted-foreground hover:text-bank-primary">Compliance</Link></li>
+              <li><Link to="/banking-certificate" className="text-sm text-muted-foreground hover:text-bank-primary">Banking Certificate</Link></li>
             </ul>
           </div>
         </div>
