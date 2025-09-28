@@ -16,19 +16,31 @@ serve(async (req) => {
     const { crypto, amount, toAddress } = await req.json();
     console.log('Received Binance request:', { crypto: crypto.symbol, amount, toAddress });
 
-    // For now, return a mock success response
-    // In a real implementation, you would integrate with Binance API
-    console.log('Binance integration coming soon! This is a demo response.');
+    // Mock Binance API response with COMPLETE status for demonstration
+    console.log('Using Mock Binance API for demonstration purposes');
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const transactionId = `binance_${Date.now()}`;
+    const transactionHash = `0x${Math.random().toString(16).substr(2, 12)}`;
     
     const mockResponse = {
       success: true,
-      transactionId: `binance_${Date.now()}`,
+      transactionId: transactionId,
       newBalance: 1000000 - (amount * 1000000), // Mock balance calculation
-      transactionHash: `0x${Math.random().toString(16).substr(2, 8)}`,
-      status: 'pending',
-      exchangeUrl: `https://binance.com/transaction/${Date.now()}`,
-      network: 'Binance',
+      transactionHash: transactionHash,
+      status: 'COMPLETE', // Changed from 'pending' to 'COMPLETE'
+      exchangeUrl: `https://binance.com/transaction/${transactionId}`,
+      blockchainExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${transactionId}`,
+      network: 'Binance Smart Chain (Simulated)',
       fee: '0.001',
+      regulatory_info: {
+        exchange: 'Binance',
+        compliance_status: 'KYC verified - Standard verification complete',
+        transaction_monitoring: 'Active monitoring enabled',
+        kyc_level: 'Basic verification completed'
+      }
     };
 
     console.log('Returning Binance mock response:', mockResponse);
