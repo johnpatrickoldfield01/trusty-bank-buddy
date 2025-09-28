@@ -6,3 +6,6 @@ project_id = "vetstaxdcukdtsfhuxsv"
 
 [functions.payfast-payment]
   verify_jwt = false
+
+[functions.blockchain-explorer-api]
+  verify_jwt = false

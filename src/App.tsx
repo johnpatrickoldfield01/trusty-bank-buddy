@@ -35,6 +35,7 @@ import DigitalDocumentsPage from "./pages/DigitalDocumentsPage";
 import BudgetingPage from "./pages/BudgetingPage";
 import ForeignExchangeDetailsPage from "./pages/ForeignExchangeDetailsPage";
 import CryptoTransactionsPage from "./pages/CryptoTransactionsPage";
+import BlockchainExplorerPage from "./pages/BlockchainExplorerPage";
 import Setup2FAPage from "./pages/Setup2FAPage";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
@@ -86,6 +87,8 @@ const AppContent = () => {
           <Route path="/budgeting" element={<BudgetingPage />} />
           <Route path="/foreign-exchange/:currency" element={<ForeignExchangeDetailsPage />} />
           <Route path="/crypto/:symbol/transactions" element={<CryptoTransactionsPage />} />
+          <Route path="/blockchain-explorer" element={<BlockchainExplorerPage />} />
+          <Route path="/blockchain-explorer/:identifier" element={<BlockchainExplorerPage />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
