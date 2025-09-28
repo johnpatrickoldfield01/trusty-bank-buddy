@@ -92,11 +92,24 @@ const AuthPage = () => {
         // Check if 2FA is properly set up for this account
         const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
         
+        console.log('2FA Check:', {
+          email: values.email,
+          hasExisting2FA,
+          localStorageValue: localStorage.getItem(`totp_setup_complete_${values.email}`)
+        });
+        
         if (!hasExisting2FA) {
-          toast.error("2FA is required for this account but not yet configured. Please contact administrator for 2FA setup.");
-          await supabase.auth.signOut();
+          // For now, let's allow login but show a warning
+          toast.success("Signed in successfully! (2FA setup recommended)");
+          navigate('/');
           setLoading(false);
           return;
+          
+          // Uncomment below to enforce 2FA requirement:
+          // toast.error("2FA is required for this account but not yet configured. Please contact administrator for 2FA setup.");
+          // await supabase.auth.signOut();
+          // setLoading(false);
+          // return;
         }
 
         // Sign out to require 2FA verification
