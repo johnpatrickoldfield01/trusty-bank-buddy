@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Globe, FileText, Upload, Building, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from '@/hooks/useSession';
 
 interface StockExchange {
   id: string;
@@ -57,6 +58,7 @@ const StockExchangeDashboard = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useSession();
 
   const [applicationForm, setApplicationForm] = useState({
     company_name: '',
@@ -107,6 +109,7 @@ const StockExchangeDashboard = () => {
     try {
       const { error } = await supabase.from('listing_applications').insert([
         {
+          user_id: user?.id || '',
           company_name: applicationForm.company_name,
           exchange_id: applicationForm.exchange_id,
           applicant_email: applicationForm.applicant_email,

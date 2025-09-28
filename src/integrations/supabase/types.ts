@@ -314,6 +314,60 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          document_number: string
+          document_type: string
+          expiry_date: string
+          file_name: string | null
+          file_path: string | null
+          file_size: number | null
+          id: string
+          issue_date: string
+          mime_type: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          description?: string | null
+          document_number: string
+          document_type: string
+          expiry_date: string
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          issue_date: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          document_number?: string
+          document_type?: string
+          expiry_date?: string
+          file_name?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          issue_date?: string
+          mime_type?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_categories: {
         Row: {
           description: string | null
