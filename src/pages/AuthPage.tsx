@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
 import TwoFactorAuth from '@/components/auth/TwoFactorAuth';
+import { Shield } from 'lucide-react';
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
@@ -170,10 +171,51 @@ const AuthPage = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Tabs defaultValue="signin" className="w-full max-w-md">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="signin">Sign In</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <TabsTrigger value="guest">Guest Access</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="guest">
+          <Card>
+            <CardHeader>
+              <CardTitle>Guest Access</CardTitle>
+              <CardDescription>
+                Access the application with view-only privileges. No registration required.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium text-blue-800">Guest Limitations</span>
+                  </div>
+                  <ul className="text-blue-700 text-sm space-y-1">
+                    <li>• View-only access to all sections</li>
+                    <li>• Cannot make transactions or changes</li>
+                    <li>• Cannot upload or delete documents</li>
+                    <li>• No access to personal data</li>
+                  </ul>
+                </div>
+                <Button 
+                  onClick={() => {
+                    // Set guest session
+                    localStorage.setItem('user_role', 'guest');
+                    localStorage.setItem('guest_session', 'true');
+                    toast.success("Logged in as guest with view-only access");
+                    navigate('/');
+                  }} 
+                  className="w-full"
+                >
+                  Continue as Guest
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         <TabsContent value="signin">
           <Card>
             <CardHeader>

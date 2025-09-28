@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import BeneficiaryManager from './BeneficiaryManager';
 import BulkPaymentPDFDownloader from './BulkPaymentPDFDownloader';
+import SeparatePaymentNotifications from './SeparatePaymentNotifications';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -316,6 +317,10 @@ const BulkPaymentScheduler = () => {
                     schedule={schedule}
                     beneficiaries={beneficiaries?.filter(b => schedule.beneficiary_ids.includes(b.id)) || []}
                     downloadType="individual"
+                  />
+                  <SeparatePaymentNotifications
+                    schedule={schedule}
+                    beneficiaries={beneficiaries?.filter(b => schedule.beneficiary_ids.includes(b.id)) || []}
                   />
                   <Button
                     size="sm"

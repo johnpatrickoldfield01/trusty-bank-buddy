@@ -105,17 +105,50 @@ export const useProofOfPaymentDownloader = () => {
 
       // Footer
       const finalTableY = (doc as any).lastAutoTable.finalY;
+      // Legal and Banking Arbitrage Section
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text("Legal & Banking Arbitrage Information", 14, finalTableY + 10);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const legalText = `
+LEGAL FRAMEWORK & ARBITRAGE PROVISIONS:
+
+Banking Arbitrage: This transaction is governed by the South African banking laws and regulations as administered by the South African Reserve Bank (SARB). Any disputes arising from this transaction shall be subject to banking arbitrage procedures as outlined in the National Credit Act and Banking Services Act.
+
+Regulatory Compliance: TrustyBank operates under Financial Services Provider License FSP12345 and adheres to all prescribed banking regulations including the Prevention of Organised Crime Act (POCA), Financial Intelligence Centre Act (FICA), and Exchange Control Regulations.
+
+Dispute Resolution: Should any dispute arise regarding this payment, the matter shall first be referred to TrustyBank's internal dispute resolution mechanism. If unresolved, the matter may be escalated to the Banking Ombudsman or the Financial Sector Conduct Authority (FSCA) for arbitrage.
+
+Legal Jurisdiction: This transaction and any related disputes shall be subject to the jurisdiction of South African courts, with specific reference to banking law precedents and regulatory framework.
+
+Documentation Retention: This proof of payment must be retained for a minimum of 7 years as required by banking regulations and may be used as evidence in any legal or arbitrage proceedings.
+
+Contact for Legal Matters: legal@trustybank.com | Banking Ombudsman: 0860 800 900`;
+
+      doc.text(legalText, 14, finalTableY + 20, { maxWidth: 180 });
+      
+      // Footer with enhanced legal notice
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        `Generated on ${new Date().toLocaleString('en-ZA')}. This is a computer-generated document and does not require a signature.`,
+        `Generated on ${new Date().toLocaleString('en-ZA')}. This is a legally binding document issued by TrustyBank (Pty) Ltd.`,
         14,
-        finalTableY + 20,
+        finalTableY + 100,
+        { maxWidth: 180 }
+      );
+      
+      doc.text(
+        `FSP License: 12345 | Registered Office: 123 Financial St, Cape Town 8001 | SARB Regulated Institution`,
+        14,
+        finalTableY + 110,
         { maxWidth: 180 }
       );
       
       doc.save(`proof-of-payment-${transaction.id}.pdf`);
-      toast.success('Proof of payment downloaded successfully!');
+      toast.success('Proof of payment with legal arbitrage information downloaded successfully!');
 
     } catch (error) {
       console.error('Error generating PDF:', error);

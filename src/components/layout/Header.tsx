@@ -1,9 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Menu, Bell, ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CreditCard, Menu, Bell, ChevronDown, LogOut, Eye } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
@@ -14,11 +16,17 @@ import {
 
 const Header = () => {
   const { user } = useSession();
+  const { isGuest, clearGuestSession } = useUserRole();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    if (isGuest) {
+      clearGuestSession();
+      navigate('/auth');
+    } else {
+      await supabase.auth.signOut();
+      navigate('/auth');
+    }
   };
 
   const southAfricanBanks = [
@@ -168,6 +176,12 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center gap-4">
+          {isGuest && (
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              Guest (View Only)
+            </Badge>
+          )}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-bank-primary" />
@@ -175,9 +189,10 @@ const Header = () => {
           <Button variant="ghost" size="icon" className="md:hidden">
             <Menu className="h-5 w-5" />
           </Button>
-          {user ? (
+          {user || isGuest ? (
             <Button onClick={handleLogout} className="hidden md:flex bg-bank-primary hover:bg-bank-primary/90" size="sm">
-              Sign Out
+              <LogOut className="h-4 w-4 mr-1" />
+              {isGuest ? 'Exit Guest' : 'Sign Out'}
             </Button>
           ) : (
             <Button asChild className="hidden md:flex bg-bank-primary hover:bg-bank-primary/90" size="sm">

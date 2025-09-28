@@ -34,9 +34,18 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
         doc.setFont('helvetica', 'bold');
         doc.text('BULK PAYMENT SCHEDULE SUMMARY', 105, 30, { align: 'center' });
         
+        // Company header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TrustyBank - Bulk Payment Services', 20, 45);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text('Licensed Financial Services Provider | FSP License: 12345', 20, 52);
+        
         // Schedule details
         doc.setFontSize(14);
-        doc.text('Schedule Details:', 20, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Schedule Details:', 20, 65);
         
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
@@ -47,9 +56,10 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           ['Total Beneficiaries:', schedule.beneficiary_ids.length.toString()],
           ['Total Amount:', `${currency} ${(schedule.amount_per_beneficiary * schedule.beneficiary_ids.length).toLocaleString()}`],
           ['Next Execution:', new Date(schedule.next_execution_date).toLocaleString()],
+          ['Status:', 'Processed'],
         ];
         
-        let yPos = 60;
+        let yPos = 75;
         scheduleDetails.forEach(([label, value]) => {
           doc.setFont('helvetica', 'bold');
           doc.text(label, 20, yPos);
@@ -58,54 +68,97 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           yPos += 10;
         });
         
-        // Beneficiaries table
+        // Payment Summary Header
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.text('Beneficiary List:', 20, yPos + 20);
+        doc.text('Accounts Paid - Summary:', 20, yPos + 15);
         
+        // Enhanced beneficiaries table with more details
         const tableData = beneficiaries.map((ben, index) => [
           (index + 1).toString(),
           ben.beneficiary_name,
           ben.bank_name,
           ben.account_number,
-          `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`
+          ben.swift_code || 'N/A',
+          `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`,
+          'Completed',
+          new Date().toLocaleDateString()
         ]);
         
         (doc as any).autoTable({
-          head: [['#', 'Beneficiary Name', 'Bank', 'Account Number', 'Amount']],
+          head: [['#', 'Beneficiary Name', 'Bank', 'Account', 'SWIFT', 'Amount', 'Status', 'Date']],
           body: tableData,
-          startY: yPos + 30,
-          styles: { fontSize: 10 },
-          headStyles: { fillColor: [41, 128, 185] }
+          startY: yPos + 25,
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [41, 128, 185] },
+          columnStyles: {
+            0: { cellWidth: 15 },
+            1: { cellWidth: 35 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 25 },
+            6: { cellWidth: 20 },
+            7: { cellWidth: 20 }
+          }
         });
         
-        doc.save(`bulk-payment-schedule-${schedule.id}.pdf`);
+        // Add summary at bottom
+        const finalY = (doc as any).lastAutoTable.finalY + 20;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Payment Summary:', 20, finalY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Total Payments Processed: ${beneficiaries.length}`, 20, finalY + 10);
+        doc.text(`Total Amount Disbursed: ${currency} ${(schedule.amount_per_beneficiary * beneficiaries.length).toLocaleString()}`, 20, finalY + 20);
+        doc.text(`Processing Date: ${new Date().toLocaleDateString()}`, 20, finalY + 30);
+        
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text('This document serves as confirmation of bulk payment processing.', 20, finalY + 50);
+        doc.text('For queries, contact TrustyBank Support at support@trustybank.com', 20, finalY + 58);
+        
+        doc.save(`bulk-payment-summary-${schedule.schedule_name}-${new Date().toISOString().split('T')[0]}.pdf`);
       } else {
-        // Individual transaction PDFs
+        // Individual transaction PDFs with enhanced details
         beneficiaries.forEach((beneficiary, index) => {
           if (index > 0) doc.addPage();
           
           doc.setFontSize(18);
           doc.setFont('helvetica', 'bold');
-          doc.text('PAYMENT CONFIRMATION', 105, 30, { align: 'center' });
+          doc.text('PAYMENT NOTIFICATION', 105, 30, { align: 'center' });
+          
+          // Company header
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('TrustyBank - Payment Services', 20, 45);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.text('Licensed Financial Services Provider | FSP License: 12345', 20, 52);
+          doc.text('Contact: +27 11 123 4567 | Email: payments@trustybank.com', 20, 59);
           
           // Transaction details
           doc.setFontSize(14);
-          doc.text('Payment Details:', 20, 60);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Payment Details:', 20, 75);
           
           doc.setFontSize(12);
           doc.setFont('helvetica', 'normal');
           const paymentDetails = [
-            ['Beneficiary:', beneficiary.beneficiary_name],
-            ['Bank:', beneficiary.bank_name],
+            ['Payment Reference:', `TBP-${schedule.schedule_name}-${beneficiary.id.substring(0, 8)}`],
+            ['Beneficiary Name:', beneficiary.beneficiary_name],
+            ['Bank Name:', beneficiary.bank_name],
             ['Account Number:', beneficiary.account_number],
-            ['SWIFT Code:', beneficiary.swift_code || 'N/A'],
-            ['Amount:', `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`],
-            ['Date:', new Date().toLocaleDateString()],
-            ['Reference:', `${schedule.schedule_name}-${beneficiary.id.substring(0, 8)}`],
+            ['SWIFT/Branch Code:', beneficiary.swift_code || 'N/A'],
+            ['Payment Amount:', `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`],
+            ['Processing Date:', new Date().toLocaleDateString()],
+            ['Processing Time:', new Date().toLocaleTimeString()],
+            ['Payment Status:', 'Successfully Processed'],
+            ['Transaction ID:', `TXN-${Date.now()}-${index + 1}`],
           ];
           
-          let yPos = 70;
+          let yPos = 85;
           paymentDetails.forEach(([label, value]) => {
             doc.setFont('helvetica', 'bold');
             doc.text(label, 20, yPos);
@@ -114,16 +167,29 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
             yPos += 10;
           });
           
+          // Add notification message
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Payment Notification:', 20, yPos + 15);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          
+          const notificationText = `Dear ${beneficiary.beneficiary_name},\n\nThis notification confirms that a payment of ${currency} ${schedule.amount_per_beneficiary.toLocaleString()} has been processed to your account ending in ${beneficiary.account_number.slice(-4)} at ${beneficiary.bank_name}.\n\nThe payment was processed as part of the "${schedule.schedule_name}" bulk payment schedule and should reflect in your account within 1-2 business days.\n\nIf you have any questions regarding this payment, please contact us using the details provided above.`;
+          
+          doc.text(notificationText, 20, yPos + 25, { maxWidth: 170 });
+          
           // Footer
-          doc.setFontSize(10);
-          doc.text('This is an automatically generated payment confirmation.', 20, 250);
-          doc.text('TrustyBank - Your Trusted Financial Partner', 20, 260);
+          doc.setFontSize(8);
+          doc.setTextColor(100);
+          doc.text('This is an automatically generated payment notification document.', 20, 250);
+          doc.text('TrustyBank - Your Trusted Financial Partner | www.trustybank.com', 20, 260);
+          doc.text(`Document generated on: ${new Date().toLocaleString()}`, 20, 270);
         });
         
-        doc.save(`individual-payments-${schedule.id}.pdf`);
+        doc.save(`payment-notifications-${schedule.schedule_name}-${new Date().toISOString().split('T')[0]}.pdf`);
       }
       
-      toast.success(`${downloadType === 'bulk' ? 'Bulk schedule' : 'Individual payment'} PDF downloaded successfully`);
+      toast.success(`${downloadType === 'bulk' ? 'Bulk payment summary' : 'Payment notifications'} PDF downloaded successfully`);
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast.error('Failed to download PDF');

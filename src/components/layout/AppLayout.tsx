@@ -1,7 +1,8 @@
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
+import { useUserRole } from '@/hooks/useUserRole';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/mobile/MobileBottomNav';
@@ -18,6 +19,7 @@ export type Profile = {
 
 const AppLayout = () => {
   const { session, loading, user } = useSession();
+  const { isGuest, userRole } = useUserRole();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -25,12 +27,18 @@ const AppLayout = () => {
   const { isNative } = useCapacitor();
 
   useEffect(() => {
-    if (!loading && !session) {
+    if (!loading && !session && !isGuest) {
       navigate('/auth');
     }
-  }, [session, loading, navigate]);
+  }, [session, loading, navigate, isGuest]);
 
   useEffect(() => {
+    if (isGuest) {
+      setProfile({ id: 'guest', full_name: 'Guest User' });
+      setProfileLoading(false);
+      return;
+    }
+
     if (session && user) {
       const fetchProfile = async () => {
         setProfileLoading(true);
@@ -64,9 +72,18 @@ const AppLayout = () => {
       };
       fetchProfile();
     }
-  }, [session, user]);
+  }, [session, user, isGuest]);
 
-  if (loading || profileLoading || !session || !profile) {
+  if ((loading || profileLoading) && !isGuest) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <div className="text-2xl font-medium">Loading...</div>
+        </div>
+    );
+  }
+
+  // Require profile for non-guest users
+  if (!isGuest && (!session || !profile)) {
     return (
         <div className="flex h-screen items-center justify-center">
             <div className="text-2xl font-medium">Loading...</div>
@@ -84,7 +101,7 @@ const AppLayout = () => {
         "flex-1",
         (isMobile || isNative) && "pb-20" // Add bottom padding for mobile nav
       )}>
-        <Outlet context={{ profile }} />
+        <Outlet context={{ profile, isGuest, userRole }} />
       </main>
       {!isNative && <Footer />}
       {(isMobile || isNative) && <MobileBottomNav />}
