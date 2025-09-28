@@ -98,14 +98,19 @@ const PayFastPaymentProcessor = ({
       if (error) throw error;
 
       if (data.success) {
-        // Process each payment individually
+        // Process each payment individually with proper spacing
         let successCount = 0;
-        for (const payment of data.payments) {
-          // Open each payment in a new tab/window
+        
+        console.log(`Opening ${data.payments.length} PayFast payment windows...`);
+        
+        for (let i = 0; i < data.payments.length; i++) {
+          const payment = data.payments[i];
+          
+          // Create and submit form for each payment
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = payment.paymentUrl;
-          form.target = '_blank';
+          form.target = `_payfast_${i}`; // Unique target for each window
 
           Object.entries(payment.paymentData).forEach(([key, value]) => {
             const input = document.createElement('input');
@@ -116,17 +121,22 @@ const PayFastPaymentProcessor = ({
           });
 
           document.body.appendChild(form);
+          
+          // Open in new window with unique name
+          window.open('', `_payfast_${i}`, 'width=800,height=600,scrollbars=yes,resizable=yes');
           form.submit();
           document.body.removeChild(form);
           
           successCount++;
           
-          // Small delay between opening payment windows
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Add delay between opening windows to prevent browser blocking
+          if (i < data.payments.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+          }
         }
 
         setPaymentStatus('completed');
-        toast.success(`${successCount} PayFast payment windows opened. Complete each payment to finish the process.`);
+        toast.success(`${successCount} PayFast payment windows opened. Complete each payment individually to process the full R${(scheduleData.amount_per_beneficiary * successCount).toLocaleString()} bulk payment.`);
         onPaymentComplete?.();
       }
     } catch (error: any) {

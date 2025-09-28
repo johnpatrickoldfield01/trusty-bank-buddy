@@ -3,3 +3,6 @@ project_id = "vetstaxdcukdtsfhuxsv"
 
 [functions.create-checkout]
   verify_jwt = true
+
+[functions.payfast-payment]
+  verify_jwt = false

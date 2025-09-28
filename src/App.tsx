@@ -67,6 +67,8 @@ const AppContent = () => {
           <Route path="/payments" element={<PaymentsPage />} />
           <Route path="/payment/success" element={<PaymentSuccessPage />} />
           <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-cancelled" element={<PaymentCancelledPage />} />
           <Route path="/transaction/:id" element={<TransactionDetailsPage />} />
           <Route path="/standard-bank" element={<StandardBankPage />} />
           <Route path="/crypto" element={<CryptoPage />} />

@@ -118,16 +118,16 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Beneficiary not found');
       }
 
-      // Prepare PayFast payment data with proper field values
+      // Prepare PayFast payment data with user's actual email
       const paymentData: any = {
         merchant_id: merchantId,
         merchant_key: merchantKey,
-        return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
-        cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
-        notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-        name_first: 'Test',
-        name_last: 'Customer',
-        email_address: 'test@example.com',
+        return_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=return`,
+        cancel_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=cancel`,
+        notify_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=notify`,
+        name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
+        name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
+        email_address: userEmail, // Use actual user email
         m_payment_id: reference,
         amount: amount.toFixed(2),
         item_name: description,
@@ -178,12 +178,12 @@ const handler = async (req: Request): Promise<Response> => {
         const paymentData: any = {
           merchant_id: merchantId,
           merchant_key: merchantKey,
-          return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
-          cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
-          notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-          name_first: 'Test',
-          name_last: 'Customer',
-          email_address: 'test@example.com',
+          return_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=return`,
+          cancel_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=cancel`,
+          notify_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/payfast-payment?action=notify`,
+          name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
+          name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
+          email_address: userEmail, // Use actual user email for notifications
           m_payment_id: reference,
           amount: amountPerBeneficiary.toFixed(2),
           item_name: description,
@@ -220,9 +220,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'notify') {
-      // Handle PayFast IPN (Instant Payment Notification)
-      const url = new URL(req.url);
-      const paymentData = Object.fromEntries(url.searchParams);
+      // Handle PayFast ITN (Instant Transaction Notification)
+      // This endpoint needs to be publicly accessible without authentication
+      console.log('PayFast ITN received - Request method:', req.method);
+      console.log('PayFast ITN received - Headers:', Object.fromEntries(req.headers.entries()));
+      
+      let paymentData: Record<string, string> = {};
+      
+      // Handle both GET and POST ITN requests
+      if (req.method === 'GET') {
+        const url = new URL(req.url);
+        paymentData = Object.fromEntries(url.searchParams);
+      } else if (req.method === 'POST') {
+        const formData = await req.formData();
+        paymentData = Object.fromEntries(formData.entries()) as Record<string, string>;
+      }
       
       console.log('PayFast IPN received:', paymentData);
 
@@ -292,21 +304,31 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'return') {
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'Payment completed successfully'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      // Handle successful payment return - redirect to success page
+      console.log('PayFast return success');
+      
+      const redirectUrl = `https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-success`;
+      
+      return new Response(null, {
+        status: 302,
+        headers: { 
+          'Location': redirectUrl,
+          ...corsHeaders 
+        }
       });
 
     } else if (action === 'cancel') {
-      return new Response(JSON.stringify({
-        success: false,
-        message: 'Payment was cancelled'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      // Handle cancelled payment - redirect to cancel page
+      console.log('PayFast payment cancelled');
+      
+      const redirectUrl = `https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-cancelled`;
+      
+      return new Response(null, {
+        status: 302,
+        headers: { 
+          'Location': redirectUrl,
+          ...corsHeaders 
+        }
       });
 
     } else {
