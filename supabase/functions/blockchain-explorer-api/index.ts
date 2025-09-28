@@ -15,11 +15,14 @@ serve(async (req) => {
     const url = new URL(req.url);
     const pathParts = url.pathname.split('/');
     
-    // Support different endpoint formats: /tx/{txid} or /hash/{hash}
-    const endpoint = pathParts[1]; // 'tx' or 'hash'
-    const identifier = pathParts[2]; // transaction ID or hash
+    // Handle Supabase edge function URL structure: /functions/v1/blockchain-explorer-api/tx/{txid}
+    // Find the indices after 'blockchain-explorer-api'
+    const apiIndex = pathParts.indexOf('blockchain-explorer-api');
+    const endpoint = pathParts[apiIndex + 1]; // 'tx' or 'hash'
+    const identifier = pathParts[apiIndex + 2]; // transaction ID or hash
     
-    console.log(`Blockchain Explorer API: ${endpoint}/${identifier}`);
+    console.log(`Blockchain Explorer API: Full path: ${url.pathname}`);
+    console.log(`Parsed - endpoint: ${endpoint}, identifier: ${identifier}`);
 
     // Mock blockchain explorer database - in real scenario this would be a proper database
     const mockTransactions = new Map([
