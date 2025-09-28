@@ -310,29 +310,65 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
     } else if (action === 'return') {
-      // Handle successful payment return - redirect to success page
+      // Handle successful payment return - redirect to success page with HTML
       console.log('PayFast return success');
       
-      const redirectUrl = `https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-success`;
+      const successHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Successful</title>
+          <meta http-equiv="refresh" content="3;url=https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-success">
+        </head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2>Payment Successful!</h2>
+          <p>Your payment has been processed successfully.</p>
+          <p>Redirecting to dashboard...</p>
+          <script>
+            setTimeout(function() {
+              window.close();
+            }, 3000);
+          </script>
+        </body>
+        </html>
+      `;
       
-      return new Response(null, {
-        status: 302,
+      return new Response(successHtml, {
+        status: 200,
         headers: { 
-          'Location': redirectUrl,
+          'Content-Type': 'text/html',
           ...corsHeaders 
         }
       });
 
     } else if (action === 'cancel') {
-      // Handle cancelled payment - redirect to cancel page
+      // Handle cancelled payment - redirect to cancel page with HTML
       console.log('PayFast payment cancelled');
       
-      const redirectUrl = `https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-cancelled`;
+      const cancelHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Payment Cancelled</title>
+          <meta http-equiv="refresh" content="3;url=https://b23c6a1d-e350-4cc9-bfba-3e402cc226bd.lovableproject.com/payment-cancelled">
+        </head>
+        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+          <h2>Payment Cancelled</h2>
+          <p>Your payment was cancelled. No charges have been made.</p>
+          <p>Redirecting back...</p>
+          <script>
+            setTimeout(function() {
+              window.close();
+            }, 3000);
+          </script>
+        </body>
+        </html>
+      `;
       
-      return new Response(null, {
-        status: 302,
+      return new Response(cancelHtml, {
+        status: 200,
         headers: { 
-          'Location': redirectUrl,
+          'Content-Type': 'text/html',
           ...corsHeaders 
         }
       });

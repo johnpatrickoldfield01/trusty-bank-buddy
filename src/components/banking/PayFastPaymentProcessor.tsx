@@ -184,12 +184,13 @@ const PayFastPaymentProcessor = ({
         </div>
 
         <div className="p-4 bg-muted rounded-lg">
-          <h4 className="font-medium mb-2">Payment Process:</h4>
+          <h4 className="font-medium mb-2">Important - Complete ALL Payments:</h4>
           <ul className="text-sm space-y-1 text-muted-foreground">
-            <li>• Each payment opens in a new PayFast window</li>
-            <li>• Complete each payment individually</li>
-            <li>• PayFast handles all banking compliance</li>
-            <li>• Confirmation emails sent automatically</li>
+            <li>• <strong>{selectedBeneficiaries.length} payment windows</strong> will open (one for each beneficiary)</li>
+            <li>• <strong>Complete each payment individually</strong> - don't close windows until done</li>
+            <li>• <strong>Total amount: {currency} {totalAmount.toLocaleString()}</strong> ({selectedBeneficiaries.length} × {currency} {scheduleData?.amount_per_beneficiary.toLocaleString()})</li>
+            <li>• Each payment processes separately through PayFast</li>
+            <li>• Use test card: 4000000000000002 (CVV: 123)</li>
           </ul>
         </div>
 
@@ -201,10 +202,10 @@ const PayFastPaymentProcessor = ({
               className="w-full"
               size="lg"
             >
-              {isProcessing ? 'Processing...' : `Process ${selectedBeneficiaries.length} Payments via PayFast`}
+              {isProcessing ? 'Opening Payment Windows...' : `Process ALL ${selectedBeneficiaries.length} Payments (${currency} ${totalAmount.toLocaleString()}) via PayFast`}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              This will open individual PayFast payment windows for each beneficiary
+              <strong>⚠️ Important:</strong> {selectedBeneficiaries.length} separate payment windows will open. Complete each one to process the full {currency} {totalAmount.toLocaleString()} amount.
             </p>
           </div>
         )}
@@ -219,7 +220,10 @@ const PayFastPaymentProcessor = ({
         {paymentStatus === 'completed' && (
           <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            <span className="text-green-800">Payment windows opened. Complete each payment to finish the process.</span>
+            <div className="text-green-800">
+              <div className="font-medium">{selectedBeneficiaries.length} payment windows opened successfully!</div>
+              <div className="text-sm">Complete each payment window to process the full {currency} {totalAmount.toLocaleString()} amount.</div>
+            </div>
           </div>
         )}
 
