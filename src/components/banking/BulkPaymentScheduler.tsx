@@ -22,6 +22,7 @@ interface BulkPaymentSchedule {
   next_execution_date: string;
   is_active: boolean;
   created_at: string;
+  currency?: string;
 }
 
 const BulkPaymentScheduler = () => {
@@ -33,7 +34,8 @@ const BulkPaymentScheduler = () => {
     schedule_name: '',
     amount_per_beneficiary: '',
     frequency: 'monthly',
-    next_execution_date: ''
+    next_execution_date: '',
+    currency: 'ZAR'
   });
 
   const { data: schedules, isLoading } = useQuery({
@@ -92,7 +94,8 @@ const BulkPaymentScheduler = () => {
         schedule_name: '',
         amount_per_beneficiary: '',
         frequency: 'monthly',
-        next_execution_date: ''
+        next_execution_date: '',
+        currency: 'ZAR'
       });
       queryClient.invalidateQueries({ queryKey: ['bulk_payment_schedules'] });
     },
@@ -177,7 +180,25 @@ const BulkPaymentScheduler = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="amount">Amount per Beneficiary (R)</Label>
+                <Label htmlFor="currency">Currency</Label>
+                <Select value={newSchedule.currency || 'ZAR'} onValueChange={(value) => setNewSchedule(prev => ({ ...prev, currency: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ZAR">ZAR (South African Rand)</SelectItem>
+                    <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                    <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                    <SelectItem value="GBP">GBP (British Pound)</SelectItem>
+                    <SelectItem value="HKD">HKD (Hong Kong Dollar)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="amount">Amount per Beneficiary</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -260,7 +281,7 @@ const BulkPaymentScheduler = () => {
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    R{schedule.amount_per_beneficiary.toLocaleString()} per beneficiary • {schedule.frequency}
+                    {schedule.currency || 'ZAR'} {schedule.amount_per_beneficiary.toLocaleString()} per beneficiary • {schedule.frequency}
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock className="h-3 w-3" />

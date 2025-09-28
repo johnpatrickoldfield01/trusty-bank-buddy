@@ -27,6 +27,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTra
       bankName: '',
       accountNumber: '',
       swiftCode: '',
+      currency: 'ZAR',
       amount: undefined,
     },
   });
@@ -40,6 +41,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTra
         bankName: '',
         accountNumber: '',
         swiftCode: '',
+        currency: 'ZAR',
         amount: undefined,
       });
     }

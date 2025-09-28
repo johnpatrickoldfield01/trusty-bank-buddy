@@ -62,10 +62,29 @@ const Header = () => {
       { name: 'Sumitomo Mitsui', url: 'https://www.smbc.co.jp' },
       { name: 'Mizuho Bank', url: 'https://www.mizuhobank.com' },
     ],
+    'Asia': [
+      { name: 'DBS Bank (Singapore)', url: 'https://www.dbs.com.sg' },
+      { name: 'OCBC Bank (Singapore)', url: 'https://www.ocbc.com' },
+      { name: 'UOB (Singapore)', url: 'https://www.uob.com.sg' },
+      { name: 'HSBC Hong Kong', url: 'https://www.hsbc.com.hk' },
+      { name: 'Standard Chartered Hong Kong', url: 'https://www.sc.com/hk' },
+      { name: 'Bank of China Hong Kong', url: 'https://www.bochk.com' },
+      { name: 'ICBC (China)', url: 'https://www.icbc.com.cn' },
+      { name: 'China Construction Bank', url: 'https://www.ccb.com' },
+    ],
+    'Australia': [
+      { name: 'Commonwealth Bank', url: 'https://www.commbank.com.au' },
+      { name: 'ANZ Bank', url: 'https://www.anz.com.au' },
+      { name: 'Westpac', url: 'https://www.westpac.com.au' },
+      { name: 'NAB (National Australia Bank)', url: 'https://www.nab.com.au' },
+      { name: 'Macquarie Bank', url: 'https://www.macquarie.com.au' },
+    ],
     'Canada': [
       { name: 'Royal Bank of Canada', url: 'https://www.rbc.com' },
       { name: 'TD Bank', url: 'https://www.td.com' },
       { name: 'Bank of Montreal', url: 'https://www.bmo.com' },
+      { name: 'Scotiabank', url: 'https://www.scotiabank.com' },
+      { name: 'CIBC', url: 'https://www.cibc.com' },
     ],
   };
 

@@ -32,6 +32,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
       accountNumber: '',
       branchCode: '',
       swiftCode: '',
+      currency: 'ZAR',
       amount: undefined,
     },
   });
@@ -47,6 +48,7 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
         accountNumber: '',
         branchCode: '',
         swiftCode: '',
+        currency: 'ZAR',
         amount: undefined,
       });
     }
