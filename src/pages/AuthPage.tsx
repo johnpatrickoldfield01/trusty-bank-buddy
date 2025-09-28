@@ -75,7 +75,16 @@ const AuthPage = () => {
     const AUTHORIZED_2FA_EMAIL = 'oldfieldjohnpatrick@gmail.com';
     
     if (values.email === AUTHORIZED_2FA_EMAIL) {
-      // For the authorized email, require 2FA
+      // Check if 2FA is properly set up for this account
+      const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
+      
+      if (!hasExisting2FA) {
+        toast.error("2FA is required for this account but not yet configured. Please contact administrator for 2FA setup.");
+        setLoading(false);
+        return;
+      }
+
+      // For the authorized email with 2FA set up, require verification
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
@@ -87,21 +96,13 @@ const AuthPage = () => {
         return;
       }
 
-      // Sign out immediately to require 2FA
+      // Sign out immediately to require 2FA verification
       await supabase.auth.signOut();
       
-      // Show 2FA screen
+      // Show 2FA verification screen (no setup allowed)
       setUserEmail(values.email);
       setShow2FA(true);
-      
-      // Check if user has existing 2FA setup
-      const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
-      
-      if (hasExisting2FA) {
-        toast.success("Password verified. Please enter your authenticator code.");
-      } else {
-        toast.success("Password verified. Please set up 2FA for enhanced security.");
-      }
+      toast.success("Password verified. Please enter your authenticator code.");
     } else {
       // Regular sign in for other users
       const { error } = await supabase.auth.signInWithPassword({

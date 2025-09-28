@@ -145,238 +145,70 @@ const TwoFactorAuth = ({ userEmail, onTwoFactorComplete, onBack }: TwoFactorAuth
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Show existing user message */}
-          {isExistingUser && (
+          {isExistingUser ? (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-5 w-5 text-blue-600" />
-                <span className="font-medium text-blue-800">Welcome Back!</span>
+                <span className="font-medium text-blue-800">2FA Verification Required</span>
               </div>
               <p className="text-blue-700 text-sm">
-                Your account has 2FA enabled. Please verify your identity to continue.
+                Enter your authenticator code to complete sign in.
+              </p>
+            </div>
+          ) : (
+            <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-5 w-5 text-red-600" />
+                <span className="font-medium text-red-800">2FA Setup Required</span>
+              </div>
+              <p className="text-red-700 text-sm">
+                This account requires 2FA but it's not configured. Please contact your administrator to set up 2FA through the secure induction process.
               </p>
             </div>
           )}
 
-          {/* Method Selection - only show for new users or if TOTP isn't set up */}
-          {!isExistingUser && (
-            <div>
-              <Label className="text-base font-medium mb-3 block">Choose Authentication Method</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedMethod === 'email' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedMethod('email')}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Mail className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                    <h3 className="font-medium">Email Code</h3>
-                    <p className="text-sm text-muted-foreground">Receive code via email</p>
-                    {selectedMethod === 'email' && (
-                      <Badge className="mt-2 bg-blue-100 text-blue-800">Selected</Badge>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card 
-                  className={`cursor-pointer border-2 transition-all ${
-                    selectedMethod === 'totp' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => setSelectedMethod('totp')}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Smartphone className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                    <h3 className="font-medium">Google Authenticator</h3>
-                    <p className="text-sm text-muted-foreground">Use authenticator app</p>
-                    {selectedMethod === 'totp' && (
-                      <Badge className="mt-2 bg-green-100 text-green-800">Selected</Badge>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {/* Email 2FA - only show if not existing user or email is selected */}
-          {!isExistingUser && selectedMethod === 'email' && (
+          {/* Only show 2FA verification for existing users - no setup during login */}
+          {isExistingUser && selectedMethod === 'totp' && (
             <div className="space-y-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mail className="h-5 w-5 text-blue-600" />
-                  <span className="font-medium text-blue-800">Email Verification</span>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
+                  <CheckCircle className="h-5 w-5" />
+                  <span>Please enter your authenticator code to continue</span>
                 </div>
-                <p className="text-blue-700 text-sm">
-                  We'll send a 6-digit verification code to: <strong>{userEmail}</strong>
-                </p>
-              </div>
 
-              {!emailSent ? (
-                <Button onClick={sendEmailCode} disabled={isVerifying} className="w-full">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Send Verification Code
+                <div>
+                  <Label htmlFor="totpCode">Enter Authenticator Code</Label>
+                  <Input
+                    id="totpCode"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="123456"
+                    maxLength={6}
+                    className="text-center text-lg tracking-widest"
+                  />
+                </div>
+
+                <Button 
+                  onClick={verifyCode} 
+                  disabled={isVerifying || verificationCode.length !== 6} 
+                  className="w-full"
+                >
+                  Verify Code
                 </Button>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="h-4 w-4" />
-                    <span className="text-sm">Verification code sent successfully</span>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="emailCode">Enter Verification Code</Label>
-                    <Input
-                      id="emailCode"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="123456"
-                      maxLength={6}
-                      className="text-center text-lg tracking-widest"
-                    />
-                  </div>
-                  
-                  <Button onClick={verifyCode} disabled={isVerifying || verificationCode.length !== 6} className="w-full">
-                    Verify Code
-                  </Button>
-                  
-                  <Button variant="outline" onClick={sendEmailCode} disabled={isVerifying} className="w-full">
-                    Resend Code
-                  </Button>
-                </div>
-              )}
+              </div>
             </div>
           )}
 
-          {/* TOTP 2FA - for both new and existing users */}
-          {selectedMethod === 'totp' && (
+          {/* Show message for users without 2FA setup */}
+          {!isExistingUser && (
             <div className="space-y-4">
-              {!totpSetupComplete ? (
-                <div className="space-y-4">
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <QrCode className="h-5 w-5 text-green-600" />
-                      <span className="font-medium text-green-800">Setup Google Authenticator</span>
-                    </div>
-                    <p className="text-green-700 text-sm">
-                      Configure your authenticator app to generate time-based codes
-                    </p>
-                  </div>
-
-                  {!totpSecret ? (
-                    <Button onClick={setupTOTP} className="w-full">
-                      <QrCode className="h-4 w-4 mr-2" />
-                      Generate Setup Code
-                    </Button>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <h3 className="font-medium mb-3">Scan QR Code</h3>
-                        <div className="bg-white p-4 rounded-lg inline-block border">
-                          <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label>Or enter this secret key manually:</Label>
-                        <div className="flex gap-2 mt-1">
-                          <Input 
-                            value={totpSecret} 
-                            readOnly 
-                            className="font-mono text-sm"
-                          />
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => copyToClipboard(totpSecret)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="totpSetupCode">Verify Setup (Enter code from app)</Label>
-                        <Input
-                          id="totpSetupCode"
-                          value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                          placeholder="123456"
-                          maxLength={6}
-                          className="text-center text-lg tracking-widest"
-                        />
-                      </div>
-
-                      <Button 
-                        onClick={confirmTOTPSetup} 
-                        disabled={verificationCode.length !== 6} 
-                        className="w-full"
-                      >
-                        Complete Setup
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded">
-                    <CheckCircle className="h-5 w-5" />
-                    <span>
-                      {isExistingUser 
-                        ? 'Please enter your authenticator code to continue' 
-                        : 'Google Authenticator is set up for your account'
-                      }
-                    </span>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="totpCode">Enter Authenticator Code</Label>
-                    <Input
-                      id="totpCode"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="123456"
-                      maxLength={6}
-                      className="text-center text-lg tracking-widest"
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={verifyCode} 
-                    disabled={isVerifying || verificationCode.length !== 6} 
-                    className="w-full"
-                  >
-                    Verify Code
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Reset 2FA option for testing - only show for existing users */}
-          {isExistingUser && (
-            <div className="border-t pt-4">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  localStorage.removeItem(`totp_secret_${userEmail}`);
-                  localStorage.removeItem(`totp_setup_complete_${userEmail}`);
-                  setTotpSetupComplete(false);
-                  setIsExistingUser(false);
-                  setSelectedMethod('email');
-                  setVerificationCode('');
-                  toast.success('2FA reset successfully. You can now set up a new method.');
-                }} 
-                className="w-full text-red-600 border-red-200 hover:bg-red-50"
-              >
-                Reset 2FA Setup
+              <p className="text-center text-muted-foreground">
+                Contact your administrator to complete the secure 2FA setup process.
+              </p>
+              <Button variant="outline" onClick={onBack} className="w-full">
+                Back to Login
               </Button>
             </div>
-          )}
-
-          {/* Back button - only show for new users or if they can change method */}
-          {!isExistingUser && (
-            <Button variant="outline" onClick={onBack} className="w-full">
-              Back to Login
-            </Button>
           )}
         </CardContent>
       </Card>

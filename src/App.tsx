@@ -34,6 +34,7 @@ import DigitalDocumentsPage from "./pages/DigitalDocumentsPage";
 import BudgetingPage from "./pages/BudgetingPage";
 import ForeignExchangeDetailsPage from "./pages/ForeignExchangeDetailsPage";
 import CryptoTransactionsPage from "./pages/CryptoTransactionsPage";
+import Setup2FAPage from "./pages/Setup2FAPage";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
 
@@ -54,6 +55,7 @@ const AppContent = () => {
     <div className={`min-h-screen ${isNative ? 'pt-safe-area-inset-top pb-safe-area-inset-bottom' : ''}`}>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/setup-2fa" element={<Setup2FAPage />} />
         <Route element={<AppLayout />}>
           <Route path="/" element={<Index />} />
           <Route path="/cards" element={<CardsPage />} />
