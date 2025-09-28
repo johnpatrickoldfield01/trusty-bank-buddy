@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
+import { crypto } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,21 +25,33 @@ interface BulkPaymentRequest {
 }
 
 const generateSignature = async (data: Record<string, any>, passphrase: string): Promise<string> => {
+  // Remove signature if it exists
+  const cleanData = { ...data };
+  delete cleanData.signature;
+  
   // Sort the data by key and create query string
-  const sortedData = Object.keys(data)
+  const sortedData = Object.keys(cleanData)
     .sort()
-    .filter(key => data[key] !== "" && data[key] !== null && data[key] !== undefined)
-    .map(key => `${key}=${encodeURIComponent(data[key])}`)
+    .filter(key => cleanData[key] !== "" && cleanData[key] !== null && cleanData[key] !== undefined)
+    .map(key => `${key}=${encodeURIComponent(cleanData[key])}`)
     .join('&');
   
   // Add passphrase if provided
   const stringToHash = passphrase ? `${sortedData}&passphrase=${passphrase}` : sortedData;
   
-  // Create MD5 hash using crypto API
+  console.log('PayFast signature string:', stringToHash);
+  
+  // Use SHA-1 and truncate to 32 characters for PayFast compatibility
   const encoder = new TextEncoder();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(stringToHash));
+  const hashBuffer = await crypto.subtle.digest('SHA-1', encoder.encode(stringToHash));
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  // PayFast expects exactly 32 characters
+  const signature = hashHex.substring(0, 32);
+  console.log('Generated signature:', signature, 'Length:', signature.length);
+  
+  return signature;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -88,8 +101,8 @@ const handler = async (req: Request): Promise<Response> => {
         return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
         cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
         notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-        name_first: beneficiary.beneficiary_name.split(' ')[0],
-        name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' '),
+        name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
+        name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
         email_address: beneficiary.beneficiary_email || userEmail,
         m_payment_id: reference,
         amount: amount.toFixed(2),
@@ -139,8 +152,8 @@ const handler = async (req: Request): Promise<Response> => {
           return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
           cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
           notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-          name_first: beneficiary.beneficiary_name.split(' ')[0],
-          name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' '),
+          name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
+          name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
           email_address: beneficiary.beneficiary_email || userEmail,
           m_payment_id: reference,
           amount: amountPerBeneficiary.toFixed(2),
