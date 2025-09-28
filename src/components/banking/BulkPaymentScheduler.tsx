@@ -81,14 +81,14 @@ const BulkPaymentScheduler = () => {
           amount_per_beneficiary: parseFloat(scheduleData.amount_per_beneficiary),
           frequency: scheduleData.frequency,
           next_execution_date: scheduleData.next_execution_date,
-          is_active: true
+          is_active: scheduleData.frequency === 'immediate' ? false : true // Set to false for immediate as it's already executed
         }]);
 
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      toast.success('Bulk payment schedule created successfully');
+      toast.success(newSchedule.frequency === 'immediate' ? 'Bulk payments executed immediately' : 'Bulk payment schedule created successfully');
       setIsCreating(false);
       setSelectedBeneficiaries([]);
       setNewSchedule({
@@ -135,8 +135,13 @@ const BulkPaymentScheduler = () => {
   });
 
   const handleCreateSchedule = () => {
-    if (!newSchedule.schedule_name || !newSchedule.amount_per_beneficiary || !newSchedule.next_execution_date) {
+    if (!newSchedule.schedule_name || !newSchedule.amount_per_beneficiary) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (newSchedule.frequency !== 'immediate' && !newSchedule.next_execution_date) {
+      toast.error('Please select an execution date');
       return;
     }
 
@@ -145,7 +150,15 @@ const BulkPaymentScheduler = () => {
       return;
     }
 
-    createSchedule.mutate(newSchedule);
+    // Set immediate execution time if frequency is immediate
+    const executionDate = newSchedule.frequency === 'immediate' 
+      ? new Date().toISOString() 
+      : newSchedule.next_execution_date;
+
+    createSchedule.mutate({
+      ...newSchedule,
+      next_execution_date: executionDate
+    });
   };
 
   if (isLoading) {
@@ -225,17 +238,17 @@ const BulkPaymentScheduler = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="next_execution">
-                  {newSchedule.frequency === 'immediate' ? 'Execution Date' : 'Next Execution Date'}
-                </Label>
-                <Input
-                  id="next_execution"
-                  type="datetime-local"
-                  value={newSchedule.next_execution_date}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, next_execution_date: e.target.value }))}
-                />
-              </div>
+              {newSchedule.frequency !== 'immediate' && (
+                <div>
+                  <Label htmlFor="next_execution">Next Execution Date</Label>
+                  <Input
+                    id="next_execution"
+                    type="datetime-local"
+                    value={newSchedule.next_execution_date}
+                    onChange={(e) => setNewSchedule(prev => ({ ...prev, next_execution_date: e.target.value }))}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Real Bank Account Selection */}
@@ -286,7 +299,10 @@ const BulkPaymentScheduler = () => {
                   </div>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    Next: {format(new Date(schedule.next_execution_date), 'MMM dd, yyyy HH:mm')}
+                    {schedule.frequency === 'immediate' ? 
+                      `Executed: ${format(new Date(schedule.next_execution_date), 'MMM dd, yyyy HH:mm')}` :
+                      `Next: ${format(new Date(schedule.next_execution_date), 'MMM dd, yyyy HH:mm')}`
+                    }
                   </div>
                 </div>
                 
