@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { localTransferFormSchema, type LocalTransferFormValues } from '@/schemas/localTransferSchema';
 import LocalTransferForm from './LocalTransferForm';
 
@@ -29,6 +30,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTra
       swiftCode: '',
       currency: 'ZAR',
       amount: undefined,
+      recipientEmail: '',
     },
   });
 
@@ -43,6 +45,7 @@ const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTra
         swiftCode: '',
         currency: 'ZAR',
         amount: undefined,
+        recipientEmail: '',
       });
     }
   }, [isOpen, form]);
@@ -50,7 +53,28 @@ const LocalTransferDialog = ({ isOpen, onOpenChange, onLocalTransfer }: LocalTra
   async function onSubmit(values: LocalTransferFormValues) {
     try {
       await onLocalTransfer(values);
-      toast.success(`Successfully transferred R ${values.amount.toLocaleString()} to ${values.accountHolderName}.`);
+      toast.success(`Successfully transferred ${values.currency} ${values.amount.toLocaleString()} to ${values.accountHolderName}.`);
+      
+      // Send transaction email notification
+      try {
+        const { error } = await supabase.functions.invoke('send-transaction-email', {
+          body: {
+            recipientName: values.accountHolderName,
+            bankName: values.bankName,
+            accountNumber: values.accountNumber,
+            swiftCode: values.swiftCode,
+            amount: values.amount,
+            currency: values.currency,
+            recipientEmail: values.recipientEmail || 'noreply@example.com'
+          }
+        });
+        if (error) throw error;
+        toast.info("Transaction confirmation email sent.");
+      } catch (error) {
+        console.error("Failed to send confirmation email:", error);
+        toast.error("Failed to send confirmation email.");
+      }
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Transfer failed:', error);

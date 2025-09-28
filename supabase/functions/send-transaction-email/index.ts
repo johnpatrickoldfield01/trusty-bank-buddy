@@ -17,6 +17,7 @@ interface TransactionDetails {
   branchCode?: string;
   swiftCode?: string;
   amount: number;
+  currency?: string;
   recipientEmail: string;
 }
 
@@ -33,6 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
         branchCode, 
         swiftCode, 
         amount, 
+        currency = 'ZAR',
         recipientEmail 
     }: TransactionDetails = await req.json();
 
@@ -42,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
       <p>This is a confirmation that a payment has been processed with the following details.</p>
       <h2>Transaction Details:</h2>
       <ul>
-        <li><strong>Amount:</strong> R ${amount.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</li>
+        <li><strong>Amount:</strong> ${currency} ${amount.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</li>
         <li><strong>Recipient Name:</strong> ${recipientName}</li>
         <li><strong>Bank Name:</strong> ${bankName}</li>
         <li><strong>Account Number:</strong> ${accountNumber}</li>

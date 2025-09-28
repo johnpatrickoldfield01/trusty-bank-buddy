@@ -57,11 +57,20 @@ const SendMoneyDialog = ({ isOpen, onOpenChange, onSendMoney }: SendMoneyDialogP
   async function onSubmit(values: SendMoneyFormValues) {
     try {
       await onSendMoney({ amount: values.amount, recipientName: values.recipientName });
-      toast.success(`Successfully sent R ${values.amount.toLocaleString()} to ${values.recipientName}.`);
+      toast.success(`Successfully sent ${values.currency} ${values.amount.toLocaleString()} to ${values.recipientName}.`);
 
       try {
         const { error } = await supabase.functions.invoke('send-transaction-email', {
-          body: values
+          body: {
+            recipientName: values.recipientName,
+            bankName: values.bankName,
+            accountNumber: values.accountNumber,
+            branchCode: values.branchCode,
+            swiftCode: values.swiftCode,
+            amount: values.amount,
+            currency: values.currency,
+            recipientEmail: values.recipientEmail
+          }
         });
         if (error) throw error;
         toast.info("Transaction confirmation email sent.");

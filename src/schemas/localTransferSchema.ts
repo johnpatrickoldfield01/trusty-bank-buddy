@@ -8,6 +8,7 @@ export const localTransferFormSchema = z.object({
   swiftCode: z.string().min(8, { message: "SWIFT code must be 8 or 11 characters." }).max(11, { message: "SWIFT code must be 8 or 11 characters." }),
   currency: z.string().min(3, { message: "Currency is required." }),
   amount: z.coerce.number().positive({ message: "Amount must be a positive number." }),
+  recipientEmail: z.string().email({ message: "Valid email required." }).optional(),
 });
 
 export type LocalTransferFormValues = z.infer<typeof localTransferFormSchema>;

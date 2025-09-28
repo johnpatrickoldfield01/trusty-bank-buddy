@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, Play, Pause, Trash2, Users } from 'lucide-react';
+import { Calendar, Clock, Play, Pause, Trash2, Users, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import BeneficiaryManager from './BeneficiaryManager';
+import BulkPaymentPDFDownloader from './BulkPaymentPDFDownloader';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -290,6 +291,16 @@ const BulkPaymentScheduler = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  <BulkPaymentPDFDownloader
+                    schedule={schedule}
+                    beneficiaries={beneficiaries?.filter(b => schedule.beneficiary_ids.includes(b.id)) || []}
+                    downloadType="bulk"
+                  />
+                  <BulkPaymentPDFDownloader
+                    schedule={schedule}
+                    beneficiaries={beneficiaries?.filter(b => schedule.beneficiary_ids.includes(b.id)) || []}
+                    downloadType="individual"
+                  />
                   <Button
                     size="sm"
                     variant="outline"

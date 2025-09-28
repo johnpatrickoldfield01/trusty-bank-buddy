@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { type Profile } from '@/components/layout/AppLayout';
 import { useProofOfPaymentDownloader, type TransactionWithAccountDetails } from '@/hooks/useProofOfPaymentDownloader';
+import ComplianceCertificateDownloader from '@/components/compliance/ComplianceCertificateDownloader';
 
 const TransactionDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -106,14 +107,24 @@ const TransactionDetailsPage = () => {
                 {format(new Date(transaction.transaction_date), "EEEE, MMMM d, yyyy 'at' h:mm a")}
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => downloadProofOfPayment(profile, transaction)}
-              className="flex-shrink-0"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => downloadProofOfPayment(profile, transaction)}
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+              <ComplianceCertificateDownloader
+                transactionData={{
+                  amount: Math.abs(transaction.amount),
+                  currency: 'ZAR',
+                  recipientName: transaction.recipient_name || transaction.name.replace('Transfer to ', ''),
+                  transactionDate: transaction.transaction_date,
+                  transactionId: transaction.id,
+                }}
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-x-8 gap-y-6">
