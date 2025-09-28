@@ -188,6 +188,7 @@ const BulkPaymentScheduler = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="immediate">Immediate Clearance</SelectItem>
                     <SelectItem value="daily">Daily</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
@@ -195,13 +196,31 @@ const BulkPaymentScheduler = () => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="next_execution">Next Execution Date</Label>
+                <Label htmlFor="next_execution">
+                  {newSchedule.frequency === 'immediate' ? 'Execution Date' : 'Next Execution Date'}
+                </Label>
                 <Input
                   id="next_execution"
                   type="datetime-local"
                   value={newSchedule.next_execution_date}
                   onChange={(e) => setNewSchedule(prev => ({ ...prev, next_execution_date: e.target.value }))}
                 />
+              </div>
+            </div>
+
+            {/* KYC Verified Beneficiaries Selection */}
+            <div className="space-y-2">
+              <Label>KYC Verified Beneficiaries ({beneficiaries?.length || 0} available)</Label>
+              <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
+                {beneficiaries?.map((beneficiary: any) => (
+                  <div key={beneficiary.id} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                    <div className="text-sm">
+                      <div className="font-medium">{beneficiary.beneficiary_name}</div>
+                      <div className="text-muted-foreground">{beneficiary.bank_name} • {beneficiary.account_number}</div>
+                    </div>
+                    <Badge variant="secondary" className="text-green-600">KYC ✓</Badge>
+                  </div>
+                )) || <p className="text-sm text-muted-foreground">No beneficiaries available</p>}
               </div>
             </div>
 

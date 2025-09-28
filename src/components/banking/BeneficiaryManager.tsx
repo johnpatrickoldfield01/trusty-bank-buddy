@@ -5,8 +5,9 @@ import { useSession } from '@/hooks/useSession';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, CheckCircle, ArrowRightLeft } from 'lucide-react';
+import { Users, CheckCircle, ArrowRightLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import AddBeneficiaryDialog from './AddBeneficiaryDialog';
 
 interface Beneficiary {
   id: string;
@@ -117,10 +118,7 @@ const BeneficiaryManager = ({ onSelectBeneficiary }: { onSelectBeneficiary?: (be
           <Users className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-medium">KYC-Verified Beneficiaries</h3>
         </div>
-        <Button variant="outline" size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New
-        </Button>
+        <AddBeneficiaryDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
