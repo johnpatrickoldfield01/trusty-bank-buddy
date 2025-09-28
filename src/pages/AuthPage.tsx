@@ -71,51 +71,49 @@ const AuthPage = () => {
   const handleSignIn = async (values: z.infer<typeof signInSchema>) => {
     setLoading(true);
     
-    // Check if 2FA is enabled for the specific authorized email
-    const AUTHORIZED_2FA_EMAIL = 'oldfieldjohnpatrick@gmail.com';
-    
-    if (values.email === AUTHORIZED_2FA_EMAIL) {
-      // Check if 2FA is properly set up for this account
-      const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
-      
-      if (!hasExisting2FA) {
-        toast.error("2FA is required for this account but not yet configured. Please contact administrator for 2FA setup.");
-        setLoading(false);
-        return;
-      }
-
-      // For the authorized email with 2FA set up, require verification
+    try {
+      // Regular sign in for all users
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       });
 
       if (error) {
+        console.error('Auth error:', error);
         toast.error(error.message || "An error occurred during sign in");
         setLoading(false);
         return;
       }
 
-      // Sign out immediately to require 2FA verification
-      await supabase.auth.signOut();
+      // Check if 2FA is enabled for the specific authorized email
+      const AUTHORIZED_2FA_EMAIL = 'oldfieldjohnpatrick@gmail.com';
       
-      // Show 2FA verification screen (no setup allowed)
-      setUserEmail(values.email);
-      setShow2FA(true);
-      toast.success("Password verified. Please enter your authenticator code.");
-    } else {
-      // Regular sign in for other users
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      if (values.email === AUTHORIZED_2FA_EMAIL) {
+        // Check if 2FA is properly set up for this account
+        const hasExisting2FA = localStorage.getItem(`totp_setup_complete_${values.email}`) === 'true';
+        
+        if (!hasExisting2FA) {
+          toast.error("2FA is required for this account but not yet configured. Please contact administrator for 2FA setup.");
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
 
-      if (error) {
-        toast.error(error.message || "An error occurred during sign in");
+        // Sign out to require 2FA verification
+        await supabase.auth.signOut();
+        
+        // Show 2FA verification screen (no setup allowed)
+        setUserEmail(values.email);
+        setShow2FA(true);
+        toast.success("Password verified. Please enter your authenticator code.");
       } else {
+        // Regular users proceed directly after successful authentication
         toast.success("Signed in successfully!");
         navigate('/');
       }
+    } catch (error) {
+      console.error('Sign in error:', error);
+      toast.error("An unexpected error occurred during sign in");
     }
     
     setLoading(false);
