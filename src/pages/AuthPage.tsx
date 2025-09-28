@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import PasswordStrengthIndicator from '@/components/auth/PasswordStrengthIndicator';
+import TwoFactorAuth from '@/components/auth/TwoFactorAuth';
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
@@ -31,6 +32,8 @@ const signInSchema = z.object({
 const AuthPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [show2FA, setShow2FA] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   const signUpForm = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -67,19 +70,82 @@ const AuthPage = () => {
 
   const handleSignIn = async (values: z.infer<typeof signInSchema>) => {
     setLoading(true);
+    
+    // Check if 2FA is enabled for the specific authorized email
+    const AUTHORIZED_2FA_EMAIL = 'oldfieldjohnpatrick@gmail.com';
+    
+    if (values.email === AUTHORIZED_2FA_EMAIL) {
+      // For the authorized email, require 2FA
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        toast.error(error.message || "An error occurred during sign in");
+        setLoading(false);
+        return;
+      }
+
+      // Sign out immediately to require 2FA
+      await supabase.auth.signOut();
+      
+      // Show 2FA screen
+      setUserEmail(values.email);
+      setShow2FA(true);
+      toast.success("Password verified. Please complete 2FA verification.");
+    } else {
+      // Regular sign in for other users
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        toast.error(error.message || "An error occurred during sign in");
+      } else {
+        toast.success("Signed in successfully!");
+        navigate('/');
+      }
+    }
+    
+    setLoading(false);
+  };
+
+  const handle2FAComplete = async () => {
+    // Complete the sign-in process after 2FA verification
     const { error } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
+      email: userEmail,
+      password: signInForm.getValues('password'),
     });
 
     if (error) {
-      toast.error(error.message || "An error occurred during sign in");
-    } else {
-      toast.success("Signed in successfully!");
-      navigate('/');
+      toast.error("Failed to complete sign in");
+      setShow2FA(false);
+      return;
     }
-    setLoading(false);
+
+    toast.success("Signed in successfully with 2FA!");
+    navigate('/');
   };
+
+  // Show 2FA screen if triggered
+  if (show2FA) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="w-full max-w-lg">
+          <TwoFactorAuth 
+            userEmail={userEmail}
+            onTwoFactorComplete={handle2FAComplete}
+            onBack={() => {
+              setShow2FA(false);
+              setUserEmail('');
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -92,7 +158,14 @@ const AuthPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>Sign In</CardTitle>
-              <CardDescription>Enter your credentials to access your account.</CardDescription>
+              <CardDescription>
+                Enter your credentials to access your account.
+                {userEmail === 'oldfieldjohnpatrick@gmail.com' && (
+                  <div className="mt-2 text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                    🔐 Enhanced security: 2FA required for this account
+                  </div>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...signInForm}>
