@@ -94,16 +94,16 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Beneficiary not found');
       }
 
-      // Prepare PayFast payment data
+      // Prepare PayFast payment data with test-friendly settings
       const paymentData: any = {
         merchant_id: merchantId,
         merchant_key: merchantKey,
         return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
         cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
         notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-        name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
-        name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
-        email_address: beneficiary.beneficiary_email || userEmail,
+        name_first: 'Test',
+        name_last: 'Customer',
+        email_address: 'test@payfast.co.za', // Use PayFast test email to avoid merchant conflict
         m_payment_id: reference,
         amount: amount.toFixed(2),
         item_name: description,
@@ -152,9 +152,9 @@ const handler = async (req: Request): Promise<Response> => {
           return_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=return`,
           cancel_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=cancel`,
           notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/payfast-payment?action=notify`,
-          name_first: beneficiary.beneficiary_name.split(' ')[0] || 'Customer',
-          name_last: beneficiary.beneficiary_name.split(' ').slice(1).join(' ') || 'Name',
-          email_address: beneficiary.beneficiary_email || userEmail,
+          name_first: 'Test',
+          name_last: 'Customer',
+          email_address: 'test@payfast.co.za', // Use PayFast test email for sandbox
           m_payment_id: reference,
           amount: amountPerBeneficiary.toFixed(2),
           item_name: description,
