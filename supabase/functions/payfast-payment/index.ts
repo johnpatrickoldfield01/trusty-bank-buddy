@@ -89,7 +89,24 @@ const handler = async (req: Request): Promise<Response> => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { action, ...requestData } = await req.json();
+    // Check if this is a PayFast callback by looking at URL parameters
+    const url = new URL(req.url);
+    const actionFromUrl = url.searchParams.get('action');
+    
+    let action: string;
+    let requestData: any = {};
+    
+    if (actionFromUrl) {
+      // This is a PayFast callback (return, cancel, or notify)
+      action = actionFromUrl;
+      // Don't try to parse JSON for PayFast callbacks
+    } else {
+      // This is our API call, parse JSON
+      const body = await req.json();
+      action = body.action;
+      requestData = body;
+      delete requestData.action;
+    }
 
     const merchantId = Deno.env.get('PAYFAST_MERCHANT_ID');
     const merchantKey = Deno.env.get('PAYFAST_MERCHANT_KEY');
