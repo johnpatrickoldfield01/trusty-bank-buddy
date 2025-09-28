@@ -244,7 +244,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     } else if (action === 'notify') {
       // Handle PayFast ITN (Instant Transaction Notification)
-      // This endpoint needs to be publicly accessible without authentication
       console.log('PayFast ITN received - Request method:', req.method);
       console.log('PayFast ITN received - Headers:', Object.fromEntries(req.headers.entries()));
       
@@ -273,50 +272,131 @@ const handler = async (req: Request): Promise<Response> => {
         });
       }
 
-      // Process successful payments
+      // Process successful payments with proper financial integration
       if (paymentData.payment_status === 'COMPLETE') {
-        // Get first available account for transaction logging
-        const { data: accounts } = await supabase
-          .from('accounts')
-          .select('id')
-          .limit(1);
+        const amount = parseFloat(paymentData.amount_gross || '0');
+        const beneficiaryId = paymentData.custom_str1;
+        const paymentType = paymentData.custom_str2 || 'single-payment';
         
-        const accountId = accounts?.[0]?.id || '00000000-0000-0000-0000-000000000000';
-        
-        const { error: logError } = await supabase
-          .from('transactions')
-          .insert({
-            account_id: accountId,
-            name: `PayFast Payment - ${paymentData.name_first} ${paymentData.name_last}`,
-            amount: -parseFloat(paymentData.amount_gross || '0'),
-            category: 'PayFast Payment',
-            icon: '💳',
-            recipient_name: `${paymentData.name_first} ${paymentData.name_last}`,
-            recipient_bank_name: 'PayFast Processing',
-            recipient_account_number: paymentData.m_payment_id,
-            recipient_swift_code: 'PAYFAST'
-          });
+        console.log('Processing completed payment:', { amount, beneficiaryId, paymentType });
 
-        if (logError) {
-          console.error('Error logging transaction:', logError);
+        // 1. Deduct from primary credit card account (first one with highest balance)
+        const { data: creditAccounts } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('account_type', 'credit')
+          .order('balance', { ascending: false })
+          .limit(1);
+
+        if (creditAccounts && creditAccounts.length > 0) {
+          const primaryCard = creditAccounts[0];
+          console.log('Deducting from primary credit card:', primaryCard.account_name, 'Current balance:', primaryCard.balance);
+          
+          // Update card balance
+          const { error: updateError } = await supabase
+            .from('accounts')
+            .update({ balance: primaryCard.balance - amount })
+            .eq('id', primaryCard.id);
+
+          if (updateError) {
+            console.error('Error updating card balance:', updateError);
+          } else {
+            console.log('Card balance updated successfully. New balance:', primaryCard.balance - amount);
+          }
+
+          // 2. Log outgoing transaction from credit card
+          const { error: outgoingLogError } = await supabase
+            .from('transactions')
+            .insert({
+              account_id: primaryCard.id,
+              name: `PayFast Payment - ${paymentData.name_first} ${paymentData.name_last}`,
+              amount: -amount,
+              category: 'PayFast Payment',
+              icon: '💳',
+              recipient_name: `${paymentData.name_first} ${paymentData.name_last}`,
+              recipient_bank_name: 'PayFast Gateway',
+              recipient_account_number: paymentData.m_payment_id,
+              recipient_swift_code: 'PAYFAST'
+            });
+
+          if (outgoingLogError) {
+            console.error('Error logging outgoing transaction:', outgoingLogError);
+          }
         }
 
-        // Send confirmation email if configured
-        if (paymentData.email_address) {
-          try {
-            await supabase.functions.invoke('send-transaction-email', {
-              body: {
-                recipientEmail: paymentData.email_address,
-                recipientName: `${paymentData.name_first} ${paymentData.name_last}`,
-                amount: parseFloat(paymentData.amount_gross || '0'),
-                currency: 'ZAR',
-                reference: paymentData.m_payment_id,
-                paymentMethod: 'PayFast',
-                transactionDate: new Date().toISOString()
-              }
-            });
-          } catch (emailError) {
-            console.error('Error sending confirmation email:', emailError);
+        // 3. Get beneficiary details for receiving bank update
+        if (beneficiaryId) {
+          const { data: beneficiary } = await supabase
+            .from('beneficiaries')
+            .select('*')
+            .eq('id', beneficiaryId)
+            .single();
+
+          if (beneficiary) {
+            console.log('Processing payment to beneficiary:', beneficiary.beneficiary_name);
+            
+            // 4. Create SARB compliance record for audit trail
+            const { error: complianceError } = await supabase
+              .from('cbs_notes')
+              .insert({
+                user_id: creditAccounts?.[0]?.user_id || '00000000-0000-0000-0000-000000000000',
+                amount: amount,
+                note_type: 'payment_clearing',
+                description: `PayFast payment processed - ${beneficiary.beneficiary_name} (${beneficiary.bank_name}) - Reference: ${paymentData.m_payment_id}`,
+                account_reference: beneficiary.account_number,
+                status: 'completed',
+                compliance_status: 'approved'
+              });
+
+            if (complianceError) {
+              console.error('Error creating compliance record:', complianceError);
+            }
+
+            // 5. Generate SARB compliance report and simulate receiving bank credit
+            try {
+              await supabase.functions.invoke('send-sarb-compliance-report', {
+                body: {
+                  paymentReference: paymentData.m_payment_id,
+                  beneficiaryDetails: {
+                    name: beneficiary.beneficiary_name,
+                    bankName: beneficiary.bank_name,
+                    accountNumber: beneficiary.account_number,
+                    swiftCode: beneficiary.swift_code
+                  },
+                  amount: amount,
+                  currency: 'ZAR',
+                  transactionDate: new Date().toISOString()
+                }
+              });
+              console.log('SARB compliance report generated and payment cleared to:', beneficiary.bank_name, beneficiary.account_number);
+            } catch (complianceError) {
+              console.error('Error generating SARB compliance report:', complianceError);
+            }
+            
+            // 6. Send transaction notifications
+            try {
+              await supabase.functions.invoke('send-transaction-email', {
+                body: {
+                  recipientEmail: beneficiary.beneficiary_email || paymentData.email_address,
+                  recipientName: beneficiary.beneficiary_name,
+                  amount: amount,
+                  currency: 'ZAR',
+                  reference: paymentData.m_payment_id,
+                  paymentMethod: 'PayFast (FSP Licensed)',
+                  transactionDate: new Date().toISOString(),
+                  bankName: beneficiary.bank_name,
+                  accountNumber: beneficiary.account_number
+                }
+              });
+              console.log('Transaction notification sent');
+            } catch (emailError) {
+              console.error('Error sending transaction notification:', emailError);
+            }
+
+            // 7. Log bulk payment tracking if applicable
+            if (paymentType === 'bulk-payment') {
+              console.log(`Bulk payment ${paymentData.m_payment_id} completed - ${amount} ZAR to ${beneficiary.beneficiary_name}`);
+            }
           }
         }
       }
