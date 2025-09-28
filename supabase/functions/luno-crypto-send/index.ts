@@ -34,6 +34,11 @@ serve(async (req) => {
     const mockCurrentBalance = 5.25; 
     const newBalance = Math.max(0, mockCurrentBalance - amount - mockFee);
 
+    // Generate consistent transaction hash for blockchain explorer
+    const transactionHash = crypto.symbol === 'BTC' && mockWithdrawalId === 'BXLC2CJ7HNB88UIYAMQN' 
+      ? '0xa3552867d759' 
+      : `0x${Math.random().toString(16).substr(2, 12)}`;
+
     // Mock successful Luno send response structure
     const lunoResponse = {
       success: true,
@@ -48,9 +53,11 @@ serve(async (req) => {
       // Additional fields for our integration
       newBalance: newBalance,
       transactionId: mockWithdrawalId,
-      transactionHash: `0x${Math.random().toString(16).substr(2, 64)}`,
+      transactionHash: transactionHash,
       exchangeUrl: `https://www.luno.com/wallet/transactions/${mockWithdrawalId}`,
-      network: 'Bitcoin Network (via Luno)',
+      blockchainExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${mockWithdrawalId}`,
+      alternativeExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${transactionHash}`,
+      network: 'Bitcoin Testnet (Simulated)',
       permissions_used: [
         'Perm_W_Send',
         'Perm_R_Transactions'
