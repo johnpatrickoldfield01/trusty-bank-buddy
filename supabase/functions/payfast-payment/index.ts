@@ -341,7 +341,7 @@ const handler = async (req: Request): Promise<Response> => {
               .insert({
                 user_id: creditAccounts?.[0]?.user_id || '00000000-0000-0000-0000-000000000000',
                 amount: amount,
-                note_type: 'payment_clearing',
+                note_type: 'manual_credit',
                 description: `PayFast payment processed - ${beneficiary.beneficiary_name} (${beneficiary.bank_name}) - Reference: ${paymentData.m_payment_id}`,
                 account_reference: beneficiary.account_number,
                 status: 'completed',
