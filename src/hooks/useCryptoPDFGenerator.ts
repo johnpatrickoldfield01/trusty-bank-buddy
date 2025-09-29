@@ -76,14 +76,20 @@ export const useCryptoPDFGenerator = () => {
 
       // Legal & Compliance Section
       currentY = (doc as any).lastAutoTable.finalY + 15;
+      
+      // Check if we need a new page for compliance section
+      if (currentY > 250) {
+        doc.addPage();
+        currentY = 20;
+      }
+      
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.text('Legal & Compliance Information', 20, currentY);
       
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      const complianceText = `
-AML/KYC COMPLIANCE: This cryptocurrency transaction has been processed in accordance with Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations. All parties have undergone appropriate due diligence procedures as required by law.
+      const complianceText = `AML/KYC COMPLIANCE: This cryptocurrency transaction has been processed in accordance with Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations. All parties have undergone appropriate due diligence procedures as required by law.
 
 REGULATORY FRAMEWORK: This transaction complies with the Financial Intelligence Centre Act (FICA), the Prevention and Combating of Corrupt Activities Act (PRECCA), and applicable cryptocurrency regulations in South Africa.
 
@@ -93,10 +99,31 @@ TAX IMPLICATIONS: This transaction may have tax implications under South African
 
 BLOCKCHAIN VERIFICATION: This transaction is permanently recorded on the Bitcoin blockchain and can be independently verified using the transaction hash provided above.`;
 
-      doc.text(complianceText, 20, currentY + 10, { maxWidth: 170, lineHeightFactor: 1.2 });
+      const textLines = doc.splitTextToSize(complianceText, 170);
+      const textHeight = textLines.length * 3; // Approximate height per line
+      
+      // Check if text fits on current page
+      if (currentY + 10 + textHeight > 280) {
+        doc.addPage();
+        currentY = 20;
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Legal & Compliance Information', 20, currentY);
+      }
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(textLines, 20, currentY + 10);
 
-      // Footer
-      currentY = currentY + 80;
+      // Footer - ensure it's on the page
+      const footerY = Math.max(currentY + 10 + textHeight + 10, 270);
+      if (footerY > 280) {
+        doc.addPage();
+        currentY = 250;
+      } else {
+        currentY = footerY;
+      }
+      
       doc.setFontSize(8);
       doc.setTextColor(100);
       doc.text(`Generated: ${new Date().toLocaleString()} | TrustyBank Cryptocurrency Services`, 20, currentY);
@@ -202,14 +229,20 @@ BLOCKCHAIN VERIFICATION: This transaction is permanently recorded on the Bitcoin
 
       // SARS Compliance Notice
       currentY = (doc as any).lastAutoTable.finalY + 15;
+      
+      // Check if we need a new page
+      if (currentY > 250) {
+        doc.addPage();
+        currentY = 20;
+      }
+      
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.text('SARS Compliance Notice', 20, currentY);
       
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      const taxNotice = `
-IMPORTANT TAX INFORMATION:
+      const taxNotice = `IMPORTANT TAX INFORMATION:
 
 1. REPORTING OBLIGATION: Under South African tax law, all cryptocurrency transactions must be reported to SARS. Cryptocurrency disposals are subject to Capital Gains Tax (CGT).
 
@@ -223,7 +256,21 @@ IMPORTANT TAX INFORMATION:
 
 Generated: ${new Date().toLocaleString()} | TrustyBank Tax Services`;
 
-      doc.text(taxNotice, 20, currentY + 10, { maxWidth: 170, lineHeightFactor: 1.2 });
+      const noticeLines = doc.splitTextToSize(taxNotice, 170);
+      const noticeHeight = noticeLines.length * 3;
+      
+      // Check if notice fits on current page
+      if (currentY + 10 + noticeHeight > 280) {
+        doc.addPage();
+        currentY = 20;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SARS Compliance Notice', 20, currentY);
+      }
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(noticeLines, 20, currentY + 10);
 
       // Save PDF
       doc.save(`crypto-tax-summary-${cryptoSymbol}-${new Date().getFullYear()}.pdf`);
