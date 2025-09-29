@@ -63,62 +63,141 @@ serve(async (req) => {
     const apiSecret = Deno.env.get('LUNO_API_SECRET_NEW');
 
     if (!apiKeyId || !apiSecret) {
-      console.log('New Luno API credentials not found, using mock data');
-      // Fall back to mock if credentials not available
-    } else {
-      console.log('Using real Luno API with new credentials');
+      console.error('CRITICAL: Luno API credentials not configured');
+      return new Response(JSON.stringify({
+        success: false,
+        error: {
+          code: 'MISSING_CREDENTIALS',
+          message: 'Luno API credentials (LUNO_API_KEY_ID_NEW, LUNO_API_SECRET_NEW) are not configured',
+          action_required: 'Please configure your Luno production API credentials in Supabase secrets'
+        }
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Using Luno API with credentials');
+    console.log('API Key ID (first 8 chars):', apiKeyId.substring(0, 8) + '...');
+    console.log('Endpoint: https://api.luno.com/api/1/send');
+    
+    try {
+      // Make actual Luno API call
+      const auth = btoa(`${apiKeyId}:${apiSecret}`);
+      const requestBody = {
+        amount: (amount * 100000000).toString(), // Convert to satoshis
+        currency: crypto.symbol.toUpperCase(),
+        address: toAddress,
+      };
       
-      try {
-        // Make actual Luno API call with new credentials
-        const auth = btoa(`${apiKeyId}:${apiSecret}`);
-        const lunoApiResponse = await fetch('https://api.luno.com/api/1/send', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            amount: (amount * 100000000).toString(), // Convert to satoshis
-            currency: crypto.symbol.toUpperCase(),
-            address: toAddress,
-          }),
+      console.log('Request payload:', {
+        amount: requestBody.amount,
+        currency: requestBody.currency,
+        address: requestBody.address
+      });
+
+      const lunoApiResponse = await fetch('https://api.luno.com/api/1/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(requestBody),
+      });
+
+      const responseText = await lunoApiResponse.text();
+      console.log('Luno API response status:', lunoApiResponse.status);
+      console.log('Luno API response body:', responseText);
+
+      if (lunoApiResponse.ok) {
+        const realLunoResponse = JSON.parse(responseText);
+        console.log('✅ Real Luno transaction successful');
+        
+        // Return real response
+        const response = {
+          success: true,
+          withdrawal_id: realLunoResponse.withdrawal_id || `luno_${Date.now()}`,
+          bitcoin_txid: realLunoResponse.txid || `real_${Date.now()}`,
+          external_id: realLunoResponse.external_id || `ext_${Date.now()}`,
+          currency: crypto.symbol,
+          amount: amount.toString(),
+          fee: realLunoResponse.fee || '0.00001',
+          destination_address: toAddress,
+          status: 'COMPLETE',
+          created_at: Date.now(),
+          newBalance: parseFloat(realLunoResponse.balance || '0'),
+          transactionId: realLunoResponse.txid,
+          transactionHash: realLunoResponse.txid,
+          exchangeUrl: `https://www.luno.com/wallet/transactions/${realLunoResponse.withdrawal_id}`,
+          blockchainExplorerUrl: `https://www.blockchain.com/btc/tx/${realLunoResponse.txid}`,
+          network: 'Bitcoin Mainnet',
+          regulatory_info: {
+            exchange: 'Luno Exchange (Pty) Ltd',
+            compliance_status: 'AML/KYC verified - Production Transaction',
+            transaction_monitoring: 'Live production transaction',
+            production_notice: `PRODUCTION: ${amount} ${crypto.symbol} sent to ${toAddress}`
+          }
+        };
+        
+        return new Response(JSON.stringify(response), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } else {
+        // Parse error response
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch {
+          errorData = { error: responseText };
+        }
+
+        console.error('❌ Luno API Error:', {
+          status: lunoApiResponse.status,
+          statusText: lunoApiResponse.statusText,
+          error: errorData
         });
 
-        if (lunoApiResponse.ok) {
-          const realLunoResponse = await lunoApiResponse.json();
-          console.log('Real Luno API response:', realLunoResponse);
-          
-          // Return real response
-          const response = {
-            success: true,
-            withdrawal_id: realLunoResponse.withdrawal_id || `luno_${Date.now()}`,
-            bitcoin_txid: realLunoResponse.txid || `real_${Date.now()}`,
-            external_id: realLunoResponse.external_id || `ext_${Date.now()}`,
-            fee: parseFloat(realLunoResponse.fee || '0.00001'),
-            newBalance: parseFloat(realLunoResponse.balance || '0.1'),
-            provider: 'Luno',
-            integration: {
-              api_used: 'Luno Exchange API',
-              transaction_status: 'completed',
-              compliance_checks: 'passed'
+        // Return detailed error instead of falling back to mock
+        return new Response(JSON.stringify({
+          success: false,
+          error: {
+            code: errorData.error_code || 'LUNO_API_ERROR',
+            message: errorData.error || 'Luno API request failed',
+            details: {
+              http_status: lunoApiResponse.status,
+              http_status_text: lunoApiResponse.statusText,
+              raw_error: errorData
+            },
+            troubleshooting: {
+              '403_forbidden': 'Check if API keys are for production (not test/sandbox)',
+              'limit_exceeded': 'Verify API key permissions and rate limits',
+              'suggested_actions': [
+                '1. Verify API keys are production keys from https://www.luno.com/wallet/security/api_keys',
+                '2. Ensure API keys have "Send" permissions enabled',
+                '3. Check if there is a separate endpoint for production vs test environment',
+                '4. Contact Luno support with error details if keys are confirmed correct'
+              ]
             }
-          };
-          
-          return new Response(JSON.stringify(response), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } else {
-          const errorText = await lunoApiResponse.text();
-          console.log('Luno API error response:', {
-            status: lunoApiResponse.status,
-            statusText: lunoApiResponse.statusText,
-            body: errorText
-          });
-          console.log('Luno API error, falling back to mock');
-        }
-      } catch (error) {
-        console.log('Luno API call failed, using mock:', error);
+          }
+        }), {
+          status: lunoApiResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+    } catch (error: any) {
+      console.error('❌ Luno API call exception:', error);
+      return new Response(JSON.stringify({
+        success: false,
+        error: {
+          code: 'NETWORK_ERROR',
+          message: 'Failed to connect to Luno API',
+          details: error?.message || String(error),
+          action_required: 'Check network connectivity and API endpoint'
+        }
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Mock response (fallback)

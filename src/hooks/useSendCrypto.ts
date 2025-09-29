@@ -72,6 +72,23 @@ export const useSendCrypto = () => {
 
       if (!data.success) {
         console.error('Transaction failed:', data.error);
+        
+        // Handle detailed error response from edge function
+        if (data.error && typeof data.error === 'object') {
+          const errorObj = data.error;
+          const errorMessage = errorObj.message || 'Transaction failed';
+          
+          // Log detailed troubleshooting info
+          if (errorObj.troubleshooting) {
+            console.error('Troubleshooting info:', errorObj.troubleshooting);
+          }
+          if (errorObj.details) {
+            console.error('Error details:', errorObj.details);
+          }
+          
+          throw new Error(errorMessage);
+        }
+        
         throw new Error(data.error || 'Transaction failed');
       }
 
