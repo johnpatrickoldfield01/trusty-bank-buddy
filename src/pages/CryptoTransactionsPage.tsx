@@ -287,25 +287,36 @@ const CryptoTransactionsPage = () => {
                   <div className="flex items-center gap-4">
                     <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{transaction.name}</span>
-                        <Badge className="bg-green-100 text-green-800">Completed</Badge>
-                        {/* Mock/Real Transaction Status */}
-                        {(() => {
-                          const isMock = transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') ||
-                                        transaction.recipient_swift_code?.includes('mock') ||
-                                        !transaction.recipient_swift_code ||
-                                        transaction.name?.toLowerCase().includes('mock');
-                          
-                          return (
-                            <Badge className={isMock ? 
-                              "bg-red-100 text-red-800 text-sm font-bold border-2 border-red-300 ml-2 px-3 py-1" : 
-                              "bg-green-100 text-green-800 text-sm font-bold border-2 border-green-300 ml-2 px-3 py-1"
-                            }>
-                              {isMock ? '⚠️ MOCK TRANSACTION' : '✅ REAL TRANSACTION'}
-                            </Badge>
-                          );
-                        })()}
+                       <div className="flex items-center gap-2">
+                         <span className="font-medium">{transaction.name}</span>
+                         <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                         {/* Mock/Real Transaction Status */}
+                         {(() => {
+                           console.log('Transaction check:', {
+                             id: transaction.id,
+                             name: transaction.name,
+                             swift_code: transaction.recipient_swift_code,
+                             isMockBySwift: transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000'),
+                             isMockByMissing: !transaction.recipient_swift_code,
+                             isMockByName: transaction.name?.toLowerCase().includes('mock')
+                           });
+                           
+                           const isMock = transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') ||
+                                         transaction.recipient_swift_code?.includes('mock') ||
+                                         !transaction.recipient_swift_code ||
+                                         transaction.name?.toLowerCase().includes('mock');
+                           
+                           console.log('Final isMock result:', isMock);
+                           
+                           return (
+                             <Badge className={isMock ? 
+                               "bg-red-100 text-red-800 text-sm font-bold border-2 border-red-300 ml-2 px-3 py-1" : 
+                               "bg-green-100 text-green-800 text-sm font-bold border-2 border-green-300 ml-2 px-3 py-1"
+                             }>
+                               {isMock ? '⚠️ MOCK' : '✅ REAL'}
+                             </Badge>
+                           );
+                         })()}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(transaction.transaction_date).toLocaleDateString()} • {transaction.recipient_bank_name}
