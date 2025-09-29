@@ -26,9 +26,9 @@ serve(async (req) => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Generate mock Luno response matching their API structure
-    // Generate proper 64-character Bitcoin transaction ID
+    // Generate proper 64-character Bitcoin transaction ID that could exist on blockchain.com
     const mockWithdrawalId = `BXLC2CJ7HNB88U${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-    const mockTxId = 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'; // 64-char Bitcoin txid
+    const mockTxId = '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f'; // Real-looking Bitcoin txid
     const mockExternalId = `ext_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const mockFee = parseFloat((amount * 0.0005).toFixed(8)); // 0.05% fee
     
@@ -36,8 +36,8 @@ serve(async (req) => {
     const mockCurrentBalance = 5.25; 
     const newBalance = Math.max(0, mockCurrentBalance - amount - mockFee);
 
-    // Generate consistent transaction hash for blockchain explorer - no special characters
-    const transactionHash = '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12';
+    // Generate real-looking transaction hash for blockchain explorer (no 0x prefix for Bitcoin)
+    const transactionHash = '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f';
 
     // Mock successful Luno send response structure
     const lunoResponse = {

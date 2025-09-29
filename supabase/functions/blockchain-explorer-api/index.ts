@@ -28,8 +28,8 @@ serve(async (req) => {
     const mockTransactions = new Map([
       // Luno transaction data (BXLC2CJ7HNB88UYQSRHA is the Luno withdrawal ID)
       ['BXLC2CJ7HNB88UYQSRHA', {
-        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
-        hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
+        txid: '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f',
+        hash: '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f',
         blockHeight: 867543,
         blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
         confirmations: 6,
@@ -108,9 +108,9 @@ serve(async (req) => {
         explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`,
         exchange: 'binance'
       }],
-      ['0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12', {
-        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
-        hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
+      ['96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f', {
+        txid: '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f',
+        hash: '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f',
         blockHeight: 867543,
         blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
         confirmations: 6,
