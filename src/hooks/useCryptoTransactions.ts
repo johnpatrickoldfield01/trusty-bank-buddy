@@ -26,6 +26,7 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
   const fetchTransactions = async () => {
     try {
       setLoading(true);
+      console.log('Starting fetchTransactions with symbol:', cryptoSymbol);
       
       // Get user's main account instead of crypto-specific account
       const { data: accountData, error: accountError } = await supabase
@@ -59,6 +60,7 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
       const { data, error: transactionError } = await query;
 
       console.log('Crypto transactions fetched:', data, 'Error:', transactionError);
+      console.log('Setting transactions and loading false');
 
       if (transactionError) {
         console.error('Error fetching transactions:', transactionError);
@@ -69,11 +71,13 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
 
       setTransactions(data || []);
       setError(null);
+      console.log('Transactions set, loading should be false now');
     } catch (err) {
       console.error('Error in fetchTransactions:', err);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
+      console.log('Finally block: setting loading to false');
     }
   };
 
