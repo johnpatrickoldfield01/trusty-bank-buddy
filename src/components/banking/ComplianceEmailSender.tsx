@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import ProofOfPaymentUploader from './ProofOfPaymentUploader';
 
 interface ComplianceError {
   id: string;
@@ -19,6 +20,13 @@ interface ComplianceError {
   timeoutCode?: number;
   lastOccurred: string;
   affectedTransfers: number;
+}
+
+interface UploadedDocument {
+  id: string;
+  name: string;
+  url: string;
+  uploadedAt: string;
 }
 
 interface ComplianceEmailSenderProps {
@@ -37,6 +45,7 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
   const [currentBalance, setCurrentBalance] = useState('100');
   const [expectedBalance, setExpectedBalance] = useState('20100');
   const [isSending, setIsSending] = useState(false);
+  const [proofDocuments, setProofDocuments] = useState<UploadedDocument[]>([]);
 
   const handleSendEmail = async () => {
     if (selectedErrors.length === 0) {
@@ -59,6 +68,7 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
           bankEmail,
           ccEmail,
           selectedErrors,
+          proofDocuments,
           transferDetails: {
             amounts,
             accountNumber,
@@ -77,7 +87,7 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
         return;
       }
 
-      toast.success(`Compliance email sent successfully to ${bankEmail} with CC to ${ccEmail}`);
+      toast.success(`Compliance email sent successfully to ${bankEmail} with CC to ${ccEmail}${proofDocuments.length > 0 ? ` including ${proofDocuments.length} proof documents` : ''}`);
       
     } catch (error) {
       console.error('Error sending compliance email:', error);
@@ -195,6 +205,11 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
           </div>
         </div>
 
+        <ProofOfPaymentUploader 
+          onDocumentsUploaded={setProofDocuments}
+          className="mb-4"
+        />
+
         <div className="bg-muted p-4 rounded-md">
           <p className="text-sm text-muted-foreground mb-2">
             <strong>Selected Errors:</strong> {selectedErrors.length}
@@ -212,6 +227,21 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
                 </p>
               )}
             </div>
+          )}
+          
+          {proofDocuments.length > 0 && (
+            <>
+              <p className="text-sm text-muted-foreground mb-2 mt-3">
+                <strong>Proof Documents:</strong> {proofDocuments.length}
+              </p>
+              <div className="space-y-1">
+                {proofDocuments.map((doc) => (
+                  <p key={doc.id} className="text-sm">
+                    • {doc.name}
+                  </p>
+                ))}
+              </div>
+            </>
           )}
         </div>
 

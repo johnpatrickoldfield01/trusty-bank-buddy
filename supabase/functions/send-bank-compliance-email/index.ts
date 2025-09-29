@@ -27,6 +27,12 @@ interface ComplianceEmailRequest {
   bankEmail: string;
   ccEmail: string;
   selectedErrors: ComplianceError[];
+  proofDocuments: {
+    id: string;
+    name: string;
+    url: string;
+    uploadedAt: string;
+  }[];
   transferDetails: {
     amounts: number[];
     accountNumber: string;
@@ -48,6 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
       bankEmail,
       ccEmail,
       selectedErrors,
+      proofDocuments = [],
       transferDetails
     }: ComplianceEmailRequest = await req.json();
 
@@ -138,9 +145,16 @@ const handler = async (req: Request): Promise<Response> => {
         <div style="background: #e9ecef; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h4 style="margin: 0 0 10px 0;">Attachments:</h4>
           <ul style="margin: 0;">
-            <li>Proof of Payment Documents (separate)</li>
+            ${proofDocuments.length > 0 ? 
+              proofDocuments.map(doc => `<li>${doc.name} (uploaded: ${new Date(doc.uploadedAt).toLocaleDateString()})</li>`).join('') :
+              '<li>Proof of Payment Documents (separate)</li>'
+            }
             <li>System Error Logs (available on request)</li>
           </ul>
+          ${proofDocuments.length > 0 ? 
+            `<p style="color: #28a745; font-weight: bold; margin-top: 10px;">✓ ${proofDocuments.length} proof of payment document(s) attached</p>` :
+            '<p style="color: #ffc107; margin-top: 10px;">⚠️ Proof of payment documents to follow separately</p>'
+          }
         </div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
