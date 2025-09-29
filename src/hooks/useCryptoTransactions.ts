@@ -38,6 +38,7 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
       if (accountError) {
         console.error('Error fetching main account:', accountError);
         setError('Failed to fetch main account');
+        setLoading(false);
         return;
       }
 
@@ -62,6 +63,7 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
       if (transactionError) {
         console.error('Error fetching transactions:', transactionError);
         setError('Failed to fetch transactions');
+        setLoading(false);
         return;
       }
 
