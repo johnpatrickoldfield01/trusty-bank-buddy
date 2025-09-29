@@ -64,6 +64,13 @@ export const LOCATIONS: Record<string, LocationCurrency> = {
     symbol: 'CHF',
     locale: 'de-CH',
     exchangeRate: 0.049 // ZAR to CHF
+  },
+  'HK': {
+    code: 'HKD',
+    name: 'Hong Kong',
+    symbol: 'HK$',
+    locale: 'en-HK',
+    exchangeRate: 0.43 // ZAR to HKD
   }
 };
 

@@ -4,6 +4,7 @@ import { Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 interface BulkPaymentSchedule {
   id: string;
@@ -23,10 +24,11 @@ interface BulkPaymentPDFProps {
 }
 
 const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, className }: BulkPaymentPDFProps) => {
+  const { formatCurrency, currentCurrency } = useCurrencyLocation();
+  
   const downloadPDF = () => {
     try {
       const doc = new jsPDF();
-      const currency = schedule.currency || 'ZAR';
       
       if (downloadType === 'bulk') {
         // Bulk schedule PDF
@@ -52,9 +54,9 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
         const scheduleDetails = [
           ['Schedule Name:', schedule.schedule_name],
           ['Frequency:', schedule.frequency],
-          ['Amount per Beneficiary:', `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`],
+          ['Amount per Beneficiary:', formatCurrency(schedule.amount_per_beneficiary)],
           ['Total Beneficiaries:', schedule.beneficiary_ids.length.toString()],
-          ['Total Amount:', `${currency} ${(schedule.amount_per_beneficiary * schedule.beneficiary_ids.length).toLocaleString()}`],
+          ['Total Amount:', formatCurrency(schedule.amount_per_beneficiary * schedule.beneficiary_ids.length)],
           ['Next Execution:', new Date(schedule.next_execution_date).toLocaleString()],
           ['Status:', 'Processed'],
         ];
@@ -80,7 +82,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           ben.bank_name,
           ben.account_number,
           ben.swift_code || 'N/A',
-          `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`,
+          formatCurrency(schedule.amount_per_beneficiary),
           'Completed',
           new Date().toLocaleDateString()
         ]);
@@ -110,7 +112,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
         doc.text('Payment Summary:', 20, finalY);
         doc.setFont('helvetica', 'normal');
         doc.text(`Total Payments Processed: ${beneficiaries.length}`, 20, finalY + 10);
-        doc.text(`Total Amount Disbursed: ${currency} ${(schedule.amount_per_beneficiary * beneficiaries.length).toLocaleString()}`, 20, finalY + 20);
+        doc.text(`Total Amount Disbursed: ${formatCurrency(schedule.amount_per_beneficiary * beneficiaries.length)}`, 20, finalY + 20);
         doc.text(`Processing Date: ${new Date().toLocaleDateString()}`, 20, finalY + 30);
         
         // Legal and Banking Arbitrage Information
@@ -160,7 +162,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
             ['Bank Name:', beneficiary.bank_name],
             ['Account Number:', beneficiary.account_number],
             ['SWIFT/Branch Code:', beneficiary.swift_code || 'N/A'],
-            ['Payment Amount:', `${currency} ${schedule.amount_per_beneficiary.toLocaleString()}`],
+            ['Payment Amount:', formatCurrency(schedule.amount_per_beneficiary)],
             ['Processing Date:', new Date().toLocaleDateString()],
             ['Processing Time:', new Date().toLocaleTimeString()],
             ['Payment Status:', 'Successfully Processed'],
@@ -183,7 +185,7 @@ const BulkPaymentPDFDownloader = ({ schedule, beneficiaries, downloadType, class
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(11);
           
-          const notificationText = `Dear ${beneficiary.beneficiary_name},\n\nThis notification confirms that a payment of ${currency} ${schedule.amount_per_beneficiary.toLocaleString()} has been processed to your account ending in ${beneficiary.account_number.slice(-4)} at ${beneficiary.bank_name}.\n\nThe payment was processed as part of the "${schedule.schedule_name}" bulk payment schedule and should reflect in your account within 1-2 business days.\n\nIf you have any questions regarding this payment, please contact us using the details provided above.`;
+          const notificationText = `Dear ${beneficiary.beneficiary_name},\n\nThis notification confirms that a payment of ${formatCurrency(schedule.amount_per_beneficiary)} has been processed to your account ending in ${beneficiary.account_number.slice(-4)} at ${beneficiary.bank_name}.\n\nThe payment was processed as part of the "${schedule.schedule_name}" bulk payment schedule and should reflect in your account within 1-2 business days.\n\nIf you have any questions regarding this payment, please contact us using the details provided above.`;
           
           doc.text(notificationText, 20, yPos + 35, { maxWidth: 170 });
           

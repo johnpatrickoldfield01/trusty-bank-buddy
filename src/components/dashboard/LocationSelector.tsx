@@ -15,7 +15,8 @@ const LocationSelector: React.FC = () => {
       'JP': '🇯🇵',
       'AU': '🇦🇺',
       'CA': '🇨🇦',
-      'CH': '🇨🇭'
+      'CH': '🇨🇭',
+      'HK': '🇭🇰'
     };
     return flags[countryCode] || '🌍';
   };

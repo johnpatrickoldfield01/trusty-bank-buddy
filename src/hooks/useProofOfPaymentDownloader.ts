@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { type Database } from '@/integrations/supabase/types';
 import { type Profile } from '@/components/layout/AppLayout';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 type TransactionRow = Database['public']['Tables']['transactions']['Row'];
 type AccountInfo = Pick<Database['public']['Tables']['accounts']['Row'], 'account_name' | 'account_number' | 'account_type'>;
@@ -13,6 +14,8 @@ export type TransactionWithAccountDetails = TransactionRow & {
 };
 
 export const useProofOfPaymentDownloader = () => {
+  const { formatCurrency } = useCurrencyLocation();
+  
   const downloadProofOfPayment = async (profile: Profile | null, transaction: TransactionWithAccountDetails | null) => {
     if (!profile || !transaction) {
       toast.error('Could not get user or transaction details to generate proof of payment.');
@@ -94,7 +97,7 @@ export const useProofOfPaymentDownloader = () => {
           ['Description', transaction.name],
           ['Date', new Date(transaction.transaction_date).toLocaleString('en-ZA')],
           ['Category', transaction.category || 'Uncategorized'],
-          ['Amount', `R ${Math.abs(transaction.amount).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+          ['Amount', formatCurrency(Math.abs(transaction.amount))],
           ['Status', 'Completed'],
         ],
         theme: 'plain',
