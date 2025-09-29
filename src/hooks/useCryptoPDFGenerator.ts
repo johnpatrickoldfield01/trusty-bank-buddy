@@ -100,10 +100,11 @@ TAX IMPLICATIONS: This transaction may have tax implications under South African
 BLOCKCHAIN VERIFICATION: This transaction is permanently recorded on the Bitcoin blockchain and can be independently verified using the transaction hash provided above.`;
 
       const textLines = doc.splitTextToSize(complianceText, 170);
-      const textHeight = textLines.length * 3; // Approximate height per line
+      const lineHeight = 4; // Increase line height to prevent overlap
+      const textHeight = textLines.length * lineHeight;
       
       // Check if text fits on current page
-      if (currentY + 10 + textHeight > 280) {
+      if (currentY + 10 + textHeight > 270) {
         doc.addPage();
         currentY = 20;
         doc.setFontSize(14);
@@ -113,10 +114,15 @@ BLOCKCHAIN VERIFICATION: This transaction is permanently recorded on the Bitcoin
       
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
-      doc.text(textLines, 20, currentY + 10);
+      
+      // Draw text line by line with proper spacing
+      textLines.forEach((line: string, index: number) => {
+        doc.text(line, 20, currentY + 10 + (index * lineHeight));
+      });
 
       // Footer - ensure it's on the page
-      const footerY = Math.max(currentY + 10 + textHeight + 10, 270);
+      const finalTextY = currentY + 10 + textHeight;
+      const footerY = Math.max(finalTextY + 10, 270);
       if (footerY > 280) {
         doc.addPage();
         currentY = 250;

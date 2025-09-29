@@ -267,16 +267,10 @@ const CryptoTransactionsPage = () => {
                                         transaction.recipient_swift_code?.startsWith('0x000000') ||
                                         !transaction.recipient_swift_code;
                           
-                          console.log('Transaction indicator check:', {
-                            id: transaction.id,
-                            swift_code: transaction.recipient_swift_code,
-                            isMock
-                          });
-                          
                           return (
                             <Badge className={isMock ? 
-                              "bg-gray-100 text-gray-700 text-xs font-medium ml-2" : 
-                              "bg-red-50 text-red-700 text-xs font-medium border border-red-200 ml-2"
+                              "bg-orange-100 text-orange-700 text-xs font-medium ml-2" : 
+                              "bg-green-100 text-green-700 text-xs font-medium ml-2"
                             }>
                               {isMock ? 'mock' : 'real'}
                             </Badge>
@@ -315,6 +309,14 @@ const CryptoTransactionsPage = () => {
                       >
                         <Receipt className="h-3 w-3 mr-1" />
                         Receipt
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => generateTaxationSummary([transaction], symbol || 'BTC', cryptoInfo.currentPrice)}
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        Tax
                       </Button>
                     </div>
                   </div>

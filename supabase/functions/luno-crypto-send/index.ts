@@ -40,7 +40,7 @@ serve(async (req) => {
           },
           body: new URLSearchParams({
             amount: (amount * 100000000).toString(), // Convert to satoshis
-            currency: crypto.toUpperCase(),
+            currency: crypto.symbol.toUpperCase(),
             address: toAddress,
           }),
         });
@@ -84,7 +84,7 @@ serve(async (req) => {
 
     // Generate mock Luno response matching their API structure
     const mockWithdrawalId = `BXMC${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
-    const mockTxId = '0x000000000000000000000000000000000000000000000000.' + Math.random().toString(36).substr(2, 9); // Mock txid with 0x prefix
+    const mockTxId = '0x000000000000000000000000000000000000000000000000' + Math.random().toString(36).substr(2, 9); // Mock txid with 0x prefix
     const mockExternalId = `ext_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const mockFee = parseFloat((amount * 0.0005).toFixed(8)); // 0.05% fee
     
