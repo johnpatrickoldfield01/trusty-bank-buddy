@@ -151,7 +151,57 @@ serve(async (req) => {
     ]);
 
     // Look up transaction by either txid or hash
-    const transaction = mockTransactions.get(identifier);
+    let transaction = mockTransactions.get(identifier);
+    
+    // Handle dynamically generated mock transactions (those starting with 0x000000000000000000000000000000000000000000000000)
+    if (!transaction && identifier?.startsWith('0x000000000000000000000000000000000000000000000000')) {
+      console.log(`Generating mock transaction data for: ${identifier}`);
+      
+      // Extract the random suffix after the mock prefix
+      const randomSuffix = identifier.split('.')[1] || 'mock';
+      
+      // Generate mock transaction data for this ID
+      transaction = {
+        txid: identifier,
+        hash: identifier,
+        blockHeight: 867543 + Math.floor(Math.random() * 100), // Random recent block
+        blockHash: `0x00000000000000000001${randomSuffix}abcdef1234567890abcdef1234567`,
+        confirmations: 6,
+        timestamp: Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 3600), // Random time in last hour
+        fee: 0.0005,
+        size: 250,
+        vsize: 142,
+        weight: 568,
+        version: 2,
+        locktime: 0,
+        inputs: [{
+          txid: `0xprev${randomSuffix}`,
+          vout: 0,
+          scriptSig: {
+            asm: 'mock_signature_data',
+            hex: '473044022...'
+          },
+          sequence: 4294967295,
+          value: 1.0005
+        }],
+        outputs: [{
+          value: 1.0000,
+          n: 0,
+          scriptPubKey: {
+            asm: 'OP_DUP OP_HASH160 38vbWK3Z7SoQKVdrutUaGZVWhtn9fohmsP OP_EQUALVERIFY OP_CHECKSIG',
+            hex: '76a914...',
+            reqSigs: 1,
+            type: 'pubkeyhash',
+            addresses: ['38vbWK3Z7SoQKVdrutUaGZVWhtn9fohmsP']
+          }
+        }],
+        hex: `mock_raw_transaction_hex_data_${randomSuffix}`,
+        status: 'confirmed',
+        network: 'bitcoin-testnet-mock',
+        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`,
+        exchange: 'luno'
+      };
+    }
     
     if (!transaction) {
       return new Response(JSON.stringify({
