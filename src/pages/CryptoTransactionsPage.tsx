@@ -260,27 +260,26 @@ const CryptoTransactionsPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{transaction.name}</span>
                         <Badge className="bg-green-100 text-green-800">Completed</Badge>
-                        {/* Mock/Real indicator based on transaction source */}
+                        {/* Debug and Mock/Real indicator */}
                         {(() => {
-                          console.log('Transaction for indicator check:', {
+                          // Debug output
+                          console.log('DEBUG - Transaction check:', {
                             id: transaction.id,
-                            name: transaction.name,
-                            recipient_swift_code: transaction.recipient_swift_code,
-                            recipient_bank_name: transaction.recipient_bank_name
+                            swift_code: transaction.recipient_swift_code,
+                            bank_name: transaction.recipient_bank_name
                           });
                           
+                          // Check if mock transaction
                           const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
-                                        transaction.recipient_swift_code?.includes('mock') ||
                                         transaction.recipient_swift_code?.includes('96f87fe') ||
-                                        transaction.recipient_bank_name?.toLowerCase().includes('mock') ||
-                                        !transaction.recipient_swift_code?.match(/^[a-f0-9]{64}$/i); // Real Bitcoin tx hashes are 64 hex chars
+                                        transaction.recipient_swift_code?.includes('mock');
                           
-                          console.log('Is mock transaction?', isMock);
+                          console.log('DEBUG - Is mock?', isMock, 'for transaction:', transaction.name);
                           
-                          return isMock ? (
-                            <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
-                          ) : (
-                            <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
+                          return (
+                            <Badge className={isMock ? "bg-gray-100 text-gray-600 text-xs ml-1" : "bg-red-50 text-red-600 text-xs border-red-200 ml-1"}>
+                              {isMock ? 'mock' : 'real'}
+                            </Badge>
                           );
                         })()}
                       </div>

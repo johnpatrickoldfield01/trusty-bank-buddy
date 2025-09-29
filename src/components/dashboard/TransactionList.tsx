@@ -84,7 +84,21 @@ This certificate serves as proof of tax compliance for the above transaction.
                   <span className="text-lg">{transaction.icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{transaction.name}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium truncate">{transaction.name}</p>
+                    {/* Mock/Real indicator for dashboard */}
+                    {(() => {
+                      const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
+                                    transaction.recipient_swift_code?.includes('96f87fe') ||
+                                    transaction.recipient_swift_code?.includes('mock');
+                      
+                      return (
+                        <Badge className={isMock ? "bg-gray-100 text-gray-600 text-xs" : "bg-red-50 text-red-600 text-xs border-red-200"}>
+                          {isMock ? 'mock' : 'real'}
+                        </Badge>
+                      );
+                    })()}
+                  </div>
                   <p className="text-xs text-muted-foreground">{transaction.date}</p>
                 </div>
                  <div className="text-right">
@@ -97,39 +111,25 @@ This certificate serves as proof of tax compliance for the above transaction.
                       : formatCurrency(transaction.amount)
                     }
                   </p>
-                  <div className="flex items-center gap-2 justify-end">
-                    <Badge variant="secondary" className="text-xs font-normal">
-                      {transaction.category}
-                    </Badge>
-                    {/* Mock/Real indicator */}
-                    {(() => {
-                      const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
-                                    transaction.recipient_swift_code?.includes('mock') ||
-                                    transaction.recipient_swift_code?.includes('96f87fe') ||
-                                    transaction.recipient_bank_name?.toLowerCase().includes('mock') ||
-                                    !transaction.recipient_swift_code?.match(/^[a-f0-9]{64}$/i);
-                      
-                      return isMock ? (
-                        <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
-                      ) : (
-                        <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
-                      );
-                    })()}
-                    {transaction.category === 'crypto' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleTaxDocument(transaction);
-                        }}
-                        className="h-6 px-2 text-xs"
-                      >
-                        <Receipt className="w-3 h-3 mr-1" />
-                        Tax
-                      </Button>
-                    )}
-                  </div>
+                   <div className="flex items-center gap-2 justify-end">
+                     <Badge variant="secondary" className="text-xs font-normal">
+                       {transaction.category}
+                     </Badge>
+                     {transaction.category === 'crypto' && (
+                       <Button 
+                         size="sm" 
+                         variant="outline" 
+                         onClick={(e) => {
+                           e.preventDefault();
+                           handleTaxDocument(transaction);
+                         }}
+                         className="h-6 px-2 text-xs"
+                       >
+                         <Receipt className="w-3 h-3 mr-1" />
+                         Tax
+                       </Button>
+                     )}
+                   </div>
                 </div>
               </div>
             </Link>
