@@ -4,7 +4,7 @@ import StatCard from '@/components/ui/StatCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletCards, Coins, CreditCard } from 'lucide-react';
-import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 interface DashboardStatsProps {
   isLoading: boolean;

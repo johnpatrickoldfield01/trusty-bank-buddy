@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { SessionProvider } from "./hooks/useSession";
+import { CurrencyLocationProvider } from "@/contexts/CurrencyLocationContext";
 import AuthPage from "./pages/AuthPage";
 import AppLayout from "./components/layout/AppLayout";
 import CardsPage from "./pages/CardsPage";
@@ -107,13 +108,15 @@ const AppContent = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <SessionProvider>
-          <AppContent />
-        </SessionProvider>
-      </BrowserRouter>
+      <CurrencyLocationProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <SessionProvider>
+            <AppContent />
+          </SessionProvider>
+        </BrowserRouter>
+      </CurrencyLocationProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

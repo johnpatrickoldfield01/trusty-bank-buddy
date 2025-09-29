@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface LocationCurrency {
   code: string;
@@ -67,7 +67,18 @@ export const LOCATIONS: Record<string, LocationCurrency> = {
   }
 };
 
-export const useCurrencyLocation = () => {
+interface CurrencyLocationContextType {
+  selectedLocation: string;
+  currentCurrency: LocationCurrency;
+  locations: Record<string, LocationCurrency>;
+  convertAmount: (amountInZAR: number) => number;
+  formatCurrency: (amountInZAR: number, options?: Intl.NumberFormatOptions) => string;
+  updateLocation: (locationCode: string) => void;
+}
+
+const CurrencyLocationContext = createContext<CurrencyLocationContextType | undefined>(undefined);
+
+export const CurrencyLocationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [selectedLocation, setSelectedLocation] = useState<string>(() => {
     // Load from localStorage or default to South Africa
     return localStorage.getItem('selectedLocation') || 'ZA';
@@ -115,7 +126,7 @@ export const useCurrencyLocation = () => {
     }
   };
 
-  return {
+  const value: CurrencyLocationContextType = {
     selectedLocation,
     currentCurrency,
     locations: LOCATIONS,
@@ -123,4 +134,18 @@ export const useCurrencyLocation = () => {
     formatCurrency,
     updateLocation
   };
+
+  return (
+    <CurrencyLocationContext.Provider value={value}>
+      {children}
+    </CurrencyLocationContext.Provider>
+  );
+};
+
+export const useCurrencyLocation = (): CurrencyLocationContextType => {
+  const context = useContext(CurrencyLocationContext);
+  if (!context) {
+    throw new Error('useCurrencyLocation must be used within a CurrencyLocationProvider');
+  }
+  return context;
 };

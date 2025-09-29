@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Wallet, CreditCard, PiggyBank, Landmark, Home, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatAccountNumber } from '@/lib/utils';
-import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 interface AccountSummaryProps {
   mainAccountBalance: number;

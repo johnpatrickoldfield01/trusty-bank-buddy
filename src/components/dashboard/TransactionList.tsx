@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 export type Transaction = {
   id: string;

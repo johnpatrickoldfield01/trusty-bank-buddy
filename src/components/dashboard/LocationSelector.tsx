@@ -1,10 +1,10 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe } from 'lucide-react';
-import { useCurrencyLocation, LOCATIONS } from '@/hooks/useCurrencyLocation';
+import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 const LocationSelector: React.FC = () => {
-  const { selectedLocation, currentCurrency, updateLocation } = useCurrencyLocation();
+  const { selectedLocation, currentCurrency, locations, updateLocation } = useCurrencyLocation();
 
   const getFlagEmoji = (countryCode: string): string => {
     const flags: Record<string, string> = {
@@ -34,7 +34,7 @@ const LocationSelector: React.FC = () => {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {Object.entries(LOCATIONS).map(([code, location]) => (
+          {Object.entries(locations).map(([code, location]) => (
             <SelectItem key={code} value={code}>
               <div className="flex items-center gap-2">
                 <span>{getFlagEmoji(code)}</span>
