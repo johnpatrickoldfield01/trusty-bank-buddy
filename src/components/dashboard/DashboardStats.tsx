@@ -4,6 +4,7 @@ import StatCard from '@/components/ui/StatCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletCards, Coins, CreditCard } from 'lucide-react';
+import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
 
 interface DashboardStatsProps {
   isLoading: boolean;
@@ -12,6 +13,7 @@ interface DashboardStatsProps {
 }
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ isLoading, totalBalance, spendingThisMonth }) => {
+  const { formatCurrency, currentCurrency } = useCurrencyLocation();
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       {isLoading ? (
@@ -35,19 +37,19 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ isLoading, totalBalance
         <>
           <StatCard
             title="Total Balance"
-            value={`R${totalBalance.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            value={formatCurrency(totalBalance)}
             trend={{ value: "3.2% this month", positive: true }}
             icon={<WalletCards className="h-5 w-5" />}
           />
           <StatCard
             title="Spending this month"
-            value={`R${spendingThisMonth.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            value={formatCurrency(spendingThisMonth)}
             trend={{ value: "12% more than last month", positive: false }}
             icon={<CreditCard className="h-5 w-5" />}
           />
           <StatCard
             title="Saved this month"
-            value="R15240.00"
+            value={formatCurrency(15240)}
             trend={{ value: "5.3% this month", positive: true }}
             icon={<Coins className="h-5 w-5" />}
           />

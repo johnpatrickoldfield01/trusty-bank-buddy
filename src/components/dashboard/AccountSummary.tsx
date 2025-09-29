@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Wallet, CreditCard, PiggyBank, Landmark, Home, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatAccountNumber } from '@/lib/utils';
+import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
 
 interface AccountSummaryProps {
   mainAccountBalance: number;
@@ -22,6 +23,7 @@ interface AccountSummaryProps {
 }
 
 const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber, onDownloadConfirmation }: AccountSummaryProps) => {
+  const { formatCurrency } = useCurrencyLocation();
   const creditUsagePercentage = creditCardBalance < 0 ? (Math.abs(creditCardBalance) / creditCardLimit) * 100 : 0;
   const monthlyRepayment = Math.abs((loanBalance || 0) * 0.0001);
   const homeLoanMonthlyRepayment = Math.abs((homeLoanBalance || 0) * 0.0001);
@@ -42,7 +44,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Main Account</p>
                 <div className="flex items-center gap-2">
-                  <p className="font-bold">R{(mainAccountBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="font-bold">{formatCurrency(mainAccountBalance || 0)}</p>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDownloadConfirmation}>
                     <Download className="h-4 w-4" />
                     <span className="sr-only">Download confirmation letter</span>
@@ -61,7 +63,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Savings</p>
-                <p className="font-bold">R{(savingsBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">{formatCurrency(savingsBalance || 0)}</p>
               </div>
               {savingsAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(savingsAccountNumber)}</p>}
               <div className="mt-2">
@@ -82,7 +84,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Credit Card</p>
-                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>R{(creditCardBalance || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className={`font-bold ${creditCardBalance < 0 ? 'text-destructive' : ''}`}>{formatCurrency(creditCardBalance || 0)}</p>
               </div>
               {creditCardAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(creditCardAccountNumber)}</p>}
               <div className="mt-2">
@@ -91,7 +93,7 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
                   <span>{creditUsagePercentage.toFixed(1)}%</span>
                 </div>
                 <Progress value={creditUsagePercentage} className={`h-1.5 ${creditCardBalance < 0 ? 'bg-red-200' : 'bg-secondary'}`} />
-                <p className="text-xs text-muted-foreground text-right mt-1">Limit: R{creditCardLimit.toLocaleString('en-ZA')}</p>
+                <p className="text-xs text-muted-foreground text-right mt-1">Limit: {formatCurrency(creditCardLimit)}</p>
               </div>
             </div>
           </div>
@@ -104,13 +106,13 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Business Loan</p>
-                <p className="font-bold">R{(Math.abs(loanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">{formatCurrency(Math.abs(loanBalance || 0))}</p>
               </div>
               {loanAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(loanAccountNumber)}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
-                  <span>R{monthlyRepayment.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>{formatCurrency(monthlyRepayment)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground text-right mt-1">30 years remaining</p>
               </div>
@@ -125,13 +127,13 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium">Home Loan</p>
-                <p className="font-bold">R{(Math.abs(homeLoanBalance || 0)).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="font-bold">{formatCurrency(Math.abs(homeLoanBalance || 0))}</p>
               </div>
               {homeLoanAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(homeLoanAccountNumber)}</p>}
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1 text-xs">
                   <span className="text-muted-foreground">Monthly Repayment (0.01%)</span>
-                  <span>R{homeLoanMonthlyRepayment.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>{formatCurrency(homeLoanMonthlyRepayment)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground text-right mt-1">30 years remaining</p>
               </div>

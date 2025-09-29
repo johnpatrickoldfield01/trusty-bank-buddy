@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCurrencyLocation } from '@/hooks/useCurrencyLocation';
 
 export type Transaction = {
   id: string;
@@ -17,6 +18,7 @@ export type Transaction = {
 };
 
 const TransactionList = ({ transactions, onDownloadStatement, onDownload12MonthStatement }: { transactions: Transaction[], onDownloadStatement: () => void, onDownload12MonthStatement: () => void }) => {
+  const { formatCurrency } = useCurrencyLocation();
   return (
     <Card className="w-full">
       <CardHeader>
@@ -39,8 +41,10 @@ const TransactionList = ({ transactions, onDownloadStatement, onDownload12MonthS
                     "font-medium",
                     transaction.amount > 0 ? "text-bank-secondary" : ""
                   )}>
-                    {transaction.amount > 0 ? '+' : ''}
-                    R{Math.abs(transaction.amount).toFixed(2)}
+                    {transaction.amount > 0 
+                      ? `+${formatCurrency(transaction.amount)}` 
+                      : formatCurrency(transaction.amount)
+                    }
                   </p>
                   <Badge variant="secondary" className="text-xs font-normal">
                     {transaction.category}
