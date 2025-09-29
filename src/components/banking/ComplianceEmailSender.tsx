@@ -87,7 +87,12 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
         return;
       }
 
-      toast.success(`Compliance email sent successfully to ${bankEmail} with CC to ${ccEmail}${proofDocuments.length > 0 ? ` including ${proofDocuments.length} proof documents` : ''}`);
+      toast.success(`Email sent to ${ccEmail} (testing mode). Please forward to ${bankEmail} manually. ${proofDocuments.length > 0 ? `Includes ${proofDocuments.length} proof documents.` : ''}`);
+      
+      // Show additional guidance
+      toast.info('Due to Resend testing limits, emails can only be sent to your verified address. The email contains all compliance details for forwarding to the bank.', {
+        duration: 8000
+      });
       
     } catch (error) {
       console.error('Error sending compliance email:', error);
@@ -260,6 +265,13 @@ const ComplianceEmailSender = ({ selectedErrors, className }: ComplianceEmailSen
             Please select compliance errors from the error tracker above to send an email.
           </p>
         )}
+        
+        <div className="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-r">
+          <p className="text-sm text-yellow-800">
+            <strong>⚠️ Testing Mode:</strong> Due to Resend limitations, emails will be sent to your verified address ({ccEmail}) only. 
+            You'll need to forward the compliance letter to {bankEmail} manually.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

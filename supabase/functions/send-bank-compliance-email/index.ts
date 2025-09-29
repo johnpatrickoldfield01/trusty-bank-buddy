@@ -167,21 +167,32 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    // Send email notification
+    // Send email notification - In testing mode, send only to verified email
     const emailResponse = await resend.emails.send({
       from: "TrustyBank Compliance <onboarding@resend.dev>",
-      to: [bankEmail],
-      cc: [ccEmail],
-      subject: `URGENT: Compliance & Technical Review - Account ${transferDetails.accountNumber}`,
-      html: emailHtml,
+      to: [ccEmail], // Send to user's verified email only in testing mode
+      subject: `URGENT: Compliance & Technical Review - Account ${transferDetails.accountNumber} (INTENDED FOR: ${bankEmail})`,
+      html: `
+        <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+          <h3 style="color: #856404; margin: 0 0 10px 0;">📧 EMAIL DELIVERY NOTICE</h3>
+          <p style="margin: 0; color: #856404;">
+            <strong>INTENDED RECIPIENT:</strong> ${bankEmail}<br>
+            <strong>ACTUAL RECIPIENT:</strong> ${ccEmail} (testing mode)<br>
+            <strong>ACTION REQUIRED:</strong> Forward this email to ${bankEmail} or verify domain in Resend
+          </p>
+        </div>
+        ${emailHtml}
+      `,
     });
 
     console.log("Bank compliance email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
-      message: "Compliance email sent successfully",
+      message: "Compliance email sent successfully (testing mode - sent to your verified email)",
       emailSent: true,
-      recipients: [bankEmail, ccEmail]
+      actualRecipient: ccEmail,
+      intendedRecipient: bankEmail,
+      note: "Email sent to your verified email due to Resend testing limitations. Forward to bank manually."
     }), {
       status: 200,
       headers: {
