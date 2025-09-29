@@ -1,11 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Download, Receipt, Loader2 } from 'lucide-react';
 import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
+import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
+import { useCryptoPDFGenerator } from '@/hooks/useCryptoPDFGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 const CryptoDetailsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
@@ -46,6 +49,14 @@ const CryptoDetailsPage = () => {
 
   const crypto = cryptocurrencies.find(c => c.symbol === symbol?.toUpperCase());
   const [balance, setBalance] = useState(1000000);
+  const { transactions, loading, error, refetch } = useCryptoTransactions(symbol);
+  const { generateProofOfPayment, generateTaxationSummary } = useCryptoPDFGenerator();
+  const { toast } = useToast();
+
+  // Refresh transactions when the page loads or symbol changes
+  useEffect(() => {
+    refetch();
+  }, [symbol, refetch]);
 
   if (!crypto) {
     return (
@@ -84,6 +95,19 @@ const CryptoDetailsPage = () => {
 
   const portfolioValue = crypto.price * balance;
 
+  const downloadTaxCertificate = () => {
+    if (transactions.length === 0) {
+      toast({
+        title: "No Transactions Found",
+        description: "No cryptocurrency transactions available for tax summary.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    generateTaxationSummary(transactions, symbol || 'BTC', crypto.price);
+  };
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -91,11 +115,17 @@ const CryptoDetailsPage = () => {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Portfolio
         </Button>
-        <SendCryptoDialog 
-          crypto={crypto} 
-          balance={balance} 
-          onBalanceUpdate={setBalance}
-        />
+        <div className="flex gap-2">
+          <Button onClick={downloadTaxCertificate} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download Tax Summary
+          </Button>
+          <SendCryptoDialog 
+            crypto={crypto} 
+            balance={balance} 
+            onBalanceUpdate={setBalance}
+          />
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -212,6 +242,79 @@ const CryptoDetailsPage = () => {
                 <p className="text-sm text-muted-foreground">USD</p>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading transactions...</span>
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-600 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()}>Retry</Button>
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">No crypto transactions found.</p>
+                <p className="text-sm text-muted-foreground">Send some {symbol} to create your first transaction!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map((transaction) => (
+                  <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{transaction.name}</span>
+                          <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(transaction.transaction_date).toLocaleDateString()} • {transaction.recipient_bank_name}
+                        </div>
+                        {transaction.recipient_name && (
+                          <div className="text-xs text-muted-foreground">
+                            To: {transaction.recipient_name}
+                          </div>
+                        )}
+                        {transaction.recipient_swift_code && (
+                          <div className="text-xs text-blue-600">
+                            Tx: {transaction.recipient_swift_code}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right flex items-center gap-3">
+                      <div>
+                        <div className="font-medium text-red-600">
+                          {transaction.amount} {symbol}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {transaction.category}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => generateProofOfPayment(transaction, symbol || 'BTC', crypto.price)}
+                        >
+                          <Receipt className="h-3 w-3 mr-1" />
+                          Receipt
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
