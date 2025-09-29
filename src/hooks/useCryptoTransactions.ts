@@ -27,17 +27,17 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
     try {
       setLoading(true);
       
-      // Get user's crypto account
+      // Get user's main account instead of crypto-specific account
       const { data: accountData, error: accountError } = await supabase
         .from('accounts')
         .select('id')
-        .eq('account_type', 'crypto')
+        .eq('account_type', 'main')
         .limit(1)
         .single();
 
       if (accountError) {
-        console.error('Error fetching crypto account:', accountError);
-        setError('Failed to fetch crypto account');
+        console.error('Error fetching main account:', accountError);
+        setError('Failed to fetch main account');
         return;
       }
 

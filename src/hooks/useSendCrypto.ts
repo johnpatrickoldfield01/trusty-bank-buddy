@@ -75,11 +75,11 @@ export const useSendCrypto = () => {
 
       console.log('Transaction successful:', data);
 
-      // Save crypto transaction to database
+      // Save crypto transaction to database  
       const { data: accountData } = await supabase
         .from('accounts')
         .select('id')
-        .eq('account_type', 'crypto')
+        .eq('account_type', 'main')
         .limit(1)
         .single();
 

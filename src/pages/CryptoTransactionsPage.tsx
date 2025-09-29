@@ -170,13 +170,13 @@ const CryptoTransactionsPage = () => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-2xl font-bold">
-                R {transactions.reduce((sum, t) => sum + t.zarValue, 0).toLocaleString()}
+                R {transactions.reduce((sum, t) => sum + Math.abs(t.amount), 0).toLocaleString()}
               </div>
               <div className="text-sm text-muted-foreground">
                 Transaction volume (ZAR)
               </div>
               <div className="text-xs text-muted-foreground">
-                ≈ ${transactions.reduce((sum, t) => sum + t.usdValue, 0).toLocaleString()} USD
+                ≈ ${transactions.reduce((sum, t) => sum + Math.abs(t.amount * 0.055), 0).toLocaleString()} USD
               </div>
             </div>
           </CardContent>
