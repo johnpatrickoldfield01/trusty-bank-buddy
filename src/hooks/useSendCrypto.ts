@@ -13,14 +13,15 @@ interface SendCryptoParams {
   toAddress: string;
   fromBalance: number;
   exchange: string;
+  mockMode?: boolean;
   onSuccess: (newBalance: number) => void;
 }
 
 export const useSendCrypto = () => {
-  const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, exchange, onSuccess }: SendCryptoParams) => {
+  const sendCrypto = async ({ crypto, amount, toAddress, fromBalance, exchange, mockMode = false, onSuccess }: SendCryptoParams) => {
     try {
-      console.log('Starting crypto send:', { crypto: crypto.symbol, amount, toAddress, exchange });
-      toast.info(`Processing transaction with ${exchange}...`);
+      console.log('Starting crypto send:', { crypto: crypto.symbol, amount, toAddress, exchange, mockMode });
+      toast.info(`Processing ${mockMode ? 'mock' : 'real'} transaction with ${exchange}...`);
 
       // Route to different exchange integrations
       let edgeFunctionName = '';
@@ -52,7 +53,8 @@ export const useSendCrypto = () => {
         body: {
           crypto,
           amount,
-          toAddress
+          toAddress,
+          mockMode
         }
       });
 
@@ -95,7 +97,8 @@ export const useSendCrypto = () => {
             recipient_name: toAddress.substring(0, 20) + '...',
             recipient_bank_name: exchange.charAt(0).toUpperCase() + exchange.slice(1),
             recipient_account_number: toAddress,
-            recipient_swift_code: data.transactionHash || data.transactionId
+            recipient_swift_code: data.transactionHash || data.transactionId || 
+                             (mockMode ? `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : 'unknown')
           });
 
         if (transactionError) {

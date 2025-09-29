@@ -284,6 +284,42 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_wallet_addresses: {
+        Row: {
+          address_label: string | null
+          created_at: string
+          cryptocurrency: string
+          exchange_name: string
+          id: string
+          is_default: boolean | null
+          updated_at: string
+          user_id: string
+          wallet_address: string
+        }
+        Insert: {
+          address_label?: string | null
+          created_at?: string
+          cryptocurrency: string
+          exchange_name: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+          user_id: string
+          wallet_address: string
+        }
+        Update: {
+          address_label?: string | null
+          created_at?: string
+          cryptocurrency?: string
+          exchange_name?: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       db_change_requests: {
         Row: {
           created_at: string

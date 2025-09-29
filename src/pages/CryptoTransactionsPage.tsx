@@ -292,21 +292,10 @@ const CryptoTransactionsPage = () => {
                          <Badge className="bg-green-100 text-green-800">Completed</Badge>
                          {/* Mock/Real Transaction Status */}
                          {(() => {
-                           console.log('Transaction check:', {
-                             id: transaction.id,
-                             name: transaction.name,
-                             swift_code: transaction.recipient_swift_code,
-                             isMockBySwift: transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000'),
-                             isMockByMissing: !transaction.recipient_swift_code,
-                             isMockByName: transaction.name?.toLowerCase().includes('mock')
-                           });
-                           
                            const isMock = transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') ||
                                          transaction.recipient_swift_code?.includes('mock') ||
                                          !transaction.recipient_swift_code ||
                                          transaction.name?.toLowerCase().includes('mock');
-                           
-                           console.log('Final isMock result:', isMock);
                            
                            return (
                              <Badge className={isMock ? 

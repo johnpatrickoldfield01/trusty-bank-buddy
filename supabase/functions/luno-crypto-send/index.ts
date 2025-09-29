@@ -12,12 +12,51 @@ serve(async (req) => {
   }
 
   try {
-    const { crypto, amount, toAddress } = await req.json();
+    const { crypto, amount, toAddress, mockMode } = await req.json();
     console.log('Received Luno send request:', { 
       currency: crypto.symbol, 
       amount, 
-      address: toAddress 
+      address: toAddress,
+      mockMode: mockMode || false
     });
+
+    // If mockMode is enabled, skip API call and return mock response
+    if (mockMode === true) {
+      console.log('Mock mode enabled - generating mock response');
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const mockTxId = 'mock_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const mockResponse = {
+        success: true,
+        withdrawal_id: `MOCK${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+        bitcoin_txid: mockTxId,
+        external_id: `mock_ext_${Date.now()}`,
+        currency: crypto.symbol,
+        amount: amount.toString(),
+        fee: (amount * 0.0005).toString(),
+        destination_address: toAddress,
+        status: 'COMPLETE',
+        created_at: Date.now(),
+        newBalance: 5.0,
+        transactionId: mockTxId,
+        transactionHash: mockTxId,
+        exchangeUrl: `https://mock.luno.com/wallet/transactions/mock`,
+        blockchainExplorerUrl: `https://mock.blockchain.com/tx/${mockTxId}`,
+        network: 'Mock Network',
+        regulatory_info: {
+          exchange: 'Mock Luno Exchange',
+          compliance_status: 'MOCK TRANSACTION - FOR TESTING ONLY',
+          transaction_monitoring: 'Mock transaction mode - no real funds transferred',
+          mock_notice: `MOCK: ${amount} ${crypto.symbol} to ${toAddress}`
+        }
+      };
+
+      return new Response(JSON.stringify(mockResponse), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Use the new API credentials
     const apiKeyId = Deno.env.get('LUNO_API_KEY_ID_NEW');
