@@ -69,6 +69,12 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         } else {
+          const errorText = await lunoApiResponse.text();
+          console.log('Luno API error response:', {
+            status: lunoApiResponse.status,
+            statusText: lunoApiResponse.statusText,
+            body: errorText
+          });
           console.log('Luno API error, falling back to mock');
         }
       } catch (error) {
