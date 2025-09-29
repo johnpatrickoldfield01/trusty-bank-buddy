@@ -76,6 +76,23 @@ This certificate serves as proof of tax compliance for the above transaction.
         <CardTitle className="text-lg font-medium">Recent Transactions</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Mock Transactions Warning */}
+        {transactions.some(t => 
+          t.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') ||
+          t.recipient_swift_code?.includes('mock') ||
+          !t.recipient_swift_code ||
+          t.name?.toLowerCase().includes('mock')
+        ) && (
+          <div className="bg-orange-50 border border-orange-200 rounded-md p-3 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-orange-600">⚠️</span>
+              <p className="text-orange-800 text-sm font-medium">
+                Mock transactions detected - these won't appear on public blockchain explorers
+              </p>
+            </div>
+          </div>
+        )}
+        
         <div className="space-y-1">
           {transactions.map((transaction) => (
             <Link key={transaction.id} to={`/transaction/${transaction.id}`} className="block p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors">
@@ -86,15 +103,19 @@ This certificate serves as proof of tax compliance for the above transaction.
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="font-medium truncate">{transaction.name}</p>
-                    {/* Mock/Real indicator for dashboard */}
+                    {/* Transaction Status Indicator */}
                     {(() => {
-                      const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
-                                    transaction.recipient_swift_code?.includes('96f87fe') ||
-                                    transaction.recipient_swift_code?.includes('mock');
+                      const isMock = transaction.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') || 
+                                    transaction.recipient_swift_code?.includes('mock') ||
+                                    !transaction.recipient_swift_code ||
+                                    transaction.name?.toLowerCase().includes('mock');
                       
                       return (
-                        <Badge className={isMock ? "bg-gray-100 text-gray-600 text-xs" : "bg-red-50 text-red-600 text-xs border-red-200"}>
-                          {isMock ? 'mock' : 'real'}
+                        <Badge className={isMock ? 
+                          "bg-orange-100 text-orange-800 text-xs font-semibold border border-orange-300" : 
+                          "bg-green-100 text-green-800 text-xs font-semibold border border-green-300"
+                        }>
+                          {isMock ? '⚠️ MOCK' : '✅ REAL'}
                         </Badge>
                       );
                     })()}
