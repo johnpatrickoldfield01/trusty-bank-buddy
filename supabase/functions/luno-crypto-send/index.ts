@@ -36,10 +36,8 @@ serve(async (req) => {
     const mockCurrentBalance = 5.25; 
     const newBalance = Math.max(0, mockCurrentBalance - amount - mockFee);
 
-    // Generate consistent transaction hash for blockchain explorer  
-    const transactionHash = crypto.symbol === 'BTC' && mockWithdrawalId === 'BXLC2CJ7HNB88UIYAMQN' 
-      ? '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12' 
-      : `0x${Math.random().toString(16).padStart(62, '0').substr(0, 62)}`;
+    // Generate consistent transaction hash for blockchain explorer - no special characters
+    const transactionHash = '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12';
 
     // Mock successful Luno send response structure
     const lunoResponse = {

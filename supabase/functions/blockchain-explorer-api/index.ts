@@ -26,8 +26,9 @@ serve(async (req) => {
 
     // Mock blockchain explorer database - Bitcoin txids are 64-character hex strings
     const mockTransactions = new Map([
-      ['BXLC2CJ7HNB88UIYAMQN', {
-        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456', // 64-char hex
+      // Luno transaction data (BXLC2CJ7HNB88UYQSRHA is the Luno withdrawal ID)
+      ['BXLC2CJ7HNB88UYQSRHA', {
+        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
         hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
         blockHeight: 867543,
         blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
@@ -63,7 +64,49 @@ serve(async (req) => {
         hex: 'mock_raw_transaction_hex_data_would_be_here',
         status: 'confirmed',
         network: 'bitcoin-testnet',
-        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`
+        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`,
+        exchange: 'luno'
+      }],
+      // Legacy Binance transaction for backward compatibility
+      ['BXLC2CJ7HNB88UIYAMQN', {
+        txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
+        hash: '0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12',
+        blockHeight: 867543,
+        blockHash: '0x00000000000000000001a2b3c4d5e6f7890abcdef1234567890abcdef1234567',
+        confirmations: 6,
+        timestamp: 1727508773,
+        fee: 0.0005,
+        size: 250,
+        vsize: 142,
+        weight: 568,
+        version: 2,
+        locktime: 0,
+        inputs: [{
+          txid: '0xprev123456789abcdef',
+          vout: 0,
+          scriptSig: {
+            asm: 'mock_signature_data',
+            hex: '473044022...'
+          },
+          sequence: 4294967295,
+          value: 1.0005
+        }],
+        outputs: [{
+          value: 1.0000,
+          n: 0,
+          scriptPubKey: {
+            asm: 'OP_DUP OP_HASH160 38vbWK3Z7SoQKVdrutUaGZVWhtn9fohmsP OP_EQUALVERIFY OP_CHECKSIG',
+            hex: '76a914...',
+            reqSigs: 1,
+            type: 'pubkeyhash',
+            addresses: ['38vbWK3Z7SoQKVdrutUaGZVWhtn9fohmsP']
+          }
+        }],
+        hex: 'mock_raw_transaction_hex_data_would_be_here',
+        status: 'confirmed',
+        network: 'bitcoin-testnet',
+        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${identifier}`,
+        exchange: 'binance'
       }],
       ['0xa3552867d759abcd1234567890abcdef1234567890abcdef1234567890abcd12', {
         txid: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
@@ -102,7 +145,8 @@ serve(async (req) => {
         hex: 'mock_raw_transaction_hex_data_would_be_here',
         status: 'confirmed',
         network: 'bitcoin-testnet',
-        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${identifier}`
+        explorer_url: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${identifier}`,
+        exchange: 'luno'
       }]
     ]);
 
