@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email notification
     const emailResponse = await resend.emails.send({
-      from: "TrustyBank Alerts <alerts@trustybank.com>",
+      from: "TrustyBank Alerts <onboarding@resend.dev>",
       to: [userEmail],
       subject: `Transfer Error Alert - ${errorCode}`,
       html: emailHtml,

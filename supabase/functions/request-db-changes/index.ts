@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
     const dbPersonnelEmail = "db-admin@trustybank.com"; // Mock email
     
     const emailResponse = await resend.emails.send({
-      from: "TrustyBank System <system@trustybank.com>",
+      from: "TrustyBank System <onboarding@resend.dev>",
       to: [dbPersonnelEmail],
       cc: [requesterEmail],
       subject: `DB Change Request: ${requestType} - ${currentNaming}`,
