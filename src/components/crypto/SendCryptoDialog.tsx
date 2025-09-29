@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,10 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Send, Settings, Star } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSendCrypto } from '@/hooks/useSendCrypto';
-import { useWalletAddresses } from '@/hooks/useWalletAddresses';
 import WalletAddressManager from './WalletAddressManager';
 
 interface SendCryptoDialogProps {
@@ -31,7 +30,6 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
   const [useMockTransaction, setUseMockTransaction] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { sendCrypto } = useSendCrypto();
-  const { addresses, getAddressesForExchangeAndCrypto, getDefaultAddress } = useWalletAddresses();
 
   const exchanges = [
     { value: 'luno', label: 'Luno', description: 'Your connected exchange' },
@@ -41,18 +39,6 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
     { value: 'gemini', label: 'Gemini', description: 'Regulated exchange' },
     { value: 'bitfinex', label: 'Bitfinex', description: 'Advanced trading features' },
   ];
-
-  // Get saved addresses for current exchange and crypto
-  const savedAddresses = getAddressesForExchangeAndCrypto(selectedExchange, crypto.symbol);
-  const defaultAddress = getDefaultAddress(selectedExchange, crypto.symbol);
-
-  // Set default address when exchange changes
-  useEffect(() => {
-    const defaultAddr = getDefaultAddress(selectedExchange, crypto.symbol);
-    if (defaultAddr && !address) {
-      setAddress(defaultAddr.wallet_address);
-    }
-  }, [selectedExchange, crypto.symbol, getDefaultAddress, address]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,29 +186,7 @@ const SendCryptoDialog = ({ crypto, balance, onBalanceUpdate }: SendCryptoDialog
               />
             </div>
             
-            {/* Saved Addresses Quick Select */}
-            {savedAddresses.length > 0 && (
-              <div className="mb-2">
-                <Label className="text-xs text-muted-foreground">Saved Addresses:</Label>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {savedAddresses.map((savedAddr) => (
-                    <Button
-                      key={savedAddr.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 px-2"
-                      onClick={() => setAddress(savedAddr.wallet_address)}
-                      disabled={isLoading}
-                    >
-                      {savedAddr.is_default && <Star className="h-3 w-3 mr-1 fill-current" />}
-                      {savedAddr.address_label || savedAddr.wallet_address.slice(0, 8) + '...'}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
+            {/* Saved Addresses Quick Select - Simplified */}
             <Input
               id="address"
               placeholder="Enter cryptocurrency address"
