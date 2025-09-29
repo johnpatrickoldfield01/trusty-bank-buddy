@@ -3,6 +3,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import BeneficiaryManager from '@/components/banking/BeneficiaryManager';
 import BulkPaymentScheduler from '@/components/banking/BulkPaymentScheduler';
 import TransferErrorMonitor from '@/components/banking/TransferErrorMonitor';
+import ComplianceErrorTracker from '@/components/banking/ComplianceErrorTracker';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const BulkPaymentsPage = () => {
@@ -16,10 +17,11 @@ const BulkPaymentsPage = () => {
         </div>
 
         <Tabs defaultValue="beneficiaries" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="beneficiaries">Beneficiaries</TabsTrigger>
             <TabsTrigger value="scheduler">Bulk Scheduler</TabsTrigger>
             <TabsTrigger value="errors">Error Monitor</TabsTrigger>
+            <TabsTrigger value="compliance">Compliance & BaaS</TabsTrigger>
           </TabsList>
           
           <TabsContent value="beneficiaries" className="space-y-4">
@@ -32,6 +34,10 @@ const BulkPaymentsPage = () => {
           
           <TabsContent value="errors" className="space-y-4">
             <TransferErrorMonitor />
+          </TabsContent>
+          
+          <TabsContent value="compliance" className="space-y-4">
+            <ComplianceErrorTracker />
           </TabsContent>
         </Tabs>
       </div>
