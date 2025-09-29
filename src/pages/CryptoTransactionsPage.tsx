@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, TrendingUp, TrendingDown, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Download, Loader2, FileText, Receipt } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
+import { useCryptoPDFGenerator } from '@/hooks/useCryptoPDFGenerator';
 
 const mockTransactions = [
   { id: '1', date: '2024-01-15', type: 'Buy', amount: 0.5, price: 67234.56, usdValue: 33617.28, zarValue: 621919.68, status: 'Completed', txHash: '0x1a2b3c...', exchange: 'Coinbase' },
@@ -45,8 +46,14 @@ const cryptoData: { [key: string]: { name: string; symbol: string; currentPrice:
 const CryptoTransactionsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
-  const { transactions, loading, error } = useCryptoTransactions(symbol);
+  const { transactions, loading, error, refetch } = useCryptoTransactions(symbol);
   const { toast } = useToast();
+  const { generateProofOfPayment, generateTaxationSummary } = useCryptoPDFGenerator();
+
+  // Refresh transactions when the page loads or symbol changes
+  useEffect(() => {
+    refetch();
+  }, [symbol, refetch]);
 
   if (!symbol || !cryptoData[symbol]) {
     return (
@@ -68,10 +75,16 @@ const CryptoTransactionsPage = () => {
   const isPositive = cryptoInfo.change24h > 0;
 
   const downloadTaxCertificate = () => {
-    toast({
-      title: "Tax Certificate Generated",
-      description: `${cryptoInfo.name} tax certificate with compliance details has been downloaded.`,
-    });
+    if (transactions.length === 0) {
+      toast({
+        title: "No Transactions Found",
+        description: "No cryptocurrency transactions available for tax summary.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    generateTaxationSummary(transactions, symbol || 'BTC', cryptoInfo.currentPrice);
   };
 
   const getTransactionIcon = (type: string) => {
@@ -117,7 +130,7 @@ const CryptoTransactionsPage = () => {
         </div>
         <Button onClick={downloadTaxCertificate} className="bg-bank-primary hover:bg-bank-primary/90">
           <Download className="h-4 w-4 mr-2" />
-          Download Tax Certificate
+          Download Tax Summary
         </Button>
       </div>
 
@@ -263,12 +276,24 @@ const CryptoTransactionsPage = () => {
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-medium text-red-600">
-                      {transaction.amount} {symbol}
+                  <div className="text-right flex items-center gap-3">
+                    <div>
+                      <div className="font-medium text-red-600">
+                        {transaction.amount} {symbol}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {transaction.category}
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {transaction.category}
+                    <div className="flex flex-col gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => generateProofOfPayment(transaction, symbol || 'BTC', cryptoInfo.currentPrice)}
+                      >
+                        <Receipt className="h-3 w-3 mr-1" />
+                        Receipt
+                      </Button>
                     </div>
                   </div>
                 </div>

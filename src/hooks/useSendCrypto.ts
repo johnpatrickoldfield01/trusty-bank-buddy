@@ -122,7 +122,7 @@ export const useSendCrypto = () => {
         compliance_documentation: data.compliance_documentation
       });
 
-      // Update balance
+      // Update balance and refresh transactions
       onSuccess(data.newBalance);
       
       toast.success(`Successfully sent ${amount} ${crypto.symbol} via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}!`);

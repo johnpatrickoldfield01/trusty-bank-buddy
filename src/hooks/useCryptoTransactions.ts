@@ -41,6 +41,8 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
         return;
       }
 
+      console.log('Fetching crypto transactions for account:', accountData.id);
+
       // Fetch crypto transactions
       let query = supabase
         .from('transactions')
@@ -54,6 +56,8 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
       }
 
       const { data, error: transactionError } = await query;
+
+      console.log('Crypto transactions fetched:', data, 'Error:', transactionError);
 
       if (transactionError) {
         console.error('Error fetching transactions:', transactionError);
