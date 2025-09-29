@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import BeneficiaryManager from '@/components/banking/BeneficiaryManager';
 import BulkPaymentScheduler from '@/components/banking/BulkPaymentScheduler';
 import TransferErrorMonitor from '@/components/banking/TransferErrorMonitor';
 import ComplianceErrorTracker from '@/components/banking/ComplianceErrorTracker';
+import ComplianceEmailSender from '@/components/banking/ComplianceEmailSender';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+interface ComplianceError {
+  id: string;
+  errorCode: string;
+  errorMessage: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  category: 'database' | 'compliance' | 'api' | 'regulatory';
+  description: string;
+  resolution: string;
+  baasRequest?: string;
+  timeoutCode?: number;
+  lastOccurred: string;
+  affectedTransfers: number;
+}
+
 const BulkPaymentsPage = () => {
+  const [selectedErrors, setSelectedErrors] = useState<ComplianceError[]>([]);
+
   return (
     <div className="container mx-auto p-4 space-y-6">
         <div className="text-center space-y-2">
@@ -36,8 +53,12 @@ const BulkPaymentsPage = () => {
             <TransferErrorMonitor />
           </TabsContent>
           
-          <TabsContent value="compliance" className="space-y-4">
-            <ComplianceErrorTracker />
+          <TabsContent value="compliance" className="space-y-6">
+            <ComplianceErrorTracker 
+              selectedErrors={selectedErrors}
+              onErrorSelectionChange={setSelectedErrors}
+            />
+            <ComplianceEmailSender selectedErrors={selectedErrors} />
           </TabsContent>
         </Tabs>
       </div>

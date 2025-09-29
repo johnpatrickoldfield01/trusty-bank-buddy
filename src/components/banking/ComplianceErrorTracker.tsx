@@ -21,6 +21,11 @@ interface ComplianceError {
   affectedTransfers: number;
 }
 
+interface ComplianceErrorTrackerProps {
+  selectedErrors: ComplianceError[];
+  onErrorSelectionChange: (errors: ComplianceError[]) => void;
+}
+
 const predefinedErrors: ComplianceError[] = [
   {
     id: '1',
@@ -102,16 +107,21 @@ const predefinedErrors: ComplianceError[] = [
   }
 ];
 
-const ComplianceErrorTracker = () => {
-  const [selectedErrors, setSelectedErrors] = useState<string[]>([]);
+const ComplianceErrorTracker = ({ selectedErrors, onErrorSelectionChange }: ComplianceErrorTrackerProps) => {
   const [activeTab, setActiveTab] = useState('errors');
+  const selectedErrorIds = selectedErrors.map(e => e.id);
 
   const handleErrorSelection = (errorId: string) => {
-    setSelectedErrors(prev => 
-      prev.includes(errorId) 
-        ? prev.filter(id => id !== errorId)
-        : [...prev, errorId]
-    );
+    const error = predefinedErrors.find(e => e.id === errorId);
+    if (!error) return;
+    
+    const isSelected = selectedErrorIds.includes(errorId);
+    
+    if (isSelected) {
+      onErrorSelectionChange(selectedErrors.filter(e => e.id !== errorId));
+    } else {
+      onErrorSelectionChange([...selectedErrors, error]);
+    }
   };
 
   const getSeverityColor = (severity: string) => {
@@ -134,7 +144,7 @@ const ComplianceErrorTracker = () => {
     }
   };
 
-  const selectedErrorData = predefinedErrors.filter(error => selectedErrors.includes(error.id));
+  const selectedErrorData = selectedErrors;
 
   return (
     <div className="space-y-6">
@@ -169,7 +179,7 @@ const ComplianceErrorTracker = () => {
           <div className="grid gap-4">
             {predefinedErrors.map((error) => (
               <Card key={error.id} className={`cursor-pointer transition-all ${
-                selectedErrors.includes(error.id) ? 'ring-2 ring-primary' : ''
+                selectedErrorIds.includes(error.id) ? 'ring-2 ring-primary' : ''
               }`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
@@ -177,7 +187,7 @@ const ComplianceErrorTracker = () => {
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          checked={selectedErrors.includes(error.id)}
+                          checked={selectedErrorIds.includes(error.id)}
                           onChange={() => handleErrorSelection(error.id)}
                           className="rounded"
                         />
