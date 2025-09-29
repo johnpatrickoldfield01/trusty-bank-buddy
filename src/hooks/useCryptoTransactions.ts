@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CryptoTransaction {
@@ -19,11 +19,7 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [cryptoSymbol]);
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       console.log('Starting fetchTransactions with symbol:', cryptoSymbol);
@@ -79,7 +75,11 @@ export const useCryptoTransactions = (cryptoSymbol?: string) => {
       setLoading(false);
       console.log('Finally block: setting loading to false');
     }
-  };
+  }, [cryptoSymbol]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
 
   return { transactions, loading, error, refetch: fetchTransactions };
 };
