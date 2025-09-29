@@ -1,6 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
-import MinimalApp from './App-minimal.tsx';
+import App from './App.tsx';
 import './index.css'
 
 // Add mobile-specific class to body when running in Capacitor
@@ -27,4 +27,4 @@ window.addEventListener('resize', handleViewportChange);
 window.addEventListener('orientationchange', handleViewportChange);
 handleViewportChange();
 
-createRoot(document.getElementById("root")!).render(<MinimalApp />);
+createRoot(document.getElementById("root")!).render(<App />);
