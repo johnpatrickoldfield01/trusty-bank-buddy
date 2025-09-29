@@ -75,6 +75,36 @@ export const useSendCrypto = () => {
 
       console.log('Transaction successful:', data);
 
+      // Save crypto transaction to database
+      const { data: accountData } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('account_type', 'crypto')
+        .limit(1)
+        .single();
+
+      if (accountData) {
+        const { error: transactionError } = await supabase
+          .from('transactions')
+          .insert({
+            account_id: accountData.id,
+            amount: -amount, // Negative for outgoing
+            name: `Send ${crypto.symbol} via ${exchange}`,
+            category: 'crypto',
+            icon: '₿',
+            recipient_name: toAddress.substring(0, 20) + '...',
+            recipient_bank_name: exchange.charAt(0).toUpperCase() + exchange.slice(1),
+            recipient_account_number: toAddress,
+            recipient_swift_code: data.transactionHash || data.transactionId
+          });
+
+        if (transactionError) {
+          console.error('Failed to save crypto transaction:', transactionError);
+        } else {
+          console.log('Crypto transaction saved to database');
+        }
+      }
+
       // Generate PDF proof with enhanced transaction and compliance data
       await generateTransactionPDF({
         transactionId: data.transactionId,

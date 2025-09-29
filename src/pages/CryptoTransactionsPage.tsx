@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, TrendingUp, TrendingDown, Download } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Download, Loader2 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
+import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
 
 const mockTransactions = [
   { id: '1', date: '2024-01-15', type: 'Buy', amount: 0.5, price: 67234.56, usdValue: 33617.28, zarValue: 621919.68, status: 'Completed', txHash: '0x1a2b3c...', exchange: 'Coinbase' },
@@ -44,7 +45,7 @@ const cryptoData: { [key: string]: { name: string; symbol: string; currentPrice:
 const CryptoTransactionsPage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
-  const [transactions] = useState(mockTransactions);
+  const { transactions, loading, error } = useCryptoTransactions(symbol);
   const { toast } = useToast();
 
   if (!symbol || !cryptoData[symbol]) {
@@ -219,56 +220,61 @@ const CryptoTransactionsPage = () => {
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {transactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-4">
-                  {getTransactionIcon(transaction.type)}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {transaction.type} {transaction.amount} {symbol}
-                      </span>
-                      {getStatusBadge(transaction.status)}
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading transactions...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            </div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground mb-4">No crypto transactions found.</p>
+              <Button onClick={() => navigate(`/crypto/${symbol}`)}>
+                Send {symbol} to create your first transaction
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {transactions.map((transaction) => (
+                <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{transaction.name}</span>
+                        <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {new Date(transaction.transaction_date).toLocaleDateString()} • {transaction.recipient_bank_name}
+                      </div>
+                      {transaction.recipient_name && (
+                        <div className="text-xs text-muted-foreground">
+                          To: {transaction.recipient_name}
+                        </div>
+                      )}
+                      {transaction.recipient_swift_code && (
+                        <div className="text-xs text-blue-600">
+                          Tx: {transaction.recipient_swift_code}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-red-600">
+                      {transaction.amount} {symbol}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {transaction.date} • {transaction.exchange} • ${transaction.price.toLocaleString()}/coin
-                    </div>
-                    {transaction.type === 'Send' && transaction.recipient && (
-                      <div className="text-xs text-muted-foreground">
-                        To: {transaction.recipient.substring(0, 20)}...
-                      </div>
-                    )}
-                    {transaction.type === 'Receive' && transaction.sender && (
-                      <div className="text-xs text-muted-foreground">
-                        From: {transaction.sender.substring(0, 20)}...
-                      </div>
-                    )}
-                    <div className="text-xs text-blue-600">
-                      Tx: {transaction.txHash}
+                      {transaction.category}
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-medium">
-                    ${transaction.usdValue.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    R {transaction.zarValue.toLocaleString()}
-                  </div>
-                  <div className={`text-sm ${
-                    transaction.type === 'Buy' ? 'text-red-600' : 
-                    transaction.type === 'Sell' ? 'text-green-600' : 
-                    'text-blue-600'
-                  }`}>
-                    {transaction.type === 'Buy' && '-'}
-                    {transaction.type === 'Sell' && '+'}
-                    {transaction.amount} {symbol}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

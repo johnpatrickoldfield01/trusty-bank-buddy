@@ -23,7 +23,7 @@ serve(async (req) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     const transactionId = `binance_${Date.now()}`;
-    const transactionHash = `0x${Math.random().toString(16).substr(2, 12)}`;
+    const transactionHash = `${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}${Math.random().toString(16).substr(2, 8)}`;
     
     const mockResponse = {
       success: true,
