@@ -260,24 +260,22 @@ const CryptoTransactionsPage = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{transaction.name}</span>
                         <Badge className="bg-green-100 text-green-800">Completed</Badge>
-                        {/* Debug and Mock/Real indicator */}
+                        {/* DEBUG: Mock/Real indicator with simplified detection */}
                         {(() => {
-                          // Debug output
-                          console.log('DEBUG - Transaction check:', {
+                          console.log('DEBUG indicator - tx data:', {
                             id: transaction.id,
-                            swift_code: transaction.recipient_swift_code,
-                            bank_name: transaction.recipient_bank_name
+                            swift: transaction.recipient_swift_code
                           });
                           
-                          // Check if mock transaction
-                          const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
-                                        transaction.recipient_swift_code?.includes('96f87fe') ||
-                                        transaction.recipient_swift_code?.includes('mock');
-                          
-                          console.log('DEBUG - Is mock?', isMock, 'for transaction:', transaction.name);
+                          const isMock = transaction.recipient_swift_code?.includes('96f87fe') ||
+                                        transaction.recipient_swift_code?.includes('0x000000') ||
+                                        !transaction.recipient_swift_code;
                           
                           return (
-                            <Badge className={isMock ? "bg-gray-100 text-gray-600 text-xs ml-1" : "bg-red-50 text-red-600 text-xs border-red-200 ml-1"}>
+                            <Badge className={isMock ? 
+                              "bg-gray-100 text-gray-700 text-xs font-medium" : 
+                              "bg-red-50 text-red-700 text-xs font-medium border border-red-200"
+                            }>
                               {isMock ? 'mock' : 'real'}
                             </Badge>
                           );

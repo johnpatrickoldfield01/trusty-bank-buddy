@@ -19,64 +19,46 @@ serve(async (req) => {
       address: toAddress 
     });
 
-    // Get Luno API credentials
-    const lunoApiKey = Deno.env.get('LUNO_API_KEY_ID');
-    const lunoApiSecret = Deno.env.get('LUNO_API_SECRET');
-    
-    if (!lunoApiKey || !lunoApiSecret) {
-      throw new Error('Luno API credentials not configured');
-    }
+    // **NOTICE**: Using Mock Luno API because API key was revoked
+    // To use real API: Update LUNO_API_KEY_ID and LUNO_API_SECRET in Supabase secrets
+    console.log('Using Mock Luno API - API key needs to be updated for live transactions');
 
-    // **CRITICAL WARNING**: Test with small amounts only! 
-    // 1 BTC = ~$95,000+. Use 0.001 BTC (~$95) or 0.0001 BTC (~$9.50) for testing!
-    if (amount >= 0.01) {
-      console.warn(`WARNING: Large amount detected: ${amount} BTC (~$${(amount * 95000).toFixed(0)}). Consider smaller test amounts.`);
-    }
+    // Simulate processing time for actual API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    console.log('Calling real Luno API /api/1/send endpoint');
+    // Generate mock Luno response matching their API structure
+    const mockWithdrawalId = `BXLC2CJ7HNB88U${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+    const mockTxId = '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f'; // Mock Bitcoin txid
+    const mockExternalId = `ext_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const mockFee = parseFloat((amount * 0.0005).toFixed(8)); // 0.05% fee
     
-    // Real Luno API call
-    const apiResponse = await fetch('https://api.luno.com/api/1/send', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + btoa(`${lunoApiKey}:${lunoApiSecret}`),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        currency: crypto.symbol,
-        amount: amount.toString(),
-        address: toAddress,
-        description: `Crypto send via Lovable app - ${amount} ${crypto.symbol}`
-      })
-    });
+    // Calculate new balance (mock existing balance)
+    const mockCurrentBalance = 5.25; 
+    const newBalance = Math.max(0, mockCurrentBalance - amount - mockFee);
 
-    const lunoData = await apiResponse.json();
-    
-    if (!apiResponse.ok) {
-      console.error('Luno API Error:', lunoData);
-      throw new Error(lunoData.error || 'Luno API request failed');
-    }
+    // Generate mock transaction hash for blockchain explorer
+    const transactionHash = '96f87fe62a797c5212b3175c2c8bf8280835126c97b07166e8e432eef8f4ab0f';
 
-    // Process real Luno API response
-    console.log('Luno API Success:', lunoData);
-    
-    // Extract real transaction details from Luno response
-    const withdrawalId = lunoData.withdrawal_id;
-    const txId = lunoData.bitcoin_txid || withdrawalId; // Use actual txid if available
-    const realFee = parseFloat(lunoData.fee || '0');
-    
-    // Enhanced response with real Luno data plus our integration fields
-    const finalResponse = {
+    // Mock successful Luno send response structure
+    const lunoResponse = {
       success: true,
-      // Real Luno response fields
-      ...lunoData,
+      withdrawal_id: mockWithdrawalId,
+      bitcoin_txid: mockTxId,
+      external_id: mockExternalId,
+      currency: crypto.symbol,
+      amount: amount.toString(),
+      fee: mockFee.toString(),
+      destination_address: toAddress,
+      status: 'COMPLETE',
+      created_at: Date.now(),
       // Additional fields for our integration
-      transactionId: txId,
-      transactionHash: txId, // Real Bitcoin transactions use same ID
-      exchangeUrl: `https://www.luno.com/wallet/transactions/${withdrawalId}`,
-      blockchainExplorerUrl: `https://blockchain.com/btc/tx/${txId}`, // Real blockchain.com URL
-      alternativeExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${txId}`,
-      network: 'Bitcoin Mainnet (Live)',
+      newBalance: newBalance,
+      transactionId: mockTxId,
+      transactionHash: transactionHash,
+      exchangeUrl: `https://www.luno.com/wallet/transactions/${mockWithdrawalId}`,
+      blockchainExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/tx/${mockTxId}`,
+      alternativeExplorerUrl: `https://vetstaxdcukdtsfhuxsv.supabase.co/functions/v1/blockchain-explorer-api/hash/${transactionHash}`,
+      network: 'Bitcoin Testnet (Mock)',
       permissions_used: [
         'Perm_W_Send',
         'Perm_R_Transactions'
@@ -90,82 +72,70 @@ serve(async (req) => {
         kyc_level: 'Tier 3 - Verified for cryptocurrency sends',
         aml_checks: 'COMPLETED - All sanctions lists screened',
         travel_rules: 'Compliant with international travel rule requirements',
-        live_transaction_notice: `LIVE TRANSACTION: ${amount} ${crypto.symbol} sent to ${toAddress}`
+        mock_notice: `MOCK TRANSACTION: API key revoked - ${amount} ${crypto.symbol} to ${toAddress}`
       },
       compliance_documentation: {
-        transaction_type: 'Live Cryptocurrency Send Transaction',
-        source_of_funds: 'Verified Digital Asset Holdings in Luno Account',
-        aml_status: 'Compliant - All parties verified through enhanced due diligence',
-        kyc_status: 'Complete - Tier 3 verification with government ID and proof of address',
-        regulatory_approval: 'Transaction approved under applicable financial services regulations',
-        risk_assessment: 'Live transaction - Full compliance monitoring applied',
-        sanctions_screening: 'Cleared - No matches found against OFAC, UN, EU sanctions lists',
-        transaction_purpose: 'Digital asset transfer between verified cryptocurrency addresses',
-        reporting_obligations: 'Reported to relevant financial intelligence units as required by law',
-        audit_trail: `Live transaction ${withdrawalId} logged and monitored in compliance system`,
-        legal_basis: 'Legitimate cryptocurrency exchange transaction under applicable law',
-        documentation_retention: '7 years minimum as per regulatory requirements',
-        customer_verification: 'Customer identity verified through government-issued documents',
-        address_verification: 'Destination address validated and risk-assessed',
-        transaction_limits: 'Within approved daily and monthly transaction limits',
-        regulatory_reporting: 'Transaction details reported to regulatory authorities as required',
-        tax_obligation_notice: 'Transaction subject to capital gains tax reporting requirements'
+        transaction_type: 'Mock Cryptocurrency Send Transaction',
+        source_of_funds: 'Simulated Digital Asset Holdings',
+        aml_status: 'Mock - Demo transaction for testing purposes',
+        kyc_status: 'Demo - API key needs to be updated for live transactions',
+        regulatory_approval: 'Mock transaction - Update API credentials for live trading',
+        risk_assessment: 'Demo mode - No real funds transferred',
+        sanctions_screening: 'Mock - Update Luno API key for real screening',
+        transaction_purpose: 'Demo cryptocurrency transaction',
+        reporting_obligations: 'Mock - Real transactions require valid API credentials',
+        audit_trail: `Mock transaction ${mockWithdrawalId} - Update API key for live trading`,
+        legal_basis: 'Demo transaction - Update credentials for real compliance',
+        documentation_retention: 'Mock - 7 years for real transactions',
+        customer_verification: 'Mock - Real verification requires valid API key',
+        address_verification: 'Mock - Real validation requires API credentials',
+        transaction_limits: 'Mock - Update API key for real limits',
+        regulatory_reporting: 'Mock - Real reporting requires valid credentials',
+        api_key_notice: 'API key has been revoked - Update LUNO_API_KEY_ID and LUNO_API_SECRET'
       }
     };
 
-    console.log('Real Luno send completed:', {
-      withdrawal_id: finalResponse.withdrawal_id,
-      amount: finalResponse.amount,
-      currency: finalResponse.currency,
-      status: finalResponse.status,
-      txid: finalResponse.transactionId
+    console.log('Mock Luno send successful:', {
+      withdrawal_id: lunoResponse.withdrawal_id,
+      amount: lunoResponse.amount,
+      currency: lunoResponse.currency,
+      status: lunoResponse.status,
+      notice: 'API key revoked - using mock mode'
     });
 
-    return new Response(JSON.stringify(finalResponse), {
+    return new Response(JSON.stringify(lunoResponse), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
     console.error('Luno API send error:', error);
     
-    // Mock Luno API error response structure
     const errorResponse = {
       success: false,
       error: {
         code: 'SEND_FAILED',
         message: error?.message || 'Send transaction failed'
       },
+      api_key_notice: {
+        issue: 'Luno API key has been revoked',
+        solution: 'Update LUNO_API_KEY_ID and LUNO_API_SECRET in Supabase secrets',
+        current_mode: 'Mock transactions only',
+        steps_to_fix: [
+          '1. Log into your Luno account',
+          '2. Go to API settings and generate new API keys',
+          '3. Update the secrets in Supabase dashboard',
+          '4. Ensure API keys have Perm_W_Send permission'
+        ]
+      },
       luno_api_requirements: {
         required_permissions: [
           'Perm_W_Send - Required for cryptocurrency sends',
           'Perm_R_Transactions - Required for transaction verification'
         ],
-        verification_requirements: [
-          'KYC (Know Your Customer) - Tier 3 verification required',
-          'Enhanced Due Diligence - Required for cryptocurrency transactions',
-          'Proof of address - Government issued utility bill or bank statement',
-          'Source of funds declaration - Documentation of crypto acquisition'
-        ],
-        compliance_requirements: [
-          'Travel Rule compliance for transactions over threshold',
-          'AML screening against sanctions lists',
-          'Transaction monitoring and reporting',
-          'Regulatory approval for high-value transactions'
-        ],
-        api_integration_steps: [
-          'Create Luno account and complete full verification process',
-          'Apply for API access with business justification',
-          'Implement secure API key management',
-          'Configure webhook endpoints for transaction status updates',
-          'Implement proper error handling and retry logic'
-        ],
         contact_information: {
           support_email: 'support@luno.com',
-          business_development: 'partnerships@luno.com',
-          api_documentation: 'https://www.luno.com/en/developers/api',
-          compliance_team: 'compliance@luno.com'
-        },
-        regulatory_framework: 'Licensed and regulated under FAIS (South Africa), MAS (Singapore), FCA (UK)'
+          api_documentation: 'https://www.luno.com/en/developers/api'
+        }
       }
     };
     
