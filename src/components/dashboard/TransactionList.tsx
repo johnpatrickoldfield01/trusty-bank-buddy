@@ -157,9 +157,11 @@ This certificate serves as proof of tax compliance for the above transaction.
           ))}
           
           <div className="w-full mt-4 pt-4 border-t flex justify-center items-center gap-4 flex-wrap">
-            <Button variant="link" className="text-bank-primary">
-              View all transactions
-            </Button>
+            <Link to="/payments">
+              <Button variant="link" className="text-bank-primary">
+                View all transactions
+              </Button>
+            </Link>
             <Button variant="outline" onClick={onDownloadStatement}>
               <Download className="mr-2 h-4 w-4" />
               Statement (3 mo)

@@ -117,25 +117,31 @@ const CryptoTransactionsPage = () => {
 
   return (
     <div className="container mx-auto py-10 space-y-6">
-      {/* Mock Transaction Warning */}
-      {transactions.some(t => 
-        t.recipient_swift_code?.startsWith('0x000000000000000000000000000000000000000000000000') ||
-        t.recipient_swift_code?.includes('mock') ||
-        !t.recipient_swift_code ||
-        t.name?.toLowerCase().includes('mock')
-      ) && (
+      {/* Mock Transaction Warning - Always show if any transactions exist */}
+      {transactions && transactions.length > 0 && (
         <div className="bg-orange-50 border-2 border-orange-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
             <div className="text-orange-600 text-xl">⚠️</div>
             <div>
-              <h3 className="font-semibold text-orange-800 mb-1">Mock Transactions Detected</h3>
-              <p className="text-orange-700 text-sm">
-                Some transactions shown are <strong>MOCK/TEST transactions</strong> and will NOT appear on public blockchain explorers like blockchain.com. 
-                Real transactions will have proper blockchain hashes and be visible on public explorers.
+              <h3 className="font-semibold text-orange-800 mb-1">Transaction Status Check</h3>
+              <p className="text-orange-700 text-sm mb-2">
+                <strong>MOCK transactions</strong> will NOT appear on public blockchain explorers like blockchain.com. 
+                Only <strong>REAL transactions</strong> will have proper blockchain hashes visible on public explorers.
               </p>
-              <p className="text-orange-600 text-xs mt-2">
-                Mock transactions occur when API integration fails or test mode is active. Check the individual transaction badges for status.
-              </p>
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="bg-orange-100 p-2 rounded">
+                  <div className="font-medium text-orange-800">Mock Indicators:</div>
+                  <div className="text-orange-700">• Hash starts with 0x000000...</div>
+                  <div className="text-orange-700">• ⚠️ MOCK badge shown</div>
+                  <div className="text-orange-700">• Won't appear on blockchain.com</div>
+                </div>
+                <div className="bg-green-100 p-2 rounded">
+                  <div className="font-medium text-green-800">Real Indicators:</div>
+                  <div className="text-green-700">• Valid blockchain hash</div>
+                  <div className="text-green-700">• ✅ REAL badge shown</div>
+                  <div className="text-green-700">• Visible on blockchain.com</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
