@@ -100,6 +100,14 @@ This certificate serves as proof of tax compliance for the above transaction.
                     <Badge variant="secondary" className="text-xs font-normal">
                       {transaction.category}
                     </Badge>
+                    {/* Mock/Real indicator */}
+                    {transaction.recipient_swift_code?.startsWith('0x000000') || 
+                     transaction.recipient_swift_code?.includes('mock') ||
+                     transaction.recipient_swift_code?.includes('96f87fe') ? (
+                      <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
+                    ) : (
+                      <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
+                    )}
                     {transaction.category === 'crypto' && (
                       <Button 
                         size="sm" 
