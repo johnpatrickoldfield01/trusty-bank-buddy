@@ -17,6 +17,7 @@ export type Transaction = {
   icon: string;
   recipient_name?: string;
   recipient_swift_code?: string;
+  recipient_bank_name?: string;
 };
 
 const TransactionList = ({ transactions, onDownloadStatement, onDownload12MonthStatement }: { transactions: Transaction[], onDownloadStatement: () => void, onDownload12MonthStatement: () => void }) => {
@@ -101,13 +102,19 @@ This certificate serves as proof of tax compliance for the above transaction.
                       {transaction.category}
                     </Badge>
                     {/* Mock/Real indicator */}
-                    {transaction.recipient_swift_code?.startsWith('0x000000') || 
-                     transaction.recipient_swift_code?.includes('mock') ||
-                     transaction.recipient_swift_code?.includes('96f87fe') ? (
-                      <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
-                    ) : (
-                      <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
-                    )}
+                    {(() => {
+                      const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
+                                    transaction.recipient_swift_code?.includes('mock') ||
+                                    transaction.recipient_swift_code?.includes('96f87fe') ||
+                                    transaction.recipient_bank_name?.toLowerCase().includes('mock') ||
+                                    !transaction.recipient_swift_code?.match(/^[a-f0-9]{64}$/i);
+                      
+                      return isMock ? (
+                        <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
+                      ) : (
+                        <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
+                      );
+                    })()}
                     {transaction.category === 'crypto' && (
                       <Button 
                         size="sm" 

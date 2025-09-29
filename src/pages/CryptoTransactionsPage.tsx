@@ -261,13 +261,28 @@ const CryptoTransactionsPage = () => {
                         <span className="font-medium">{transaction.name}</span>
                         <Badge className="bg-green-100 text-green-800">Completed</Badge>
                         {/* Mock/Real indicator based on transaction source */}
-                        {transaction.recipient_swift_code?.startsWith('0x000000') || 
-                         transaction.recipient_swift_code?.includes('mock') ||
-                         transaction.recipient_swift_code?.includes('96f87fe') ? (
-                          <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
-                        ) : (
-                          <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
-                        )}
+                        {(() => {
+                          console.log('Transaction for indicator check:', {
+                            id: transaction.id,
+                            name: transaction.name,
+                            recipient_swift_code: transaction.recipient_swift_code,
+                            recipient_bank_name: transaction.recipient_bank_name
+                          });
+                          
+                          const isMock = transaction.recipient_swift_code?.startsWith('0x000000') || 
+                                        transaction.recipient_swift_code?.includes('mock') ||
+                                        transaction.recipient_swift_code?.includes('96f87fe') ||
+                                        transaction.recipient_bank_name?.toLowerCase().includes('mock') ||
+                                        !transaction.recipient_swift_code?.match(/^[a-f0-9]{64}$/i); // Real Bitcoin tx hashes are 64 hex chars
+                          
+                          console.log('Is mock transaction?', isMock);
+                          
+                          return isMock ? (
+                            <Badge className="bg-gray-100 text-gray-600 text-xs">mock</Badge>
+                          ) : (
+                            <Badge className="bg-red-50 text-red-600 text-xs border-red-200">real</Badge>
+                          );
+                        })()}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {new Date(transaction.transaction_date).toLocaleDateString()} • {transaction.recipient_bank_name}
