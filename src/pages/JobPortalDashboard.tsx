@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Briefcase, Search, MapPin, Clock, GraduationCap, Building2, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { DualSalaryDialog } from '@/components/jobs/DualSalaryDialog';
 
 interface JobCategory {
   id: string;
@@ -348,12 +349,13 @@ const JobPortalDashboard = () => {
                         )}
                       </div>
                       
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            View Details
-                          </Button>
-                        </DialogTrigger>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                          </DialogTrigger>
                         <DialogContent className="max-w-2xl">
                           <DialogHeader>
                             <DialogTitle>{job.title}</DialogTitle>
@@ -386,7 +388,15 @@ const JobPortalDashboard = () => {
                             </div>
                           </div>
                         </DialogContent>
-                      </Dialog>
+                        </Dialog>
+                        
+                        <DualSalaryDialog
+                          job={job}
+                          selectedCurrency={selectedCurrency}
+                          convertSalary={convertSalary}
+                          formatSalary={formatSalary}
+                        />
+                      </div>
                     </div>
                   </Card>
                 ))}
