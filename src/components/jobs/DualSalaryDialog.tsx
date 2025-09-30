@@ -44,6 +44,7 @@ export const DualSalaryDialog: React.FC<DualSalaryDialogProps> = ({
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [salaryAmount, setSalaryAmount] = useState(job.expected_salary_max);
+  const [hasSalarySetup, setHasSalarySetup] = useState(false);
   
   const { toast } = useToast();
   const { user } = useSession();
@@ -80,7 +81,7 @@ export const DualSalaryDialog: React.FC<DualSalaryDialogProps> = ({
       // Create a new mock account for the second salary
       const mockAccountNumber = `MOCK${Date.now().toString().slice(-8)}`;
       
-      const { error: accountError } = await supabase
+      const { data: newAccount, error: accountError } = await supabase
         .from('accounts')
         .insert({
           user_id: user.id,
@@ -88,7 +89,9 @@ export const DualSalaryDialog: React.FC<DualSalaryDialogProps> = ({
           account_type: 'savings',
           account_number: mockAccountNumber,
           balance: 0
-        });
+        })
+        .select()
+        .single();
 
       if (accountError) throw accountError;
 
@@ -109,19 +112,53 @@ export const DualSalaryDialog: React.FC<DualSalaryDialogProps> = ({
 
       // Calculate monthly salary amount
       const monthlySalary = salaryAmount / 12;
-      const halfSalary = monthlySalary / 2;
+      const totalTax = taxBreakdown.reduce((sum, item) => sum + item.taxDue, 0);
+      const monthlyTaxDeduction = totalTax / 12;
+      const netMonthlySalary = monthlySalary - monthlyTaxDeduction;
 
       // Create payment schedule for both accounts
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       nextMonth.setDate(1);
 
+      // Record salary setup
+      const { error: salarySetupError } = await supabase
+        .from('job_salary_setups')
+        .insert([{
+          user_id: user.id,
+          job_id: job.id,
+          job_title: job.title,
+          annual_salary: salaryAmount,
+          monthly_gross: monthlySalary,
+          monthly_net: netMonthlySalary,
+          fnb_account_holder: fnbDetails.accountHolder,
+          fnb_account_number: fnbDetails.accountNumber,
+          fnb_branch_code: fnbDetails.branchCode,
+          mock_account_id: newAccount.id,
+          next_payment_date: nextMonth.toISOString(),
+          is_active: true,
+          auto_email_enabled: true
+        }]);
+
+      if (salarySetupError) throw salarySetupError;
+
+      // Send initial email notification
+      await supabase.functions.invoke('send-salary-notification', {
+        body: {
+          userEmail: user.email,
+          jobTitle: job.title,
+          monthlySalary: formatSalary(netMonthlySalary / 2, selectedCurrency),
+          setupComplete: true
+        }
+      });
+
       toast({
         title: "Success",
-        description: `Dual salary setup completed! Monthly payments of ${formatSalary(halfSalary, selectedCurrency)} will be sent to each account.`,
+        description: `Dual salary setup completed! Monthly payments of ${formatSalary(netMonthlySalary / 2, selectedCurrency)} will be sent to each account.`,
         variant: "default"
       });
 
+      setHasSalarySetup(true);
       refreshAccounts();
       setIsOpen(false);
     } catch (error) {
@@ -281,7 +318,7 @@ export const DualSalaryDialog: React.FC<DualSalaryDialogProps> = ({
             
             <SalarySlipGenerator
               jobTitle={job.title}
-              grossSalary={netHalfSalary}
+              grossSalary={monthlySalary}
               currency={selectedCurrency}
               formatSalary={formatSalary}
               accountDetails={{

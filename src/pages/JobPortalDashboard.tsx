@@ -11,6 +11,8 @@ import { Briefcase, Search, MapPin, Clock, GraduationCap, Building2, DollarSign 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { DualSalaryDialog } from '@/components/jobs/DualSalaryDialog';
+import { useSession } from '@/hooks/useSession';
+import { useQuery } from '@tanstack/react-query';
 
 interface JobCategory {
   id: string;
@@ -65,14 +67,44 @@ const JobPortalDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState('ZAR');
   const [experienceLevel, setExperienceLevel] = useState<string>('all');
   const [remoteOnly, setRemoteOnly] = useState(false);
+  const [salarySetups, setSalarySetups] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+  const { user } = useSession();
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Fetch salary setups for current user
+  const { data: userSalarySetups } = useQuery({
+    queryKey: ['salary-setups', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('job_salary_setups')
+        .select('job_id, is_active')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Update salary setups state when data changes
+  useEffect(() => {
+    if (userSalarySetups) {
+      const setupsMap = userSalarySetups.reduce((acc, setup) => {
+        acc[setup.job_id] = setup.is_active;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setSalarySetups(setupsMap);
+    }
+  }, [userSalarySetups]);
 
   const fetchData = async () => {
     try {
@@ -347,6 +379,11 @@ const JobPortalDashboard = () => {
                             Remote Available
                           </Badge>
                         )}
+                        {salarySetups[job.id] && (
+                          <Badge variant="default" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                            ✓ Monthly Salary Active
+                          </Badge>
+                        )}
                       </div>
                       
                       <div className="flex gap-2">
@@ -385,9 +422,22 @@ const JobPortalDashboard = () => {
                                   {job.experience_level.charAt(0).toUpperCase() + job.experience_level.slice(1)}
                                 </Badge>
                               </div>
-                            </div>
-                          </div>
-                        </DialogContent>
+                             </div>
+                             
+                             {salarySetups[job.id] && (
+                               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                 <div className="flex items-center gap-2">
+                                   <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                                     ✓ Monthly Salary Active
+                                   </Badge>
+                                 </div>
+                                 <p className="text-sm text-green-700 mt-1">
+                                   Automatic monthly payments are set up for this position. Salary slips are emailed monthly to oldfieldjohnpatrick@gmail.com.
+                                 </p>
+                               </div>
+                             )}
+                           </div>
+                         </DialogContent>
                         </Dialog>
                         
                         <DualSalaryDialog

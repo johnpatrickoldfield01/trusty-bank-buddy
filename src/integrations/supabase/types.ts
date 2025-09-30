@@ -478,6 +478,60 @@ export type Database = {
           },
         ]
       }
+      job_salary_setups: {
+        Row: {
+          annual_salary: number
+          auto_email_enabled: boolean | null
+          fnb_account_holder: string
+          fnb_account_number: string
+          fnb_branch_code: string
+          id: string
+          is_active: boolean | null
+          job_id: string
+          job_title: string
+          mock_account_id: string | null
+          monthly_gross: number
+          monthly_net: number
+          next_payment_date: string
+          setup_date: string
+          user_id: string
+        }
+        Insert: {
+          annual_salary: number
+          auto_email_enabled?: boolean | null
+          fnb_account_holder: string
+          fnb_account_number: string
+          fnb_branch_code: string
+          id?: string
+          is_active?: boolean | null
+          job_id: string
+          job_title: string
+          mock_account_id?: string | null
+          monthly_gross: number
+          monthly_net: number
+          next_payment_date: string
+          setup_date?: string
+          user_id: string
+        }
+        Update: {
+          annual_salary?: number
+          auto_email_enabled?: boolean | null
+          fnb_account_holder?: string
+          fnb_account_number?: string
+          fnb_branch_code?: string
+          id?: string
+          is_active?: boolean | null
+          job_id?: string
+          job_title?: string
+          mock_account_id?: string | null
+          monthly_gross?: number
+          monthly_net?: number
+          next_payment_date?: string
+          setup_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       listing_applications: {
         Row: {
           applicant_email: string
@@ -556,6 +610,47 @@ export type Database = {
             columns: ["exchange_id"]
             isOneToOne: false
             referencedRelation: "stock_exchanges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monthly_salary_payments: {
+        Row: {
+          account_type: string
+          amount_paid: number
+          created_at: string
+          email_sent: boolean | null
+          id: string
+          payment_date: string
+          payment_status: string
+          salary_setup_id: string
+        }
+        Insert: {
+          account_type: string
+          amount_paid: number
+          created_at?: string
+          email_sent?: boolean | null
+          id?: string
+          payment_date?: string
+          payment_status?: string
+          salary_setup_id: string
+        }
+        Update: {
+          account_type?: string
+          amount_paid?: number
+          created_at?: string
+          email_sent?: boolean | null
+          id?: string
+          payment_date?: string
+          payment_status?: string
+          salary_setup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_salary_payments_salary_setup_id_fkey"
+            columns: ["salary_setup_id"]
+            isOneToOne: false
+            referencedRelation: "job_salary_setups"
             referencedColumns: ["id"]
           },
         ]

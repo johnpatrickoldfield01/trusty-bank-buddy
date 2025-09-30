@@ -84,14 +84,14 @@ export const SalarySlipGenerator: React.FC<SalarySlipGeneratorProps> = ({
     pdf.text('Salary Breakdown:', 20, 210);
     pdf.setFont('helvetica', 'normal');
     
-    const annualSalary = grossSalary * 12;
+    // Use the actual monthly gross salary passed from the parent
     const monthlySalary = grossSalary;
     const totalTax = taxBreakdown.reduce((sum, item) => sum + item.taxDue, 0);
     const monthlyTax = totalTax / 12;
     const halfMonthlyTax = monthlyTax / 2;
-    const netSalary = monthlySalary - halfMonthlyTax;
+    const netSalary = monthlySalary; // This is already the net amount
     
-    pdf.text(`Annual Salary: ${formatSalary(annualSalary, currency)}`, 20, 225);
+    pdf.text(`Annual Salary: ${formatSalary(monthlySalary * 24, currency)}`, 20, 225); // x24 because this is half salary
     pdf.text(`Monthly Gross (50%): ${formatSalary(monthlySalary, currency)}`, 20, 235);
     pdf.text(`Tax Deduction: ${formatSalary(halfMonthlyTax, currency)}`, 20, 245);
     pdf.text(`Net Payment: ${formatSalary(netSalary, currency)}`, 20, 255);
