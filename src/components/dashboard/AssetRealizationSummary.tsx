@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { useCurrencyLocation } from '@/contexts/CurrencyLocationContext';
 
 interface AssetRealizationSummaryProps {
@@ -104,7 +104,7 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
       ]);
     });
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Asset Type', 'Account Number', 'Value', 'Status', 'Notes']],
       body: bankingData,
@@ -126,7 +126,9 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
       }
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+    // Get final Y position from the last autoTable
+    const finalY = (doc as any).lastAutoTable?.finalY || yPosition + 80;
+    yPosition = finalY + 20;
 
     // Employment Assets Section
     doc.setFontSize(16);
@@ -155,7 +157,7 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
       ]);
     }
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: yPosition,
       head: [['Employment Asset', 'Reference', 'Annual Value', 'Status', 'Notes']],
       body: employmentData,
@@ -177,7 +179,9 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
       }
     });
 
-    yPosition = (doc as any).lastAutoTable.finalY + 20;
+    // Get final Y position from the last autoTable
+    const finalY2 = (doc as any).lastAutoTable?.finalY || yPosition + 80;
+    yPosition = finalY2 + 20;
 
     // Footer Information
     doc.setFontSize(10);
