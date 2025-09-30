@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DualSalaryDialog } from '@/components/jobs/DualSalaryDialog';
 import { useSession } from '@/hooks/useSession';
 import { useQuery } from '@tanstack/react-query';
+import { TestEmailButton } from '@/components/jobs/TestEmailButton';
 
 interface JobCategory {
   id: string;
@@ -328,7 +329,10 @@ const JobPortalDashboard = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Job Listings ({filteredJobs.length} results)</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                <span>Job Listings ({filteredJobs.length} results)</span>
+                <TestEmailButton />
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
