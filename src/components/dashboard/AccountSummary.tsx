@@ -20,9 +20,10 @@ interface AccountSummaryProps {
   loanAccountNumber?: string;
   homeLoanAccountNumber?: string;
   onDownloadConfirmation: () => void;
+  savingsAccounts?: any[];
 }
 
-const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber, onDownloadConfirmation }: AccountSummaryProps) => {
+const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance, creditCardLimit, loanBalance, homeLoanBalance, mainAccountNumber, savingsAccountNumber, creditCardAccountNumber, loanAccountNumber, homeLoanAccountNumber, onDownloadConfirmation, savingsAccounts }: AccountSummaryProps) => {
   const { formatCurrency } = useCurrencyLocation();
   const creditUsagePercentage = creditCardBalance < 0 ? (Math.abs(creditCardBalance) / creditCardLimit) * 100 : 0;
   const monthlyRepayment = Math.abs((loanBalance || 0) * 0.0001);
@@ -55,26 +56,50 @@ const AccountSummary = ({ mainAccountBalance, savingsBalance, creditCardBalance,
             </div>
           </div>
 
-          {/* Savings Account */}
-          <div className="flex items-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bank-secondary/20 mr-3">
-              <PiggyBank className="h-5 w-5 text-bank-secondary" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <p className="font-medium">Savings</p>
-                <p className="font-bold">{formatCurrency(savingsBalance || 0)}</p>
+          {/* Savings Accounts */}
+          {savingsAccounts?.map((account, index) => (
+            <div key={account.id} className="flex items-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bank-secondary/20 mr-3">
+                <PiggyBank className="h-5 w-5 text-bank-secondary" />
               </div>
-              {savingsAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(savingsAccountNumber)}</p>}
-              <div className="mt-2">
-                <div className="flex items-center justify-between mb-1 text-xs">
-                  <span className="text-muted-foreground">Savings Goal</span>
-                  <span>58%</span>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-medium">{account.account_name}</p>
+                  <p className="font-bold">{formatCurrency(account.balance || 0)}</p>
                 </div>
-                <Progress value={58} className="h-1.5" />
+                {account.account_number && <p className="text-xs text-muted-foreground">{formatAccountNumber(account.account_number)}</p>}
+                {index === 0 && (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1 text-xs">
+                      <span className="text-muted-foreground">Savings Goal</span>
+                      <span>58%</span>
+                    </div>
+                    <Progress value={58} className="h-1.5" />
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )) || (
+            <div className="flex items-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-bank-secondary/20 mr-3">
+                <PiggyBank className="h-5 w-5 text-bank-secondary" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-medium">Savings</p>
+                  <p className="font-bold">{formatCurrency(savingsBalance || 0)}</p>
+                </div>
+                {savingsAccountNumber && <p className="text-xs text-muted-foreground">{formatAccountNumber(savingsAccountNumber)}</p>}
+                <div className="mt-2">
+                  <div className="flex items-center justify-between mb-1 text-xs">
+                    <span className="text-muted-foreground">Savings Goal</span>
+                    <span>58%</span>
+                  </div>
+                  <Progress value={58} className="h-1.5" />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Credit Card */}
           <div className="flex items-center">

@@ -98,6 +98,7 @@ const Dashboard = ({ profile }: DashboardProps) => {
                 loanAccountNumber={data.businessLoanAccountNumber}
                 homeLoanAccountNumber={data.homeLoanAccountNumber}
                 onDownloadConfirmation={actions.handleDownloadConfirmation}
+                savingsAccounts={data.accounts?.filter(acc => acc.account_type === 'savings')}
               />
             )}
           </div>

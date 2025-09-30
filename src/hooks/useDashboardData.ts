@@ -11,15 +11,16 @@ export const useDashboardData = () => {
   // Find the most recent accounts of each type (with latest created_at)
   const mainAccount = accounts?.filter(acc => acc.account_type === 'main')
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
-  const savingsAccount = accounts?.filter(acc => acc.account_type === 'savings')
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+  const savingsAccounts = accounts?.filter(acc => acc.account_type === 'savings')
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const savingsAccount = savingsAccounts?.[0]; // Primary savings account
   const creditAccount = accounts?.filter(acc => acc.account_type === 'credit')
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
   const businessLoanAccount = accounts?.find(acc => acc.account_name === 'Business Loan');
   const homeLoanAccount = accounts?.find(acc => acc.account_name === 'Home Loan');
 
   const mainAccountBalance = mainAccount?.balance ?? 0;
-  const savingsBalance = savingsAccount?.balance ?? 0;
+  const savingsBalance = savingsAccounts?.reduce((sum, acc) => sum + (acc.balance || 0), 0) ?? 0;
   const creditCardBalance = creditAccount?.balance ?? 0;
   const creditCardLimit = 10000; 
   const businessLoanBalance = businessLoanAccount?.balance ?? 0;

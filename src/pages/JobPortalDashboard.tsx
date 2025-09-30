@@ -391,6 +391,7 @@ const JobPortalDashboard = () => {
                       </div>
                       
                       <div className="flex gap-2">
+                        <TestEmailButton />
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
