@@ -11,14 +11,37 @@ import DashboardStats from '@/components/dashboard/DashboardStats';
 import PremiumCardOffer from '@/components/dashboard/PremiumCardOffer';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useDashboardActions } from '@/hooks/useDashboardActions';
+import { AssetRealizationSummary } from '@/components/dashboard/AssetRealizationSummary';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useSession } from '@/hooks/useSession';
 
 interface DashboardProps {
     profile: Profile | null;
 }
 
 const Dashboard = ({ profile }: DashboardProps) => {
+  const { session } = useSession();
   const data = useDashboardData();
   const actions = useDashboardActions({ profile, ...data });
+
+  // Fetch salary setups for asset summary
+  const { data: salarySetups } = useQuery({
+    queryKey: ['salary-setups', session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('job_salary_setups')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!session?.user?.id
+  });
 
   // Force refresh accounts on component mount to ensure latest data
   useEffect(() => {
@@ -102,6 +125,14 @@ const Dashboard = ({ profile }: DashboardProps) => {
               />
             )}
           </div>
+        </div>
+        
+        <div className="mb-6">
+          <AssetRealizationSummary 
+            accounts={data.accounts || []}
+            salarySetups={salarySetups || []}
+            totalBalance={data.totalBalance}
+          />
         </div>
         
         <PremiumCardOffer />
