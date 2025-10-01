@@ -94,12 +94,14 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
     
     // Calculate total including cards and FX
     const totalCreditLimit = cardsData.length * 1500000; // All cards have R1.5M limit
-    const grandTotal = totalBalance + totalCreditLimit + totalFxBalance;
+    const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+    const adjustedBankingTotal = totalBalance - (mainAccount?.balance || 0) + 1500000000;
+    const grandTotal = adjustedBankingTotal + totalCreditLimit + totalFxBalance;
     doc.text(formatCurrency(grandTotal), pageWidth / 2, 85, { align: 'center' });
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Banking: ${formatCurrency(totalBalance)} | Credit: ${formatCurrency(totalCreditLimit)} | FX: ${formatCurrency(totalFxBalance)}`, pageWidth / 2, 95, { align: 'center' });
+    doc.text(`Banking: ${formatCurrency(adjustedBankingTotal)} | Credit: ${formatCurrency(totalCreditLimit)} | FX: ${formatCurrency(totalFxBalance)}`, pageWidth / 2, 95, { align: 'center' });
 
     let yPosition = 120;
 
@@ -112,13 +114,12 @@ export const AssetRealizationSummary: React.FC<AssetRealizationSummaryProps> = (
 
     const bankingData = [];
     
-    // Main Account (UNREALIZED)
-    const mainAccount = accounts?.find(acc => acc.account_type === 'main');
+    // Main Account (UNREALIZED) - Fixed at R1.5B
     if (mainAccount) {
       bankingData.push([
         'Main Operating Account',
         mainAccount.account_number,
-        formatCurrency(mainAccount.balance),
+        formatCurrency(1500000000),
         'UNREALIZED',
         'Pending regulatory verification'
       ]);
