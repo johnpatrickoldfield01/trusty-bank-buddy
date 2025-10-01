@@ -128,6 +128,54 @@ export type Database = {
         }
         Relationships: []
       }
+      bug_reports: {
+        Row: {
+          blocks_development: boolean | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          notes: string | null
+          priority: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocks_development?: boolean | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocks_development?: boolean | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          priority?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bulk_payment_schedules: {
         Row: {
           amount_per_beneficiary: number
