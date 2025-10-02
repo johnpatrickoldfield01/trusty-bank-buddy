@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Menu, Bell, ChevronDown, LogOut, Eye } from 'lucide-react';
+import { CreditCard, Menu, Bell, ChevronDown, LogOut, Eye, Settings } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -173,6 +173,27 @@ const Header = () => {
           <Link to="/stock-exchange" className="text-sm font-medium hover:text-bank-primary transition-colors">Stock Exchange</Link>
           <Link to="/digital-documents" className="text-sm font-medium hover:text-bank-primary transition-colors">Digital Documents</Link>
           <Link to="/bug-tracking" className="text-sm font-medium hover:text-bank-primary transition-colors">Bug Tracking</Link>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 text-sm font-medium hover:text-bank-primary transition-colors">
+                <Settings className="h-4 w-4" />
+                Settings
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-gray-800 z-50">
+              <DropdownMenuItem asChild>
+                <Link
+                  to="/email-scheduler"
+                  className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                  Email Scheduler
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <a href="#" className="text-sm font-medium hover:text-bank-primary transition-colors">Support</a>
         </nav>
         

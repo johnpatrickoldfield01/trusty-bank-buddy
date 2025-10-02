@@ -455,6 +455,51 @@ export type Database = {
         }
         Relationships: []
       }
+      email_scheduler_settings: {
+        Row: {
+          bank_summary_enabled: boolean | null
+          bug_report_enabled: boolean | null
+          created_at: string
+          crypto_summary_enabled: boolean | null
+          email_address: string
+          id: string
+          last_sent_date: string | null
+          salary_slip_enabled: boolean | null
+          schedule_enabled: boolean | null
+          treasury_summary_enabled: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_summary_enabled?: boolean | null
+          bug_report_enabled?: boolean | null
+          created_at?: string
+          crypto_summary_enabled?: boolean | null
+          email_address: string
+          id?: string
+          last_sent_date?: string | null
+          salary_slip_enabled?: boolean | null
+          schedule_enabled?: boolean | null
+          treasury_summary_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_summary_enabled?: boolean | null
+          bug_report_enabled?: boolean | null
+          created_at?: string
+          crypto_summary_enabled?: boolean | null
+          email_address?: string
+          id?: string
+          last_sent_date?: string | null
+          salary_slip_enabled?: boolean | null
+          schedule_enabled?: boolean | null
+          treasury_summary_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       job_categories: {
         Row: {
           description: string | null
