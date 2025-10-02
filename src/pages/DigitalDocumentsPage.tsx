@@ -9,6 +9,7 @@ import { Download, Upload, FileText, Shield, Plane, GraduationCap, Briefcase, Tr
 import { useDocuments } from '@/hooks/useDocuments';
 import { useForm } from 'react-hook-form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import PassportCard3D from '@/components/documents/PassportCard3D';
 
 const documentIcons = {
   passport: <FileText className="h-5 w-5" />,
@@ -205,10 +206,29 @@ const DigitalDocumentsPage = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="passports" className="space-y-4">
+        <TabsContent value="passports" className="space-y-6">
+          {/* 3D Passport Showcase */}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-center">Interactive Passport Preview</h3>
+            <PassportCard3D
+              country="South Africa"
+              countryCode="ZAF"
+              documentNumber="M00123456"
+              holderName="JOHN DAVID SMITH"
+              nationality="South African"
+              dateOfBirth="15 MAR 1990"
+              sex="M"
+              placeOfBirth="Cape Town"
+              issueDate="10 JAN 2020"
+              expiryDate="10 JAN 2030"
+              authority="Department of Home Affairs"
+              passportColor="#006400"
+            />
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle>Digital Passports & ID Cards</CardTitle>
+              <CardTitle>Your Digital Passports & ID Cards</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
