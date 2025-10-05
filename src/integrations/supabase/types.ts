@@ -921,6 +921,96 @@ export type Database = {
         }
         Relationships: []
       }
+      treasury_transfer_audit: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          notes: string | null
+          performed_by: string
+          transfer_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          performed_by: string
+          transfer_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          performed_by?: string
+          transfer_id?: string
+        }
+        Relationships: []
+      }
+      treasury_transfer_requests: {
+        Row: {
+          amount: number
+          authorized_at: string | null
+          cbs_posting_status: string | null
+          created_at: string
+          destination_account_id: string | null
+          destination_currency: string | null
+          destination_type: string
+          exchange_rate: number | null
+          id: string
+          posted_at: string | null
+          reason: string | null
+          settled_at: string | null
+          source_account_id: string | null
+          source_currency: string
+          source_type: string
+          status: string
+          transfer_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          authorized_at?: string | null
+          cbs_posting_status?: string | null
+          created_at?: string
+          destination_account_id?: string | null
+          destination_currency?: string | null
+          destination_type: string
+          exchange_rate?: number | null
+          id?: string
+          posted_at?: string | null
+          reason?: string | null
+          settled_at?: string | null
+          source_account_id?: string | null
+          source_currency: string
+          source_type: string
+          status?: string
+          transfer_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          authorized_at?: string | null
+          cbs_posting_status?: string | null
+          created_at?: string
+          destination_account_id?: string | null
+          destination_currency?: string | null
+          destination_type?: string
+          exchange_rate?: number | null
+          id?: string
+          posted_at?: string | null
+          reason?: string | null
+          settled_at?: string | null
+          source_account_id?: string | null
+          source_currency?: string
+          source_type?: string
+          status?: string
+          transfer_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       treasury_users: {
         Row: {
           created_at: string

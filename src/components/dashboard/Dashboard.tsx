@@ -15,6 +15,7 @@ import { AssetRealizationSummary } from '@/components/dashboard/AssetRealization
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
+import TreasuryTransfersCard from '@/components/dashboard/TreasuryTransfersCard';
 
 interface DashboardProps {
     profile: Profile | null;
@@ -127,12 +128,13 @@ const Dashboard = ({ profile }: DashboardProps) => {
           </div>
         </div>
         
-        <div className="mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <AssetRealizationSummary 
             accounts={data.accounts || []}
             salarySetups={salarySetups || []}
             totalBalance={data.totalBalance}
           />
+          <TreasuryTransfersCard />
         </div>
         
         <PremiumCardOffer />

@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Vault, TrendingUp, ArrowRightLeft, DollarSign, AlertCircle, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import LiquidityTransferDialog from './LiquidityTransferDialog';
 
 interface Country {
   code: string;
@@ -224,18 +225,21 @@ const CountryTreasuryDashboard: React.FC<CountryTreasuryDashboardProps> = ({ cou
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{country.flag}</span>
-            <div>
-              <h1 className="text-4xl font-bold text-slate-900">{country.name} Treasury</h1>
-              <p className="text-slate-600">Treasury Management Dashboard - {country.currency}</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{country.flag}</span>
+              <div>
+                <h1 className="text-4xl font-bold text-slate-900">{country.name} Treasury</h1>
+                <p className="text-slate-600">Treasury Management Dashboard - {country.currency}</p>
+              </div>
             </div>
           </div>
+          <LiquidityTransferDialog sourceCurrency={country.currency} sourceType="treasury" />
         </div>
 
         {/* Key Metrics */}

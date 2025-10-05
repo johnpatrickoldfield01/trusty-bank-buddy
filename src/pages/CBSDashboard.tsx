@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Building, FileText, CreditCard, Upload, History, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import PendingPostingsView from '@/components/treasury/PendingPostingsView';
 
 interface CBSNote {
   id: string;
@@ -251,13 +252,18 @@ const CBSDashboard = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="notes" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="postings" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="postings">Pending Postings</TabsTrigger>
           <TabsTrigger value="notes">Credit/Debit Notes</TabsTrigger>
           <TabsTrigger value="letters">Lawyer Letters</TabsTrigger>
           <TabsTrigger value="balances">Balance Updates</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="postings">
+          <PendingPostingsView />
+        </TabsContent>
 
         <TabsContent value="notes" className="space-y-4">
           <Card>
