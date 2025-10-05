@@ -71,6 +71,7 @@ const JobPortalDashboard = () => {
   const [selectedCurrency, setSelectedCurrency] = useState('ZAR');
   const [experienceLevel, setExperienceLevel] = useState<string>('all');
   const [remoteOnly, setRemoteOnly] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [salarySetups, setSalarySetups] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
   const { user } = useSession();
@@ -154,6 +155,42 @@ const JobPortalDashboard = () => {
     return `${symbol}${Math.round(amount).toLocaleString()}`;
   };
 
+  const getRegionFromLocation = (location: string): string => {
+    const locationLower = location.toLowerCase();
+    
+    // EMEA (Europe, Middle East, Africa)
+    if (locationLower.includes('europe') || locationLower.includes('uk') || locationLower.includes('london') || 
+        locationLower.includes('paris') || locationLower.includes('berlin') || locationLower.includes('madrid') ||
+        locationLower.includes('africa') || locationLower.includes('dubai') || locationLower.includes('middle east') ||
+        locationLower.includes('south africa') || locationLower.includes('egypt') || locationLower.includes('israel')) {
+      return 'EMEA';
+    }
+    
+    // North America
+    if (locationLower.includes('usa') || locationLower.includes('united states') || locationLower.includes('canada') ||
+        locationLower.includes('new york') || locationLower.includes('san francisco') || locationLower.includes('toronto') ||
+        locationLower.includes('north america') || locationLower.includes('chicago') || locationLower.includes('boston')) {
+      return 'NA';
+    }
+    
+    // LATAM (Latin America)
+    if (locationLower.includes('latin america') || locationLower.includes('brazil') || locationLower.includes('mexico') ||
+        locationLower.includes('argentina') || locationLower.includes('chile') || locationLower.includes('colombia') ||
+        locationLower.includes('peru') || locationLower.includes('venezuela')) {
+      return 'LATAM';
+    }
+    
+    // APAC (Asia-Pacific)
+    if (locationLower.includes('asia') || locationLower.includes('pacific') || locationLower.includes('china') ||
+        locationLower.includes('japan') || locationLower.includes('singapore') || locationLower.includes('australia') ||
+        locationLower.includes('india') || locationLower.includes('hong kong') || locationLower.includes('tokyo') ||
+        locationLower.includes('sydney') || locationLower.includes('mumbai') || locationLower.includes('beijing')) {
+      return 'APAC';
+    }
+    
+    return 'Other';
+  };
+
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -162,8 +199,9 @@ const JobPortalDashboard = () => {
     const matchesCategory = selectedCategory === 'all' || job.category_id === selectedCategory;
     const matchesExperience = experienceLevel === 'all' || job.experience_level === experienceLevel;
     const matchesRemote = !remoteOnly || job.remote_available;
+    const matchesRegion = selectedRegion === 'all' || getRegionFromLocation(job.location) === selectedRegion;
 
-    return matchesSearch && matchesCategory && matchesExperience && matchesRemote;
+    return matchesSearch && matchesCategory && matchesExperience && matchesRemote && matchesRegion;
   });
 
   const getExperienceLevelColor = (level: string) => {
@@ -259,7 +297,7 @@ const JobPortalDashboard = () => {
               <CardTitle>Job Search Filters</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
                 <div className="md:col-span-2">
                   <div className="relative">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -283,6 +321,20 @@ const JobPortalDashboard = () => {
                           {category.name}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Select value={selectedRegion} onValueChange={setSelectedRegion}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Region" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Regions</SelectItem>
+                      <SelectItem value="EMEA">EMEA</SelectItem>
+                      <SelectItem value="NA">North America</SelectItem>
+                      <SelectItem value="LATAM">LATAM</SelectItem>
+                      <SelectItem value="APAC">APAC</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
