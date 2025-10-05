@@ -23,6 +23,20 @@ export type Transaction = {
 const TransactionList = ({ transactions, onDownloadStatement, onDownload12MonthStatement }: { transactions: Transaction[], onDownloadStatement: () => void, onDownload12MonthStatement: () => void }) => {
   const { formatCurrency } = useCurrencyLocation();
 
+  const formatTransactionAmount = (transaction: Transaction) => {
+    // For crypto transactions, extract and use the crypto symbol
+    if (transaction.category === 'crypto') {
+      const nameParts = transaction.name.split(' ');
+      const cryptoSymbol = nameParts.find(part => 
+        ['BTC', 'ETH', 'USDT', 'XRP', 'ADA', 'SOL', 'DOT', 'DOGE', 'MATIC', 'LTC'].includes(part.toUpperCase())
+      );
+      if (cryptoSymbol) {
+        return `${Math.abs(transaction.amount).toFixed(8)} ${cryptoSymbol.toUpperCase()}`;
+      }
+    }
+    return formatCurrency(transaction.amount);
+  };
+
   const handleTaxDocument = (transaction: Transaction) => {
     // Generate tax compliance document for crypto transactions
     if (transaction.category === 'crypto' && transaction.recipient_swift_code) {
@@ -128,8 +142,8 @@ This certificate serves as proof of tax compliance for the above transaction.
                     transaction.amount > 0 ? "text-bank-secondary" : ""
                   )}>
                     {transaction.amount > 0 
-                      ? `+${formatCurrency(transaction.amount)}` 
-                      : formatCurrency(transaction.amount)
+                      ? `+${formatTransactionAmount(transaction)}` 
+                      : transaction.amount < 0 ? `-${formatTransactionAmount(transaction)}` : formatTransactionAmount(transaction)
                     }
                   </p>
                    <div className="flex items-center gap-2 justify-end">
