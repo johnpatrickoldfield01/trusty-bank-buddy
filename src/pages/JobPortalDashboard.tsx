@@ -443,7 +443,15 @@ const JobPortalDashboard = () => {
                       </div>
                       
                       <div className="flex gap-2">
-                        <TestEmailButton />
+                        <TestEmailButton 
+                          jobTitle={job.title}
+                          jobDescription={job.description}
+                          salaryMin={convertSalary(job.expected_salary_min, job.currency, selectedCurrency)}
+                          salaryMax={convertSalary(job.expected_salary_max, job.currency, selectedCurrency)}
+                          currency={selectedCurrency}
+                          location={job.location}
+                          bankName="FNB"
+                        />
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">

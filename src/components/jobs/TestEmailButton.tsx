@@ -4,7 +4,25 @@ import { Mail, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-export const TestEmailButton: React.FC = () => {
+interface TestEmailButtonProps {
+  jobTitle?: string;
+  jobDescription?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  currency?: string;
+  location?: string;
+  bankName?: string;
+}
+
+export const TestEmailButton: React.FC<TestEmailButtonProps> = ({
+  jobTitle = 'Commerce Graduate Position',
+  jobDescription = 'General position for commerce graduates',
+  salaryMin = 100000,
+  salaryMax = 120000,
+  currency = 'ZAR',
+  location = 'South Africa',
+  bankName = 'FNB'
+}) => {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
 
@@ -13,7 +31,15 @@ export const TestEmailButton: React.FC = () => {
     
     try {
       const { data, error } = await supabase.functions.invoke('test-salary-email', {
-        body: {}
+        body: {
+          jobTitle,
+          jobDescription,
+          salaryMin,
+          salaryMax,
+          currency,
+          location,
+          bankName
+        }
       });
 
       if (error) throw error;
