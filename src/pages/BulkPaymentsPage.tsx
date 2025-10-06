@@ -5,6 +5,7 @@ import BulkPaymentScheduler from '@/components/banking/BulkPaymentScheduler';
 import TransferErrorMonitor from '@/components/banking/TransferErrorMonitor';
 import ComplianceErrorTracker from '@/components/banking/ComplianceErrorTracker';
 import ComplianceEmailSender from '@/components/banking/ComplianceEmailSender';
+import { BankEngineeringDiagnosticTemplate } from '@/components/banking/BankEngineeringDiagnosticTemplate';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ComplianceError {
@@ -59,6 +60,7 @@ const BulkPaymentsPage = () => {
               onErrorSelectionChange={setSelectedErrors}
             />
             <ComplianceEmailSender selectedErrors={selectedErrors} />
+            <BankEngineeringDiagnosticTemplate />
           </TabsContent>
         </Tabs>
       </div>
