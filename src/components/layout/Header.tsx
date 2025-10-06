@@ -111,7 +111,6 @@ const Header = () => {
           <Link to="/cards" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</Link>
           <Link to="/payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</Link>
           <Link to="/bulk-payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Bulk Payments</Link>
-          <Link to="/standard-bank" className="text-sm font-medium hover:text-bank-primary transition-colors">Standard Bank API</Link>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -121,7 +120,25 @@ const Header = () => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-gray-800 z-50">
-              {southAfricanBanks.map((bank) => (
+              <DropdownMenuItem key="standard-bank-external" asChild>
+                <a
+                  href="https://www.standardbank.co.za"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                  Standard Bank
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem key="standard-bank-api" asChild>
+                <Link
+                  to="/standard-bank"
+                  className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+                >
+                  <span>→ Standard Bank API</span>
+                </Link>
+              </DropdownMenuItem>
+              {southAfricanBanks.filter(bank => bank.name !== 'Standard Bank').map((bank) => (
                 <DropdownMenuItem key={bank.name} asChild>
                   <a
                     href={bank.url}
