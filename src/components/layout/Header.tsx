@@ -111,6 +111,7 @@ const Header = () => {
           <Link to="/cards" className="text-sm font-medium hover:text-bank-primary transition-colors">Cards</Link>
           <Link to="/payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Payments</Link>
           <Link to="/bulk-payments" className="text-sm font-medium hover:text-bank-primary transition-colors">Bulk Payments</Link>
+          <Link to="/standard-bank" className="text-sm font-medium hover:text-bank-primary transition-colors">Standard Bank API</Link>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
