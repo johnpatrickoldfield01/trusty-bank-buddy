@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, TrendingUp, TrendingDown, Download, Loader2, FileText, Receipt } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Download, Loader2, FileText, Receipt, AlertCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
 import { useCryptoPDFGenerator } from '@/hooks/useCryptoPDFGenerator';
+import { useFailureReports } from '@/hooks/useFailureReports';
 
 const mockTransactions = [
   { id: '1', date: '2024-01-15', type: 'Buy', amount: 0.5, price: 67234.56, usdValue: 33617.28, zarValue: 621919.68, status: 'Completed', txHash: '0x1a2b3c...', exchange: 'Coinbase' },
@@ -49,6 +50,7 @@ const CryptoTransactionsPage = () => {
   const { transactions, loading, error, refetch } = useCryptoTransactions(symbol);
   const { toast } = useToast();
   const { generateProofOfPayment, generateTaxationSummary } = useCryptoPDFGenerator();
+  const { getFailureForTransaction, downloadReport } = useFailureReports();
 
   // Refresh transactions when the page loads or symbol changes
   useEffect(() => {

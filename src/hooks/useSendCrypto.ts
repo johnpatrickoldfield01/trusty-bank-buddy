@@ -63,8 +63,8 @@ export const useSendCrypto = () => {
       if (error) {
         console.error('Edge function error:', error);
         
-        // Generate diagnostic report for failed transaction
-        await generateFailureReport({
+        // Store failure data for later diagnostic report download (don't auto-download)
+        const failureData = {
           exchange,
           crypto,
           amount,
@@ -72,15 +72,20 @@ export const useSendCrypto = () => {
           error: error.message || 'Unknown error',
           timestamp: new Date(),
           errorType: 'EDGE_FUNCTION_ERROR'
-        });
+        };
+        
+        // Store in localStorage for access from transaction history
+        const failures = JSON.parse(localStorage.getItem('crypto_failures') || '[]');
+        failures.push({ ...failureData, id: Date.now() });
+        localStorage.setItem('crypto_failures', JSON.stringify(failures.slice(-20))); // Keep last 20
         
         // If rate limit exceeded, provide specific guidance
         if (error.message?.includes('403') || error.message?.includes('Forbidden') || error.message?.includes('Limit exceeded')) {
           toast.error('Transaction Failed - Rate Limit Exceeded', {
-            description: 'A diagnostic report has been downloaded. Do NOT use Mock mode - contact support with the report.',
+            description: 'Diagnostic report available in transaction history. Do NOT use Mock mode.',
             duration: 10000,
           });
-          throw new Error('Exchange API rate limit exceeded. Diagnostic report generated. Contact exchange support.');
+          throw new Error('Exchange API rate limit exceeded. View diagnostic report in transaction history.');
         }
         
         throw new Error(`Edge function error: ${error.message}`);
@@ -89,8 +94,8 @@ export const useSendCrypto = () => {
       if (!data) {
         console.error('No data returned from edge function');
         
-        // Generate diagnostic report
-        await generateFailureReport({
+        // Store failure for diagnostic report
+        const failureData = {
           exchange,
           crypto,
           amount,
@@ -98,9 +103,13 @@ export const useSendCrypto = () => {
           error: 'No response from exchange API',
           timestamp: new Date(),
           errorType: 'NO_RESPONSE'
-        });
+        };
         
-        throw new Error(`No response data from ${exchange} API - Diagnostic report downloaded`);
+        const failures = JSON.parse(localStorage.getItem('crypto_failures') || '[]');
+        failures.push({ ...failureData, id: Date.now() });
+        localStorage.setItem('crypto_failures', JSON.stringify(failures.slice(-20)));
+        
+        throw new Error(`No response data from ${exchange} API - Check transaction history for diagnostic report`);
       }
 
       if (!data.success) {
@@ -112,8 +121,8 @@ export const useSendCrypto = () => {
           const errorMessage = errorObj.message || 'Transaction failed';
           const errorCode = errorObj.code || 'UNKNOWN_ERROR';
           
-          // Generate diagnostic report for failed transaction
-          await generateFailureReport({
+          // Store detailed failure for diagnostic report
+          const failureData = {
             exchange,
             crypto,
             amount,
@@ -124,27 +133,31 @@ export const useSendCrypto = () => {
             troubleshooting: errorObj.troubleshooting,
             timestamp: new Date(),
             errorType: 'TRANSACTION_FAILED'
-          });
+          };
+          
+          const failures = JSON.parse(localStorage.getItem('crypto_failures') || '[]');
+          failures.push({ ...failureData, id: Date.now() });
+          localStorage.setItem('crypto_failures', JSON.stringify(failures.slice(-20)));
           
           // Check for specific error codes
           if (errorCode === 'ErrLimitExceeded' || errorCode.includes('LIMIT') || errorCode.includes('RATE')) {
             toast.error('Transaction Failed - Exchange API Error', {
-              description: 'Diagnostic report downloaded. Do NOT switch to Mock mode. Forward report to exchange support.',
+              description: 'Diagnostic report available in transaction history. Do NOT switch to Mock mode.',
               duration: 15000,
             });
-            throw new Error('Exchange rate limit error. Real transaction failed - diagnostic report generated for support escalation.');
+            throw new Error('Exchange rate limit error. Real transaction failed - view diagnostic report in transaction history.');
           }
           
           toast.error('Transaction Failed', {
-            description: `${errorMessage}. Diagnostic report has been downloaded.`,
+            description: `${errorMessage}. Diagnostic report available in transaction history.`,
             duration: 10000,
           });
           
           throw new Error(errorMessage);
         }
         
-        // Generate generic failure report
-        await generateFailureReport({
+        // Store generic failure
+        const failureData = {
           exchange,
           crypto,
           amount,
@@ -152,7 +165,11 @@ export const useSendCrypto = () => {
           error: data.error || 'Unknown transaction error',
           timestamp: new Date(),
           errorType: 'GENERIC_FAILURE'
-        });
+        };
+        
+        const failures = JSON.parse(localStorage.getItem('crypto_failures') || '[]');
+        failures.push({ ...failureData, id: Date.now() });
+        localStorage.setItem('crypto_failures', JSON.stringify(failures.slice(-20)));
         
         throw new Error(data.error || 'Transaction failed');
       }
@@ -219,7 +236,7 @@ export const useSendCrypto = () => {
         }
       }
 
-      // Generate PDF proof with enhanced transaction and compliance data
+      // Generate PDF proof with enhanced transaction and compliance data (AUTO-DOWNLOAD SUCCESS)
       await generateTransactionPDF({
         transactionId: data.transactionId,
         crypto,
@@ -256,7 +273,7 @@ export const useSendCrypto = () => {
         toast.success(
           `✅ Successfully sent ${amount} ${crypto.symbol}!`,
           {
-            description: `Via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)} • Hash: ${txHash.substring(0, 16)}...${txHash.substring(txHash.length - 8)} • View on blockchain.com`,
+            description: `Receipt downloaded. Via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)} • Hash: ${txHash.substring(0, 16)}...${txHash.substring(txHash.length - 8)}`,
             duration: 10000,
           }
         );
@@ -474,6 +491,7 @@ export const useSendCrypto = () => {
     }
   };
 
+  // Generate failure report - NOT auto-downloaded, stored for access later
   const generateFailureReport = async (failureData: {
     exchange: string;
     crypto: { name: string; symbol: string; price: number };
@@ -486,12 +504,33 @@ export const useSendCrypto = () => {
     timestamp: Date;
     errorType: string;
   }) => {
+    return new Promise<string>((resolve) => {
+      const reportId = `FAILURE-${failureData.exchange}-${failureData.crypto.symbol}-${Date.now()}`;
+      
+      // Store report data for later download
+      const reportData = {
+        ...failureData,
+        reportId,
+        timestamp: failureData.timestamp.toISOString()
+      };
+      
+      const reports = JSON.parse(localStorage.getItem('failure_reports') || '[]');
+      reports.push(reportData);
+      localStorage.setItem('failure_reports', JSON.stringify(reports.slice(-50))); // Keep last 50
+      
+      console.log('🔴 Transaction failure logged:', reportId);
+      resolve(reportId);
+    });
+  };
+
+  // Actual PDF generator for failure reports (called manually from UI)
+  const downloadFailureReportPDF = async (failureData: any) => {
     try {
       const doc = new jsPDF();
       const { data: userData } = await supabase.auth.getUser();
 
       // Header - CRITICAL FAILURE NOTICE
-      doc.setFillColor(220, 53, 69); // Red background
+      doc.setFillColor(220, 53, 69);
       doc.rect(0, 0, 210, 35, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(24);
@@ -503,7 +542,7 @@ export const useSendCrypto = () => {
       
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(10);
-      doc.text(`Generated: ${failureData.timestamp.toLocaleString()}`, 14, 45);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 45);
 
       // Critical Warning Box
       doc.setDrawColor(220, 53, 69);
@@ -529,7 +568,7 @@ export const useSendCrypto = () => {
           ['Amount', `${failureData.amount} ${failureData.crypto.symbol}`],
           ['USD Value', `$${(failureData.amount * failureData.crypto.price).toFixed(2)}`],
           ['Recipient Address', failureData.toAddress],
-          ['Attempted At', failureData.timestamp.toISOString()],
+          ['Attempted At', new Date(failureData.timestamp).toISOString()],
           ['Transaction Status', '❌ FAILED'],
           ['Error Type', failureData.errorType],
         ],
@@ -547,36 +586,15 @@ export const useSendCrypto = () => {
           ['Error Message', failureData.error],
           ['Error Code', failureData.errorCode || 'N/A'],
           ['HTTP Status', failureData.errorDetails?.http_status || 'N/A'],
-          ['API Response', failureData.errorDetails?.raw_error ? JSON.stringify(failureData.errorDetails.raw_error, null, 2) : 'N/A'],
         ],
         theme: 'grid',
         headStyles: { fillColor: [220, 53, 69], textColor: 255 },
         styles: { fontSize: 9 },
       });
 
-      // Troubleshooting Information
-      if (failureData.troubleshooting) {
-        const troubleY = (doc as any).lastAutoTable.finalY + 10;
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Troubleshooting Recommendations', 14, troubleY);
-        
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'normal');
-        let yPos = troubleY + 8;
-        
-        if (failureData.troubleshooting.suggested_actions) {
-          failureData.troubleshooting.suggested_actions.forEach((action: string, idx: number) => {
-            const lines = doc.splitTextToSize(`${idx + 1}. ${action}`, 180);
-            doc.text(lines, 18, yPos);
-            yPos += lines.length * 5;
-          });
-        }
-      }
-
-      // Action Required Section
-      const actionY = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 50 : 220;
-      doc.setFillColor(255, 193, 7); // Warning yellow
+      // Action Required
+      const actionY = (doc as any).lastAutoTable.finalY + 15;
+      doc.setFillColor(255, 193, 7);
       doc.rect(14, actionY, 182, 35, 'F');
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
@@ -588,20 +606,12 @@ export const useSendCrypto = () => {
       doc.text('3. Contact exchange support with this diagnostic report', 18, actionY + 28);
       doc.text('4. Keep this report for audit trail and compliance purposes', 18, actionY + 33);
 
-      // Footer
-      doc.setFontSize(8);
-      doc.setTextColor(100);
-      doc.text('This diagnostic report must be retained for financial audit compliance.', 14, 285);
-      doc.text('Report ID: ' + Date.now().toString(36).toUpperCase(), 14, 290);
-
-      // Download the report
-      const filename = `FAILURE-${failureData.exchange}-${failureData.crypto.symbol}-${Date.now()}.pdf`;
+      // Download
+      const filename = `${failureData.reportId}.pdf`;
       doc.save(filename);
       
-      console.log('🔴 Transaction failure report generated:', filename);
-      toast.error('Transaction Failed - Diagnostic Report Downloaded', {
-        description: `Report: ${filename}. Forward to financial services provider. DO NOT use mock mode.`,
-        duration: 15000,
+      toast.success('Diagnostic report downloaded', {
+        description: filename
       });
 
     } catch (error) {
@@ -610,5 +620,5 @@ export const useSendCrypto = () => {
     }
   };
 
-  return { sendCrypto };
+  return { sendCrypto, downloadFailureReportPDF };
 };
