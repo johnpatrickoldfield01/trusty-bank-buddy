@@ -32,9 +32,10 @@ interface BugCardProps {
   bug: Bug;
   onUpdate: () => void;
   isBlocking?: boolean;
+  bugNumber?: number;
 }
 
-export function BugCard({ bug, onUpdate, isBlocking }: BugCardProps) {
+export function BugCard({ bug, onUpdate, isBlocking, bugNumber }: BugCardProps) {
   const { session } = useSession();
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(bug.notes || '');
@@ -109,6 +110,11 @@ export function BugCard({ bug, onUpdate, isBlocking }: BugCardProps) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
+                {bugNumber && (
+                  <Badge variant="outline" className="font-mono">
+                    #{bugNumber}
+                  </Badge>
+                )}
                 {getCategoryIcon(bug.status)}
                 <h3 className="font-semibold">{bug.title}</h3>
               </div>
