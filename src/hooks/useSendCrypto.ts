@@ -145,7 +145,20 @@ export const useSendCrypto = () => {
       // Update balance and refresh transactions
       onSuccess(data.newBalance);
       
-      toast.success(`Successfully sent ${amount} ${crypto.symbol} via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}!`);
+      // Determine network for explorer URL
+      const network = crypto.symbol === 'BTC' ? 'btc' : 'eth';
+      const txHash = data.transactionHash || data.transactionId;
+      const explorerUrl = `https://www.blockchain.com/explorer/transactions/${network}/${txHash}`;
+      
+      // Show success toast with transaction hash and explorer link
+      toast.success(`Successfully sent ${amount} ${crypto.symbol} via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}!`, {
+        description: `Hash: ${txHash.substring(0, 16)}...${txHash.substring(txHash.length - 8)} - View on blockchain.com`,
+        duration: 10000,
+      });
+      
+      // Log explorer URL for user to copy
+      console.log('Transaction Hash:', txHash);
+      console.log('Blockchain Explorer:', explorerUrl);
       
     } catch (error) {
       console.error('Send crypto error:', error);
