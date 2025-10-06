@@ -40,6 +40,7 @@ import BlockchainExplorerPage from "./pages/BlockchainExplorerPage";
 import Setup2FAPage from "./pages/Setup2FAPage";
 import BugTrackingPage from "./pages/BugTrackingPage";
 import EmailSchedulerPage from "./pages/EmailSchedulerPage";
+import CryptoDiagnosticsPage from "./pages/CryptoDiagnosticsPage";
 import { useCapacitor } from "./hooks/useCapacitor";
 import { useEffect } from "react";
 
@@ -94,6 +95,7 @@ const AppContent = () => {
           <Route path="/blockchain-explorer/:identifier" element={<BlockchainExplorerPage />} />
           <Route path="/bug-tracking" element={<BugTrackingPage />} />
           <Route path="/email-scheduler" element={<EmailSchedulerPage />} />
+          <Route path="/crypto-diagnostics" element={<CryptoDiagnosticsPage />} />
         </Route>
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

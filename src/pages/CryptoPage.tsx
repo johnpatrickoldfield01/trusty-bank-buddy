@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
@@ -90,8 +92,16 @@ const CryptoPage = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <h1 className="text-3xl font-bold">Cryptocurrency Portfolio</h1>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/crypto-diagnostics')}
+          className="gap-2"
+        >
+          <AlertCircle className="w-4 h-4" />
+          Error Diagnostics
+        </Button>
         <Card className="p-4">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
