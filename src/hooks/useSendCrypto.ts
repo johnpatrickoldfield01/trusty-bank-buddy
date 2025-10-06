@@ -62,6 +62,16 @@ export const useSendCrypto = () => {
 
       if (error) {
         console.error('Edge function error:', error);
+        
+        // If rate limit exceeded, provide helpful message
+        if (error.message?.includes('403') || error.message?.includes('Forbidden') || error.message?.includes('Limit exceeded')) {
+          toast.error('Exchange rate limit exceeded', {
+            description: 'Please wait a moment before trying again, or switch to Mock mode for testing.',
+            duration: 8000,
+          });
+          throw new Error('Exchange API rate limit exceeded. Please try again in a few moments or use Mock mode.');
+        }
+        
         throw new Error(`Edge function error: ${error.message}`);
       }
 
@@ -77,6 +87,16 @@ export const useSendCrypto = () => {
         if (data.error && typeof data.error === 'object') {
           const errorObj = data.error;
           const errorMessage = errorObj.message || 'Transaction failed';
+          const errorCode = errorObj.code || 'UNKNOWN_ERROR';
+          
+          // Check for specific error codes
+          if (errorCode === 'ErrLimitExceeded' || errorCode.includes('LIMIT') || errorCode.includes('RATE')) {
+            toast.error('Exchange rate limit exceeded', {
+              description: 'The exchange API has temporarily blocked requests. Please wait a few minutes or use Mock mode.',
+              duration: 10000,
+            });
+            throw new Error('Exchange rate limit exceeded. Please try Mock mode or wait before retrying.');
+          }
           
           // Log detailed troubleshooting info
           if (errorObj.troubleshooting) {
@@ -201,7 +221,14 @@ export const useSendCrypto = () => {
       
     } catch (error) {
       console.error('Send crypto error:', error);
-      toast.error(`Failed to send cryptocurrency: ${error.message}`);
+      
+      // Provide user-friendly error message
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error('Transaction failed', {
+        description: errorMsg,
+        duration: 8000,
+      });
+      
       throw error;
     }
   };
