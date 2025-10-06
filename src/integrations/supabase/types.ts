@@ -332,6 +332,57 @@ export type Database = {
         }
         Relationships: []
       }
+      crypto_transactions: {
+        Row: {
+          amount: string | null
+          confirmations: number | null
+          created_at: string
+          explorer_url: string | null
+          fee: string | null
+          from_address: string | null
+          id: string
+          network: string
+          status: string
+          timestamp: string | null
+          to_address: string | null
+          tx_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: string | null
+          confirmations?: number | null
+          created_at?: string
+          explorer_url?: string | null
+          fee?: string | null
+          from_address?: string | null
+          id?: string
+          network: string
+          status?: string
+          timestamp?: string | null
+          to_address?: string | null
+          tx_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: string | null
+          confirmations?: number | null
+          created_at?: string
+          explorer_url?: string | null
+          fee?: string | null
+          from_address?: string | null
+          id?: string
+          network?: string
+          status?: string
+          timestamp?: string | null
+          to_address?: string | null
+          tx_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       crypto_wallet_addresses: {
         Row: {
           address_label: string | null

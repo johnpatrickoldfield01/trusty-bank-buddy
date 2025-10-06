@@ -9,3 +9,9 @@ project_id = "vetstaxdcukdtsfhuxsv"
 
 [functions.blockchain-explorer-api]
   verify_jwt = false
+
+[functions.sync-fnb-balance]
+  verify_jwt = true
+
+[functions.sync-blockchain-tx]
+  verify_jwt = true
