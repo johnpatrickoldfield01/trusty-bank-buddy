@@ -253,8 +253,10 @@ const CBSDashboard = () => {
       </div>
 
       <Tabs defaultValue="postings" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="postings">Pending Postings</TabsTrigger>
+          <TabsTrigger value="accounts">Account Creation</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="notes">Credit/Debit Notes</TabsTrigger>
           <TabsTrigger value="letters">Lawyer Letters</TabsTrigger>
           <TabsTrigger value="balances">Balance Updates</TabsTrigger>
@@ -264,6 +266,114 @@ const CBSDashboard = () => {
         <TabsContent value="postings">
           <PendingPostingsView />
         </TabsContent>
+
+        <TabsContent value="accounts" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create New Account</CardTitle>
+              <CardDescription>Generate account number pending compliance approval</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Account Holder Name</Label>
+                  <Input placeholder="Full name" />
+                </div>
+                <div>
+                  <Label>Account Type</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="savings">Savings Account</SelectItem>
+                      <SelectItem value="current">Current Account</SelectItem>
+                      <SelectItem value="business">Business Account</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Initial Deposit Amount</Label>
+                <Input type="number" placeholder="0.00" />
+              </div>
+              <div>
+                <Label>Compliance Notes</Label>
+                <Textarea placeholder="KYC/AML verification notes..." rows={3} />
+              </div>
+              <Button className="w-full">
+                <CreditCard className="h-4 w-4 mr-2" />
+                Generate Account Number
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Account Approvals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                No pending account approvals
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload Supporting Documents</CardTitle>
+              <CardDescription>Upload compliance documents, stories, and supporting materials</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Document Type</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select document type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="story">Compliance Story</SelectItem>
+                    <SelectItem value="id">ID Document</SelectItem>
+                    <SelectItem value="proof_of_address">Proof of Address</SelectItem>
+                    <SelectItem value="bank_statement">Bank Statement</SelectItem>
+                    <SelectItem value="legal">Legal Document</SelectItem>
+                    <SelectItem value="other">Other Supporting Doc</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Document Title</Label>
+                <Input placeholder="Document name or reference" />
+              </div>
+              <div>
+                <Label>Description / Story</Label>
+                <Textarea placeholder="Provide context or story for this document..." rows={4} />
+              </div>
+              <div>
+                <Label>Upload File</Label>
+                <Input type="file" accept=".pdf,.doc,.docx,.jpg,.png" />
+              </div>
+              <Button className="w-full">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Document
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Uploaded Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-muted-foreground">
+                No documents uploaded yet
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
 
         <TabsContent value="notes" className="space-y-4">
           <Card>
