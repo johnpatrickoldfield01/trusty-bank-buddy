@@ -11,6 +11,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -120,24 +123,31 @@ const Header = () => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-gray-800 z-50">
-              <DropdownMenuItem key="standard-bank-external" asChild>
-                <a
-                  href="https://www.standardbank.co.za"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                >
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger className="px-2 py-2 text-sm cursor-pointer">
                   Standard Bank
-                </a>
-              </DropdownMenuItem>
-              <DropdownMenuItem key="standard-bank-api" asChild>
-                <Link
-                  to="/standard-bank"
-                  className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
-                >
-                  <span>→ Standard Bank API</span>
-                </Link>
-              </DropdownMenuItem>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="bg-white dark:bg-gray-800 z-50">
+                  <DropdownMenuItem asChild>
+                    <a
+                      href="https://www.standardbank.co.za"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                    >
+                      Standard Bank Website
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/standard-bank"
+                      className="w-full px-2 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                    >
+                      API Integration
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               {southAfricanBanks.filter(bank => bank.name !== 'Standard Bank').map((bank) => (
                 <DropdownMenuItem key={bank.name} asChild>
                   <a
