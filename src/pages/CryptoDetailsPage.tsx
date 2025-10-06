@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, TrendingUp, TrendingDown, Download, Receipt, Loader2 } from 'lucide-react';
 import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
+import ReceiveCryptoDialog from '@/components/crypto/ReceiveCryptoDialog';
 import { LunoDebugReportGenerator } from '@/components/crypto/LunoDebugReportGenerator';
 import { BinanceDebugReportGenerator } from '@/components/crypto/BinanceDebugReportGenerator';
 import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
@@ -122,6 +123,10 @@ const CryptoDetailsPage = () => {
             <Download className="h-4 w-4 mr-2" />
             Download Tax Summary
           </Button>
+          <ReceiveCryptoDialog 
+            crypto={crypto}
+            onTransactionReceived={refetch}
+          />
           <SendCryptoDialog 
             crypto={crypto} 
             balance={balance} 
