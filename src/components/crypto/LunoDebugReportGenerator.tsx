@@ -60,7 +60,8 @@ export const LunoDebugReportGenerator = ({ className }: LunoDebugReportGenerator
       doc.setFont('helvetica', 'normal');
       const accountInfo = [
         'Account Status: Fully verified',
-        'Withdrawal Limits: Unlimited (as per Luno support documentation)',
+        'Receiving Limits: UNLIMITED',
+        'Withdrawal Limits: UNLIMITED (as per Luno support documentation)',
         'Send Cap: $600,000',
         'Region: South Africa',
         'Verification Level: Complete KYC/AML verification'

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, TrendingUp, TrendingDown, Download, Receipt, Loader2 } from 'lucide-react';
 import SendCryptoDialog from '@/components/crypto/SendCryptoDialog';
 import { LunoDebugReportGenerator } from '@/components/crypto/LunoDebugReportGenerator';
+import { BinanceDebugReportGenerator } from '@/components/crypto/BinanceDebugReportGenerator';
 import { useCryptoTransactions } from '@/hooks/useCryptoTransactions';
 import { useCryptoPDFGenerator } from '@/hooks/useCryptoPDFGenerator';
 import { useToast } from '@/hooks/use-toast';
@@ -320,7 +321,10 @@ const CryptoDetailsPage = () => {
         </Card>
 
         {symbol?.toUpperCase() === 'BTC' && (
-          <LunoDebugReportGenerator />
+          <>
+            <LunoDebugReportGenerator />
+            <BinanceDebugReportGenerator />
+          </>
         )}
       </div>
     </div>
