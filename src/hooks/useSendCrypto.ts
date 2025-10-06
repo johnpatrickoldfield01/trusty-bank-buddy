@@ -94,6 +94,11 @@ export const useSendCrypto = () => {
 
       console.log('Transaction successful:', data);
 
+      // Determine network for blockchain sync
+      const network = crypto.symbol === 'BTC' ? 'bitcoin' : 'ethereum';
+      const txHash = data.transactionHash || data.transactionId;
+      const isMockTransaction = mockMode || txHash.includes('mock') || !data.transactionHash;
+
       // Save crypto transaction to database  
       const { data: accountData } = await supabase
         .from('accounts')
@@ -108,20 +113,44 @@ export const useSendCrypto = () => {
           .insert({
             account_id: accountData.id,
             amount: -amount, // Negative for outgoing
-            name: `Send ${crypto.symbol} via ${exchange}`,
+            name: `Send ${crypto.symbol} via ${exchange}${isMockTransaction ? ' (MOCK)' : ''}`,
             category: 'crypto',
             icon: '₿',
             recipient_name: toAddress.substring(0, 20) + '...',
             recipient_bank_name: exchange.charAt(0).toUpperCase() + exchange.slice(1),
             recipient_account_number: toAddress,
-            recipient_swift_code: data.transactionHash || data.transactionId || 
-                             (mockMode ? `mock_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : 'unknown')
+            recipient_swift_code: txHash
           });
 
         if (transactionError) {
           console.error('Failed to save crypto transaction:', transactionError);
         } else {
           console.log('Crypto transaction saved to database');
+        }
+      }
+
+      // Sync to blockchain database ONLY if REAL transaction
+      if (!isMockTransaction && data.transactionHash) {
+        try {
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData?.user) {
+            const { error: syncError } = await supabase.functions.invoke('sync-blockchain-tx', {
+              body: {
+                txHash: data.transactionHash,
+                network: network,
+                userId: userData.user.id
+              }
+            });
+
+            if (syncError) {
+              console.error('Failed to sync blockchain transaction:', syncError);
+              toast.error('Transaction sent but blockchain sync failed. Check console for details.');
+            } else {
+              console.log('Transaction synced to blockchain database');
+            }
+          }
+        } catch (syncErr) {
+          console.error('Blockchain sync error:', syncErr);
         }
       }
 
@@ -145,20 +174,30 @@ export const useSendCrypto = () => {
       // Update balance and refresh transactions
       onSuccess(data.newBalance);
       
-      // Determine network for explorer URL
-      const network = crypto.symbol === 'BTC' ? 'btc' : 'eth';
-      const txHash = data.transactionHash || data.transactionId;
-      const explorerUrl = `https://www.blockchain.com/explorer/transactions/${network}/${txHash}`;
+      // Build explorer URL
+      const explorerNetwork = crypto.symbol === 'BTC' ? 'btc' : 'eth';
+      const explorerUrl = `https://www.blockchain.com/explorer/transactions/${explorerNetwork}/${txHash}`;
       
-      // Show success toast with transaction hash and explorer link
-      toast.success(`Successfully sent ${amount} ${crypto.symbol} via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}!`, {
-        description: `Hash: ${txHash.substring(0, 16)}...${txHash.substring(txHash.length - 8)} - View on blockchain.com`,
-        duration: 10000,
-      });
-      
-      // Log explorer URL for user to copy
-      console.log('Transaction Hash:', txHash);
-      console.log('Blockchain Explorer:', explorerUrl);
+      // Show appropriate success message based on transaction type
+      if (isMockTransaction) {
+        toast.warning(
+          `⚠️ MOCK transaction completed (${amount} ${crypto.symbol})`,
+          {
+            description: `This is a test transaction and will NOT appear on blockchain.com. Hash: ${txHash.substring(0, 20)}...`,
+            duration: 10000,
+          }
+        );
+      } else {
+        toast.success(
+          `✅ Successfully sent ${amount} ${crypto.symbol}!`,
+          {
+            description: `Via ${exchange.charAt(0).toUpperCase() + exchange.slice(1)} • Hash: ${txHash.substring(0, 16)}...${txHash.substring(txHash.length - 8)} • View on blockchain.com`,
+            duration: 10000,
+          }
+        );
+        console.log('✅ REAL Transaction Hash:', txHash);
+        console.log('🔗 Blockchain Explorer:', explorerUrl);
+      }
       
     } catch (error) {
       console.error('Send crypto error:', error);
