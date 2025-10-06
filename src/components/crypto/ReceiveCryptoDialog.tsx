@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowDownToLine, Copy, Check } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowDownToLine, Copy, Check, Save, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useSavedAddresses } from '@/hooks/useSavedAddresses';
 
 interface ReceiveCryptoDialogProps {
   crypto: {
@@ -21,20 +23,55 @@ const ReceiveCryptoDialog = ({ crypto, onTransactionReceived }: ReceiveCryptoDia
   const [txHash, setTxHash] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [receivingAddress, setReceivingAddress] = useState('');
+  const [addressLabel, setAddressLabel] = useState('');
+  const [showSaveAddress, setShowSaveAddress] = useState(false);
 
-  // Luno receiving addresses (you can manage these in a database table)
-  const lunoAddresses = {
-    BTC: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', // Replace with actual Luno BTC address
-    ETH: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', // Replace with actual Luno ETH address
-  };
+  const { addresses, saveAddress, deleteAddress, setDefault } = useSavedAddresses('Luno', crypto.symbol);
 
-  const receivingAddress = lunoAddresses[crypto.symbol as keyof typeof lunoAddresses] || 'Address not configured';
+  // Load default address or first saved address
+  useEffect(() => {
+    if (addresses.length > 0) {
+      const defaultAddr = addresses.find(a => a.is_default) || addresses[0];
+      setReceivingAddress(defaultAddr.wallet_address);
+      setAddressLabel(defaultAddr.address_label || '');
+    }
+  }, [addresses]);
 
   const handleCopyAddress = () => {
+    if (!receivingAddress) {
+      toast.error('No address configured');
+      return;
+    }
     navigator.clipboard.writeText(receivingAddress);
     setCopied(true);
     toast.success('Address copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveAddress = () => {
+    if (!receivingAddress.trim()) {
+      toast.error('Please enter an address');
+      return;
+    }
+
+    saveAddress({
+      exchange_name: 'Luno',
+      cryptocurrency: crypto.symbol,
+      wallet_address: receivingAddress.trim(),
+      address_label: addressLabel.trim() || null,
+      is_default: addresses.length === 0, // First address is default
+    });
+
+    setShowSaveAddress(false);
+  };
+
+  const handleSelectSavedAddress = (addressId: string) => {
+    const addr = addresses.find(a => a.id === addressId);
+    if (addr) {
+      setReceivingAddress(addr.wallet_address);
+      setAddressLabel(addr.address_label || '');
+    }
   };
 
   const handleTrackTransaction = async () => {
@@ -111,13 +148,48 @@ const ReceiveCryptoDialog = ({ crypto, onTransactionReceived }: ReceiveCryptoDia
         </DialogHeader>
         
         <div className="space-y-6">
+          {/* Saved Addresses Selector */}
+          {addresses.length > 0 && (
+            <div className="space-y-2">
+              <Label>Saved Luno Addresses</Label>
+              <Select onValueChange={handleSelectSavedAddress}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a saved address" />
+                </SelectTrigger>
+                <SelectContent>
+                  {addresses.map((addr) => (
+                    <SelectItem key={addr.id} value={addr.id}>
+                      <div className="flex items-center gap-2">
+                        {addr.is_default && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+                        <span className="font-mono text-xs">{addr.wallet_address.substring(0, 20)}...</span>
+                        {addr.address_label && <span className="text-xs text-muted-foreground">({addr.address_label})</span>}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           {/* Receiving Address */}
           <div className="space-y-2">
-            <Label>Your Luno {crypto.symbol} Receiving Address</Label>
+            <div className="flex items-center justify-between">
+              <Label>Your Luno {crypto.symbol} Receiving Address</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSaveAddress(!showSaveAddress)}
+              >
+                <Save className="h-3 w-3 mr-1" />
+                Save New
+              </Button>
+            </div>
             <div className="flex gap-2">
               <Input
                 value={receivingAddress}
-                readOnly
+                onChange={(e) => setReceivingAddress(e.target.value)}
+                placeholder="Enter your Luno address"
                 className="font-mono text-sm"
               />
               <Button
@@ -125,10 +197,30 @@ const ReceiveCryptoDialog = ({ crypto, onTransactionReceived }: ReceiveCryptoDia
                 variant="outline"
                 size="icon"
                 onClick={handleCopyAddress}
+                disabled={!receivingAddress}
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
             </div>
+            
+            {showSaveAddress && (
+              <div className="space-y-2 pt-2 border-t">
+                <Input
+                  placeholder="Address label (optional)"
+                  value={addressLabel}
+                  onChange={(e) => setAddressLabel(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveAddress} size="sm" className="flex-1">
+                    Save Address
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowSaveAddress(false)} size="sm">
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <p className="text-xs text-muted-foreground">
               Send {crypto.symbol} to this address from any exchange or wallet
             </p>
