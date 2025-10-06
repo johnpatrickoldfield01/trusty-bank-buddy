@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useSession } from '@/hooks/useSession';
@@ -13,6 +13,7 @@ import { BugCard } from '@/components/bugs/BugCard';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { format } from 'date-fns';
+import { createLunoBugReport } from '@/utils/createLunoBugReport';
 
 export default function BugTrackingPage() {
   const { session } = useSession();
@@ -32,6 +33,32 @@ export default function BugTrackingPage() {
     },
     enabled: !!session,
   });
+
+  // Auto-create Luno bug report on page load if it doesn't exist
+  useEffect(() => {
+    const checkAndCreateLunoBug = async () => {
+      if (!bugs || !session) return;
+      
+      const lunoBugExists = bugs.some(bug => 
+        bug.title.includes('Luno API Rate Limit') || 
+        bug.title.includes('Bug #5')
+      );
+      
+      if (!lunoBugExists) {
+        console.log('Creating Luno API bug report...');
+        const newBug = await createLunoBugReport();
+        if (newBug) {
+          await refetch();
+          toast({
+            title: "Bug #5 Created",
+            description: "Luno API Rate Limit error has been logged to bug tracking.",
+          });
+        }
+      }
+    };
+    
+    checkAndCreateLunoBug();
+  }, [bugs, session, toast, refetch]);
 
   const openBugs = bugs?.filter(bug => bug.status === 'open') || [];
   const inProgressBugs = bugs?.filter(bug => bug.status === 'in_progress') || [];
