@@ -6,6 +6,7 @@ import TransferErrorMonitor from '@/components/banking/TransferErrorMonitor';
 import ComplianceErrorTracker from '@/components/banking/ComplianceErrorTracker';
 import ComplianceEmailSender from '@/components/banking/ComplianceEmailSender';
 import { BankEngineeringDiagnosticTemplate } from '@/components/banking/BankEngineeringDiagnosticTemplate';
+import { BankErrorHistoryDownloader } from '@/components/banking/BankErrorHistoryDownloader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface ComplianceError {
@@ -61,6 +62,7 @@ const BulkPaymentsPage = () => {
             />
             <ComplianceEmailSender selectedErrors={selectedErrors} />
             <BankEngineeringDiagnosticTemplate />
+            <BankErrorHistoryDownloader />
           </TabsContent>
         </Tabs>
       </div>
